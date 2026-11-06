@@ -1,0 +1,365 @@
+.decks-page {
+    flex: 1;
+    width: min(1200px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 42px 0 64px;
+}
+
+.decks-page, .decks-page * {
+    box-sizing: border-box;
+}
+
+.decks-page a {
+    text-decoration: none;
+}
+
+.decks-entete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    margin-bottom: 35px;
+}
+
+.decks-entete h1 {
+    margin: 12px 0;
+    font-size: clamp(32px, 4vw, 48px);
+    line-height: 1.15;
+}
+
+.decks-entete p:last-child {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.decks-page .decks-bouton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    margin: 0;
+    padding: 14px 20px;
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    background: var(--gold);
+    color: #17140d;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.decks-entete > a {
+    flex-shrink: 0;
+}
+
+.decks-disposition {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+    gap: 28px;
+}
+
+.decks-section-entete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 16px;
+}
+
+.decks-section-entete h2 {
+    margin: 0;
+    font-size: 23px;
+}
+
+.decks-section-entete > span {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.decks-grille {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.decks-carte {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: #0d192b;
+    color: var(--text);
+    transition: transform .15s, border-color .15s;
+}
+
+.decks-carte:hover {
+    transform: translateY(-3px);
+    border-color: var(--gold);
+}
+
+.decks-visuel {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: 185px;
+    padding: 14px;
+    background: radial-gradient(ellipse at 50% 100%, #365779, #132236 75%);
+}
+
+.decks-visuel img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.decks-visuel-vide {
+    color: #f4ce78;
+    font-size: 65px;
+    opacity: .7;
+}
+
+.decks-etiquette {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    padding: 5px 8px;
+    border: 1px solid #4b5f77;
+    border-radius: 5px;
+    background: #0a1426e8;
+    color: #d6dfec;
+    font-size: 10px;
+}
+
+.decks-carte-contenu {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 22px;
+}
+
+.decks-carte h3 {
+    margin: 0 0 10px;
+    font-size: 21px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.decks-carte p {
+    margin: 0 0 6px;
+    color: #b9c9df;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.decks-carte .decks-base {
+    color: #7d94b2;
+    font-size: 11px;
+}
+
+.decks-carte-pied {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 22px;
+    color: var(--gold);
+    font-size: 12px;
+}
+
+.decks-carte-pied strong {
+    font-size: 18px;
+}
+
+.decks-creation {
+    scroll-margin-top: 24px;
+    padding: 27px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: #0c1728;
+}
+
+.decks-creation h2 {
+    margin: 12px 0;
+    font-size: 26px;
+}
+
+.decks-creation > p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.decks-creation .eyebrow {
+    color: var(--gold);
+    font-size: 10px;
+}
+
+.decks-creation form {
+    margin-top: 25px;
+}
+
+.decks-creation label {
+    font-size: 12px;
+}
+
+.decks-creation label span {
+    color: #8296af;
+    font-size: 10px;
+}
+
+.decks-creation input, .decks-creation textarea {
+    display: block;
+    width: 100%;
+    margin: 8px 0 20px;
+    padding: 13px;
+    border: 1px solid #34455f;
+    border-radius: 9px;
+    background: #091322;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+}
+
+.decks-creation textarea {
+    resize: vertical;
+    min-height: 110px;
+}
+
+.decks-creation .decks-bouton {
+    width: 100%;
+}
+
+.decks-creation .decks-prive {
+    margin: 20px 0 0;
+    color: #8195b1;
+    font-size: 11px;
+}
+
+.decks-vide {
+    padding: 48px 28px;
+    border: 1px dashed #405571;
+    border-radius: 17px;
+    text-align: center;
+}
+
+.decks-vide > span {
+    color: var(--gold);
+    font-size: 35px;
+}
+
+.decks-vide h3 {
+    font-size: 23px;
+}
+
+.decks-vide p {
+    max-width: 420px;
+    margin: 0 auto 22px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.decks-vide a {
+    color: var(--gold);
+    font-size: 13px;
+}
+
+.decks-notice {
+    margin-bottom: 24px;
+    padding: 15px 18px;
+    border: 1px solid #48625e;
+    border-radius: 10px;
+    line-height: 1.7;
+    font-size: 13px;
+}
+
+.decks-succes {
+    background: #133026;
+    color: #c0ecd8;
+}
+
+.decks-erreur {
+    background: #301c2a;
+    color: #ffd0d8;
+    border-color: #83536b;
+}
+
+.decks-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 30px;
+    font-size: 12px;
+}
+
+.decks-pagination a {
+    color: var(--gold);
+}
+
+.decks-pagination span {
+    color: var(--muted);
+}
+
+.decks-page :is(a,button,input,textarea):focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 4px;
+}
+
+@media (max-width: 1000px) {
+    .decks-disposition {
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 20px;
+    }
+
+    .decks-grille {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .decks-entete {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .decks-disposition {
+        grid-template-columns: 1fr;
+    }
+
+    .decks-creation {
+        margin-top: 10px;
+    }
+
+    .decks-grille {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .decks-page {
+        width: calc(100% - 28px);
+        padding-top: 26px;
+    }
+
+    .decks-grille {
+        grid-template-columns: 1fr;
+    }
+
+    .decks-creation input, .decks-creation textarea {
+        font-size: 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .decks-carte {
+        transition: none;
+    }
+}

@@ -1,0 +1,183 @@
+<!DOCTYPE html><html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${vue.nom + ' — Mes decks · Gestion SWU'}"></title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/deck.css(v=2)}">
+    <script th:src="@{/js/deck.js(v=2)}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/recherches.css(v=2)}">
+    <script th:src="@{/js/recherches.js(v=2)}" defer></script>
+</head><body>
+<header th:replace="~{fragments/header :: header('decks')}"></header>
+<main class="deck-page">
+    <th:block th:replace="~{fragments/recherches :: messages}"></th:block>
+    <a class="deck-retour" th:href="@{/decks}">← Mes decks</a>
+    <div class="deck-entete"><div><p class="eyebrow">ATELIER DE CONSTRUCTION</p><h1 th:text="${vue.nom}"></h1>
+        <p class="deck-description" th:if="${!#strings.isEmpty(vue.description)}" th:text="${vue.description}"></p></div>
+        <details class="deck-parametres"><summary>Modifier les informations</summary>
+            <form th:action="@{/decks/{id}/informations(id=${vue.id})}" method="post">
+                <label for="deck-nom">Nom du deck</label><input id="deck-nom" name="nom" th:value="${vue.nom}" required maxlength="80">
+                <label for="deck-description">Notes</label><textarea id="deck-description" name="description" maxlength="1000" rows="3" th:text="${vue.description}"></textarea>
+                <button class="deck-bouton" type="submit">Enregistrer</button>
+            </form>
+        </details>
+    </div>
+    <p th:if="${succesDeck}" class="deck-notice deck-succes" th:text="${succesDeck}" role="status"></p>
+    <p th:if="${erreurDeck}" class="deck-notice deck-erreur" th:text="${erreurDeck}" role="alert"></p>
+    <p th:if="${vue.typesManquants}" class="deck-notice">Certaines cartes n’ont pas encore de type.
+        Actualisez les extensions depuis l’administration pour les rendre disponibles dans l’éditeur.</p>
+
+    <div class="deck-chiffres">
+        <button class="deck-stat-action" type="button" data-deck-dialog-open="deck-dialog-contenu"
+                aria-haspopup="dialog" aria-controls="deck-dialog-contenu">
+            <span class="deck-stat-libelle">Dans la liste principale</span><strong th:text="${vue.total}"></strong>
+            <span class="deck-stat-indice">Voir les cartes →</span>
+        </button>
+        <div><span>Exemplaires disponibles</span><strong th:text="${vue.disponibles + ' / ' + vue.necessaires}"></strong></div>
+        <button class="deck-stat-action" type="button" data-deck-dialog-open="deck-dialog-manquantes"
+                aria-haspopup="dialog" aria-controls="deck-dialog-manquantes">
+            <span class="deck-stat-libelle">Exemplaires à trouver</span><strong th:text="${vue.manquantes}"></strong>
+            <span class="deck-stat-indice">Voir les cartes manquantes →</span>
+        </button>
+    </div>
+    <div class="deck-progression"><span th:style="${'width:' + vue.progression + '%'}"></span></div>
+    <p class="deck-precision">Stock de votre collection, toutes finitions confondues, leader et base inclus. Les cartes ne sont pas réservées entre les decks.</p>
+
+    <div class="deck-atelier">
+        <aside class="deck-identite" aria-label="Leader et base du deck">
+            <section th:replace="~{decks/fragments :: emplacement(${vue.leader}, 'LEADER', 'Leader')}"></section>
+            <section th:replace="~{decks/fragments :: emplacement(${vue.base}, 'BASE', 'Base')}"></section>
+        </aside>
+        <div class="deck-construction">
+            <section class="deck-panneau" id="composition" aria-labelledby="composition-titre">
+                <div class="deck-section-entete"><h2 id="composition-titre">Votre liste</h2><a href="#recherche">+ Ajouter des cartes</a></div>
+                <p th:if="${vue.lignes.empty}" class="deck-vide">Votre stratégie prend forme ici. Recherchez une carte ci-dessous pour commencer.</p>
+                <ul class="deck-lignes">
+                    <li th:each="ligne : ${vue.lignes}">
+                        <img th:if="${!#strings.isEmpty(ligne.carte.image)}" th:src="${ligne.carte.image}" alt="" loading="lazy">
+                        <div class="deck-ligne-texte"><span class="deck-reference" th:text="${ligne.carte.reference}"></span><h3 th:text="${ligne.carte.titre}"></h3>
+                            <p class="deck-sous-titre" th:text="${ligne.carte.sousTitre}"></p>
+                            <p class="deck-stock" th:classappend="${ligne.manquantes > 0} ? 'deck-stock-manquant' : ''">
+                                <span th:text="${ligne.possedees + ' possédée(s)'}"></span><span th:if="${ligne.manquantes > 0}" th:text="${' · ' + ligne.manquantes + ' manquante(s)'}"></span>
+                            </p>
+                        </div>
+                        <form class="deck-quantite" th:action="@{/decks/{id}/quantite(id=${vue.id})}" method="post">
+                            <input type="hidden" name="carteId" th:value="${ligne.carte.id}">
+                            <label th:for="${'quantite-' + ligne.carte.id}">Quantité</label>
+                            <input type="number" name="quantite" th:id="${'quantite-' + ligne.carte.id}" th:value="${ligne.quantite}" min="0" max="99" required>
+                            <button class="deck-bouton" type="submit" th:attr="aria-label=${'Enregistrer la quantité de ' + ligne.carte.titre}">OK</button>
+                        </form>
+                    </li>
+                </ul>
+                <p th:if="${!vue.lignes.empty}" class="deck-aide">Saisissez 0 pour retirer une carte de la liste.</p>
+            </section>
+
+            <section class="deck-panneau deck-recherche" id="recherche" aria-labelledby="recherche-titre">
+                <div class="deck-section-entete"><h2 id="recherche-titre">Construire votre deck</h2><span>Depuis votre catalogue</span></div>
+                <nav class="deck-onglets" aria-label="Cartes à rechercher">
+                    <a th:href="@{/decks/{id}(id=${vue.id},zone='PRINCIPAL')} + '#recherche'" th:attr="aria-current=${filtres.zone.name() == 'PRINCIPAL' ? 'page' : null}">Cartes du deck</a>
+                    <a th:href="@{/decks/{id}(id=${vue.id},zone='LEADER')} + '#recherche'" th:attr="aria-current=${filtres.zone.name() == 'LEADER' ? 'page' : null}">Leaders</a>
+                    <a th:href="@{/decks/{id}(id=${vue.id},zone='BASE')} + '#recherche'" th:attr="aria-current=${filtres.zone.name() == 'BASE' ? 'page' : null}">Bases</a>
+                </nav>
+                <form class="deck-filtres" th:action="@{/decks/{id}(id=${vue.id})} + '#recherche'" method="get">
+                    <input type="hidden" name="zone" th:value="${filtres.zone}">
+                    <div class="deck-filtre-texte"><label for="q">Rechercher une carte</label><input type="search" id="q" name="q" th:value="${filtres.q}" maxlength="100" placeholder="Titre, sous-titre ou numéro…"></div>
+                    <div><label for="extensionId">Extension</label><select id="extensionId" name="extensionId"><option value="">Toutes les extensions</option><option th:each="extension : ${extensions}" th:value="${extension.id}" th:text="${extension.code + ' · ' + extension.nom}" th:selected="${extension.id == filtres.extensionId}"></option></select></div>
+                    <div><label for="coutMin">Coût minimum</label><input type="number" id="coutMin" name="coutMin" min="0" max="9999" th:value="${filtres.coutMin}" placeholder="Sans limite"></div>
+                    <div><label for="coutMax">Coût maximum</label><input type="number" id="coutMax" name="coutMax" min="0" max="9999" th:value="${filtres.coutMax}" placeholder="Sans limite"></div>
+                    <fieldset><legend>Affinités</legend><div class="deck-affinites"><label th:each="affinite : ${affinitesDisponibles}"><input type="checkbox" name="affinites" th:value="${affinite.name()}" th:checked="${filtres.affinites.contains(affinite.name())}"><span class="deck-pastille" th:style="${'background:' + affinite.couleur}"></span><span th:text="${affinite.libelle}"></span></label></div></fieldset>
+                    <div><label for="mode">Combinaison des affinités</label><select id="mode" name="mode"><option value="TOUTES" th:selected="${filtres.mode == 'TOUTES'}">Toutes celles cochées</option><option value="UNE" th:selected="${filtres.mode == 'UNE'}">Au moins une</option><option value="SANS" th:selected="${filtres.mode == 'SANS'}">Sans affinité</option></select></div>
+                    <div class="deck-filtres-actions"><button class="deck-bouton" type="submit">Rechercher →</button><a th:href="@{/decks/{id}(id=${vue.id},zone=${filtres.zone})} + '#recherche'">Réinitialiser</a></div>
+                </form>
+                <p th:if="${erreurRechercheDeck}" class="deck-notice deck-erreur" th:text="${erreurRechercheDeck}" role="alert"></p>
+                <p class="deck-resultats-compteur" th:text="${resultat.totalElements + ' carte(s) trouvée(s) · références standard'}"></p>
+                <p th:if="${resultat.empty and erreurRechercheDeck == null}" class="deck-vide">Aucune carte trouvée. Modifiez les filtres ou actualisez les extensions.</p>
+                <div class="deck-resultats">
+                    <article class="deck-carte" th:each="resultatCarte : ${resultat.content}" th:with="carte=${resultatCarte.carte}">
+                        <div class="deck-carte-image"><img th:if="${!#strings.isEmpty(carte.image)}" th:src="${carte.image}" th:alt="${carte.titre}" loading="lazy"><span th:if="${#strings.isEmpty(carte.image)}">Image indisponible</span></div>
+                        <p class="deck-reference" th:text="${carte.reference}"></p><h3 th:text="${carte.titre}"></h3><p class="deck-sous-titre" th:text="${carte.sousTitre}"></p>
+                        <p class="deck-stock" th:text="${resultatCarte.possedees + ' dans votre collection'}"></p>
+                        <p class="deck-deja" th:if="${resultatCarte.dansDeck > 0}" th:text="${resultatCarte.dansDeck + ' dans ce deck'}"></p>
+                        <form th:if="${filtres.zone.name() == 'PRINCIPAL'}" th:action="@{/decks/{id}/ajouter(id=${vue.id})}" method="post">
+                            <input type="hidden" name="carteId" th:value="${carte.id}"><th:block th:replace="~{decks/fragments :: filtresCaches}"></th:block>
+                            <label th:for="${'ajout-' + carte.id}">Exemplaires à ajouter</label>
+                            <div class="deck-ajout-actions"><input type="number" name="quantite" th:id="${'ajout-' + carte.id}" value="1" min="1" th:max="${99 - resultatCarte.dansDeck}" th:disabled="${resultatCarte.dansDeck >= 99}" required>
+                                <button class="deck-bouton" type="submit" th:disabled="${resultatCarte.dansDeck >= 99}" th:attr="aria-label=${'Ajouter ' + carte.titre + ' au deck'}">+ Ajouter</button></div>
+                        </form>
+                        <form th:if="${filtres.zone.name() != 'PRINCIPAL'}" th:action="@{/decks/{id}/choisir(id=${vue.id})}" method="post">
+                            <input type="hidden" name="carteId" th:value="${carte.id}"><input type="hidden" name="emplacement" th:value="${filtres.zone}">
+                            <th:block th:replace="~{decks/fragments :: filtresCaches}"></th:block>
+                            <button class="deck-bouton" type="submit">Choisir cette carte →</button>
+                        </form>
+                    </article>
+                </div>
+                <nav class="deck-pagination" th:if="${resultat.totalPages > 1}" aria-label="Pagination du catalogue">
+                    <a th:if="${resultat.hasPrevious()}" th:href="@{${filtres.url(vue.id, resultat.number - 1)}}">← Précédent</a>
+                    <span th:text="${'Page ' + (resultat.number + 1) + ' sur ' + resultat.totalPages}"></span>
+                    <a th:if="${resultat.hasNext()}" th:href="@{${filtres.url(vue.id, resultat.number + 1)}}">Suivant →</a>
+                </nav>
+            </section>
+        </div>
+    </div>
+
+    <section class="deck-panneau deck-manquantes" aria-labelledby="manquantes-titre">
+        <div class="deck-section-entete"><h2 id="manquantes-titre">Les cartes à trouver</h2><span th:text="${vue.manquantes + ' exemplaire(s)'}"></span></div>
+        <p th:if="${vue.necessaires == 0}" class="deck-vide">Ajoutez des cartes pour comparer ce deck à votre collection.</p>
+        <p th:if="${vue.necessaires > 0 and vue.aTrouver.empty}" class="deck-vide">Vous possédez tous les exemplaires actuellement sélectionnés dans ce deck.</p>
+        <ul class="deck-achats"><li th:each="ligne : ${vue.aTrouver}"><strong th:text="${ligne.manquantes + ' ×'}"></strong><span th:text="${ligne.carte.titre}"></span><small th:text="${ligne.carte.reference}"></small></li></ul>
+    </section>
+    <p class="deck-precision">Cet atelier enregistre des listes personnelles. Il ne vérifie pas encore leur légalité en tournoi, les restrictions de construction ou les pénalités d’affinité.</p>
+    <details class="deck-suppression"><summary>Supprimer ce deck</summary><p>Cette action supprime uniquement ce deck. Vos cartes restent dans votre collection.</p>
+        <form th:action="@{/decks/{id}/supprimer(id=${vue.id})}" method="post"><button class="deck-bouton deck-bouton-danger" type="submit">Confirmer la suppression du deck</button></form>
+    </details>
+    <dialog class="deck-dialog" id="deck-dialog-contenu" aria-labelledby="deck-contenu-titre" aria-describedby="deck-contenu-description">
+        <div class="deck-dialog-entete">
+            <div><p class="deck-dialog-eyebrow" th:text="${vue.nom}"></p><h2 id="deck-contenu-titre">Votre deck, carte par carte.</h2>
+                <p id="deck-contenu-description"><strong th:text="${vue.total}"></strong> exemplaire(s) dans la liste principale. Leader et base affichés à part.</p></div>
+            <button class="deck-dialog-fermer" type="button" data-deck-dialog-close aria-label="Fermer les cartes du deck" autofocus>✕</button>
+        </div>
+        <div class="deck-dialog-corps">
+            <section class="deck-dialog-section" aria-labelledby="deck-principale-titre">
+                <h3 id="deck-principale-titre">Liste principale <span th:text="${vue.total + ' exemplaire(s)'}"></span></h3>
+                <p class="deck-dialog-vide" th:if="${vue.lignes.empty}">Votre liste principale est encore vide. Ajoutez des cartes depuis le catalogue.</p>
+                <div class="deck-galerie">
+                    <th:block th:each="ligne : ${vue.lignes}"><th:block th:replace="~{decks/popins :: carte(${ligne}, false, 'Liste principale')}"></th:block></th:block>
+                </div>
+            </section>
+            <section th:if="${vue.leader != null or vue.base != null}" aria-labelledby="deck-commandement-titre" class="deck-dialog-section">
+                <h3 id="deck-commandement-titre">Leader &amp; base</h3>
+                <div class="deck-galerie deck-galerie-commandement">
+                    <th:block th:if="${vue.leader != null}"><th:block th:replace="~{decks/popins :: carte(${vue.leader}, false, 'Leader')}"></th:block></th:block>
+                    <th:block th:if="${vue.base != null}"><th:block th:replace="~{decks/popins :: carte(${vue.base}, false, 'Base')}"></th:block></th:block>
+                </div>
+            </section>
+        </div>
+        <div class="deck-dialog-pied"><span>Cliquez sur une image pour la lire en grand.</span><button type="button" data-deck-dialog-close>Revenir au deck</button></div>
+    </dialog>
+
+    <dialog class="deck-dialog" id="deck-dialog-manquantes" aria-labelledby="deck-manquantes-dialog-titre" aria-describedby="deck-manquantes-description">
+        <div class="deck-dialog-entete">
+            <div><p class="deck-dialog-eyebrow" th:text="${vue.nom}"></p><h2 id="deck-manquantes-dialog-titre">Les cartes à trouver.</h2>
+                <p id="deck-manquantes-description"><strong th:text="${vue.manquantes}"></strong> exemplaire(s) manquant(s), leader et base inclus. Les quantités tiennent compte de toutes vos finitions.</p></div>
+            <button class="deck-dialog-fermer" type="button" data-deck-dialog-close aria-label="Fermer les cartes manquantes" autofocus>✕</button>
+        </div>
+        <div class="deck-dialog-corps">
+            <div class="deck-marche-annonce"><span class="deck-marche-symbole" aria-hidden="true">↔</span><div><strong>Votre prochaine recherche commence ici.</strong>
+                <p>Le marché permettra de rechercher ces cartes et de préparer vos demandes. Cette fonction arrive plus tard.</p></div><span class="deck-marche-badge">À venir</span></div>
+            <p class="deck-dialog-vide" th:if="${vue.necessaires == 0}">Ajoutez des cartes à votre deck pour retrouver ici celles qu’il vous manque.</p>
+            <div class="deck-dialog-complet" th:if="${vue.necessaires > 0 and vue.aTrouver.empty}"><span aria-hidden="true">✓</span><h3>Tout est dans votre collection.</h3><p>Vous possédez tous les exemplaires sélectionnés dans ce deck.</p></div>
+            <div class="deck-galerie">
+                <th:block th:each="ligne : ${vue.aTrouver}"><th:block th:replace="~{decks/popins :: carte(${ligne}, true, ligne.carte.type)}"></th:block></th:block>
+            </div>
+        </div>
+        <div class="deck-dialog-pied"><span>Une carte déjà possédée peut apparaître s’il manque encore des exemplaires.</span><button type="button" data-deck-dialog-close>Revenir au deck</button></div>
+    </dialog>
+
+    <dialog class="deck-dialog deck-dialog-zoom" id="deck-dialog-zoom" aria-labelledby="deck-zoom-titre">
+        <div class="deck-dialog-entete"><div><h2 id="deck-zoom-titre" data-deck-zoom-titre>Carte du deck</h2><p data-deck-zoom-reference></p></div>
+            <button class="deck-dialog-fermer" type="button" data-deck-dialog-close aria-label="Fermer l’agrandissement" autofocus>✕</button></div>
+        <div class="deck-zoom-corps"><img data-deck-zoom-image alt=""></div>
+    </dialog>
+
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body></html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html><html lang="fr" xmlns:th="http://www.thymeleaf.org"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Mes recherches — Gestion SWU</title>
+<link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/recherches.css(v=1)}"><script th:src="@{/js/recherches.js(v=1)}" defer></script>
+</head><body><header th:replace="~{fragments/header :: header('recherches')}"></header>
+<main class="recherches-page"><div class="recherches-entete"><div><p class="eyebrow">LES CARTES QUI VOUS FONT ENVIE</p><h1>Mes <span>recherches.</span></h1><p>Un cœur, une envie. Retrouvez ici les cartes que vous souhaitez acquérir, même si vous en possédez déjà une version.</p></div><div class="recherches-raccourcis"><a th:href="@{/catalogue}">Parcourir le catalogue →</a><a th:href="@{/ma-vitrine}">Partager mes recherches →</a></div></div>
+<th:block th:replace="~{fragments/recherches :: messages}"></th:block>
+<form class="recherches-filtres" th:action="@{/recherches}" method="get"><div><label for="q">Rechercher dans ma liste</label><input id="q" name="q" type="search" maxlength="100" th:value="${q}" placeholder="Titre ou sous-titre…"></div><div><label for="extensionId">Extension</label><select id="extensionId" name="extensionId"><option value="">Toutes les extensions</option><option th:each="extension : ${extensions}" th:value="${extension.id}" th:selected="${extension.id == extensionId}" th:text="${extension.code + ' · ' + extension.nom}"></option></select></div><button type="submit">Filtrer →</button></form>
+<p class="recherches-compteur" th:text="${resultat.totalElements + ' carte(s) recherchée(s) dans cette sélection'}"></p>
+<p class="recherches-vide" th:if="${resultat.empty}">Aucune carte dans cette sélection.<br>Ajoutez des cœurs depuis le catalogue ou votre collection.</p>
+<div class="recherches-grille" data-liste-recherches>
+<article class="recherche-carte" th:each="carte : ${resultat.content}">
+<th:block th:replace="~{fragments/recherches :: coeur(${carte.id}, ${carte.titre}, true, ${retourRecherches})}"></th:block>
+<img th:if="${!#strings.isEmpty(carte.image)}" th:src="${carte.image}" th:alt="${carte.titre}" loading="lazy"><span class="recherche-image-absente" th:if="${#strings.isEmpty(carte.image)}">Image indisponible</span>
+<p class="recherche-reference" th:text="${carte.reference}"></p><h2 th:text="${carte.titre}"></h2><p class="recherche-sous-titre" th:text="${carte.sousTitre}"></p><span class="recherche-etiquette">Dans mes recherches</span>
+</article></div>
+<nav class="recherches-pagination" th:if="${resultat.totalPages > 1}" aria-label="Pagination des recherches"><a th:if="${resultat.hasPrevious()}" th:href="@{/recherches(q=${q},extensionId=${extensionId},page=${resultat.number - 1})}">← Précédent</a><span th:text="${'Page ' + (resultat.number + 1) + ' sur ' + resultat.totalPages}"></span><a th:if="${resultat.hasNext()}" th:href="@{/recherches(q=${q},extensionId=${extensionId},page=${resultat.number + 1})}">Suivant →</a></nav>
+</main><footer th:replace="~{fragments/footer :: footer}"></footer></body></html>

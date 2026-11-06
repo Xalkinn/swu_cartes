@@ -19,9 +19,14 @@ public interface PossessionRepository
     );
 
     @EntityGraph(attributePaths = "carte")
+    @Query("""
+            select p from Possession p
+            where lower(p.utilisateur.email) = lower(:email)
+              and p.carte.id in :carteIds
+            """)
     List<Possession> findByUtilisateurEmailIgnoreCaseAndCarteIdIn(
-            String email,
-            List<Long> carteIds
+            @Param("email") String email,
+            @Param("carteIds") List<Long> carteIds
     );
 
     @EntityGraph(attributePaths = {

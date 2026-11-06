@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mes decks — Gestion SWU</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/decks.css(v=1)}">
+</head>
+<body>
+<header th:replace="~{fragments/header :: header('decks')}"></header>
+<main class="decks-page">
+    <div class="decks-entete">
+        <div><p class="eyebrow">VOTRE TABLE DE JEU</p><h1>Vos prochaines <span>stratégies.</span></h1>
+            <p>Du premier choix de leader à la dernière carte de votre liste.</p></div>
+        <a class="decks-bouton" href="#nouveau-deck">+ Créer un deck</a>
+    </div>
+    <p class="decks-notice decks-succes" th:if="${succesDeck}" th:text="${succesDeck}" role="status"></p>
+    <p class="decks-notice decks-erreur" th:if="${erreurDeck}" th:text="${erreurDeck}" role="alert"></p>
+    <div class="decks-disposition">
+        <section aria-labelledby="decks-titre">
+            <div class="decks-section-entete"><h2 id="decks-titre">Mes decks</h2><span th:text="${resultat.totalElements + ' deck(s)'}"></span></div>
+            <div th:if="${resultat.empty}" class="decks-vide">
+                <span aria-hidden="true">✦</span><h3>Tout commence par une idée.</h3>
+                <p>Créez votre premier deck, choisissez son leader et construisez votre liste à partir du catalogue.</p>
+                <a href="#nouveau-deck">Préparer mon premier deck →</a>
+            </div>
+            <div class="decks-grille">
+                <a class="decks-carte" th:each="deck : ${resultat.content}" th:href="@{/decks/{id}(id=${deck.id})}">
+                    <div class="decks-visuel">
+                        <img th:if="${deck.leader != null and !#strings.isEmpty(deck.leader.image)}"
+                             th:src="${deck.leader.image}" th:alt="${deck.leader.titre}" loading="lazy">
+                        <span class="decks-visuel-vide" th:if="${deck.leader == null or #strings.isEmpty(deck.leader.image)}" aria-hidden="true">✦</span>
+                        <span class="decks-etiquette" th:text="${deck.leader == null or deck.base == null ? 'À construire' : 'Deck personnel'}"></span>
+                    </div>
+                    <div class="decks-carte-contenu">
+                        <h3 th:text="${deck.nom}"></h3>
+                        <p th:text="${deck.leader == null ? 'Leader à choisir' : deck.leader.titre}"></p>
+                        <p class="decks-base" th:text="${deck.base == null ? 'Base à choisir' : deck.base.titre}"></p>
+                        <div class="decks-carte-pied"><span><strong th:text="${deck.total}"></strong> cartes</span><span>Ouvrir →</span></div>
+                    </div>
+                </a>
+            </div>
+            <nav th:if="${resultat.totalPages > 1}" class="decks-pagination" aria-label="Pagination des decks">
+                <a th:if="${resultat.hasPrevious()}" th:href="@{/decks(page=${resultat.number - 1})}">← Précédent</a>
+                <span th:text="${'Page ' + (resultat.number + 1) + ' sur ' + resultat.totalPages}"></span>
+                <a th:if="${resultat.hasNext()}" th:href="@{/decks(page=${resultat.number + 1})}">Suivant →</a>
+            </nav>
+        </section>
+        <aside class="decks-creation" id="nouveau-deck" aria-labelledby="creation-titre">
+            <p class="eyebrow">UNE NOUVELLE IDÉE ?</p><h2 id="creation-titre">À vous de jouer.</h2>
+            <p>Donnez un nom à votre stratégie. Vous pourrez ensuite choisir vos cartes.</p>
+            <form th:action="@{/decks}" method="post">
+                <label for="nom">Nom du deck</label>
+                <input id="nom" name="nom" maxlength="80" required placeholder="Ex. La cour de Jabba" th:value="${nomSaisi}">
+                <label for="description">Notes <span>(facultatif)</span></label>
+                <textarea id="description" name="description" maxlength="1000" rows="4" placeholder="Votre idée, vos synergies…" th:text="${descriptionSaisie}"></textarea>
+                <button class="decks-bouton" type="submit">Créer mon deck →</button>
+            </form>
+            <p class="decks-prive">Vos decks sont personnels. Votre collection reste indépendante.</p>
+        </aside>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body></html>

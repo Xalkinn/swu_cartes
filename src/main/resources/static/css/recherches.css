@@ -1,0 +1,342 @@
+.catalogue-carte, .collection-carte, .recherche-carte {
+    position: relative;
+}
+
+.coeur-form {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+    z-index: 2;
+    margin: 0;
+}
+
+.coeur-form .recherche-coeur {
+    display: grid;
+    place-items: center;
+    width: 45px;
+    height: 45px;
+    margin: 0;
+    padding: 11px;
+    border: 1px solid #6d819c;
+    border-radius: 50%;
+    background: #0b172bec;
+    color: #d5e0ef;
+    cursor: pointer;
+    box-shadow: 0 4px 15px #0006;
+}
+
+.recherche-coeur svg {
+    display: block;
+    width: 23px;
+    height: 23px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+}
+
+.coeur-form .recherche-coeur:hover {
+    color: #ff8eb0;
+    border-color: #ff8eb0;
+    background: #302237;
+}
+
+.coeur-form .recherche-coeur-actif {
+    color: #ff81a9;
+    border-color: #ff81a9;
+    background: #40213aee;
+}
+
+.recherche-coeur-actif svg {
+    fill: currentColor;
+}
+
+.coeur-form .recherche-coeur:disabled {
+    opacity: .6;
+    cursor: wait;
+}
+
+.coeur-form .recherche-coeur:focus-visible {
+    outline: 3px solid #ff9aba;
+    outline-offset: 4px;
+}
+
+.recherche-message {
+    position: fixed;
+    z-index: 100;
+    right: 24px;
+    bottom: 24px;
+    max-width: min(430px, calc(100vw - 40px));
+    padding: 16px 22px;
+    border: 1px solid #9c627f;
+    border-radius: 12px;
+    background: #301d31;
+    color: #ffe0ea;
+    font-size: 14px;
+    line-height: 1.7;
+    box-shadow: 0 8px 30px #0008;
+}
+
+.recherche-message[hidden] {
+    display: none;
+}
+
+.recherche-message-erreur {
+    border-color: #df897a;
+    color: #ffd0c7;
+}
+
+.recherche-notice {
+    padding: 14px 18px;
+    border: 1px solid #875870;
+    border-radius: 10px;
+    color: #ffd4e4;
+    background: #312036;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.recherche-notice-erreur {
+    border-color: #a76868;
+}
+
+.recherches-page {
+    flex: 1;
+    width: min(1160px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 40px 0 60px;
+}
+
+.recherches-entete {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 25px;
+}
+
+.recherches-entete h1 {
+    margin: 10px 0 15px;
+    font-size: clamp(32px, 5vw, 48px);
+    line-height: 1.15;
+}
+
+.recherches-entete h1 span {
+    color: #ff93b5;
+}
+
+.recherches-entete p:last-child {
+    max-width: 690px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.recherches-page a {
+    text-decoration: none;
+    color: var(--gold);
+}
+
+.recherches-raccourcis {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 12px;
+}
+
+.recherches-filtres {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr auto;
+    align-items: end;
+    gap: 16px;
+    margin-top: 28px;
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    background: #0d192c;
+}
+
+.recherches-filtres > div {
+    min-width: 0;
+}
+
+.recherches-filtres label {
+    margin: 0 0 8px;
+    font-size: 12px;
+}
+
+.recherches-filtres input, .recherches-filtres select {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid #40526d;
+    border-radius: 8px;
+    color: var(--text);
+    background: #0a1424;
+    font: inherit;
+    font-size: 14px;
+}
+
+.recherches-filtres button {
+    width: auto;
+    margin: 0;
+    padding: 13px 22px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.recherches-compteur {
+    margin: 24px 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.recherches-grille {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.recherche-carte {
+    min-width: 0;
+    padding: 15px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: #0d192b;
+}
+
+.recherche-carte > img, .recherche-carte .recherche-image-absente {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2.5/3.5;
+    object-fit: contain;
+    margin-bottom: 18px;
+    border-radius: 8px;
+    background: #07111e;
+}
+
+.recherche-carte .recherche-image-absente {
+    display: grid;
+    place-items: center;
+    color: #849bb7;
+    font-size: 12px;
+}
+
+.recherche-reference {
+    color: var(--gold);
+    font-size: 11px;
+}
+
+.recherche-carte h2 {
+    margin: 8px 0;
+    font-size: 19px;
+    overflow-wrap: anywhere;
+}
+
+.recherche-sous-titre {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.recherche-etiquette {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 5px 8px;
+    border: 1px solid #89516e;
+    border-radius: 5px;
+    color: #ffa5c3;
+    font-size: 10px;
+}
+
+.recherches-vide {
+    padding: 40px 25px;
+    border: 1px dashed #65506a;
+    border-radius: 16px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.8;
+}
+
+.recherches-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 30px;
+    font-size: 13px;
+}
+
+@media (max-width: 1000px) {
+    .recherches-grille {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .recherches-entete {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 700px) {
+    .recherches-grille {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .recherches-filtres {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .recherches-page {
+        width: calc(100% - 28px);
+    }
+
+    .recherches-grille {
+        grid-template-columns: 1fr;
+    }
+
+    .recherches-filtres input, .recherches-filtres select {
+        font-size: 16px;
+    }
+}
+
+.recherches-acces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 22px;
+    margin: 20px 0 24px;
+    font-size: 12px;
+}
+
+.recherches-acces a {
+    color: #ff9cbb;
+    text-decoration: none;
+}
+
+.recherches-acces span {
+    color: var(--muted);
+}
+
+/* Cœurs dans la galerie des cartes manquantes du deck. */
+.deck-galerie-recherche .coeur-form {
+    top: 22px;
+    right: 22px;
+}
+
+.deck-galerie-recherche .deck-galerie-agrandir {
+    right: auto;
+    left: 9px;
+}
+
+.recherche-message.recherche-message-dialog {
+    position: static;
+    width: auto;
+    max-width: none;
+    margin: 12px 0 0;
+    padding: 10px 13px;
+    font-size: 12px;
+}

@@ -10,27 +10,33 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import fr.xalkinn.swu.recherche.RechercheService;
+import fr.xalkinn.swu.securite.UtilisateurConnecte;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @Controller
 public class CollectionController {
 
     private final CollectionService collectionService;
 
-    public CollectionController(CollectionService collectionService) {
+    private final RechercheService rechercheService;
+
+    public CollectionController(CollectionService collectionService, RechercheService rechercheService) {
         this.collectionService = collectionService;
+        this.rechercheService = rechercheService;
     }
 
     @GetMapping("/collection")
     public String afficher(
+            @AuthenticationPrincipal UtilisateurConnecte utilisateurConnecte,
             Principal principal,
             @RequestParam(name = "page", defaultValue = "0") int page,
             HttpServletRequest requete,
             Model model
     ) {
-        model.addAttribute(
-                "resultat",
-                collectionService.consulter(principal.getName(), page)
-        );
+        var resultat = collectionService.consulter(principal.getName(), page);
+        model.addAttribute("resultat", resultat);
+        model.addAttribute("recherchesSelection", rechercheService.selection(utilisateurConnecte.getUtilisateurId(), resultat.map(CollectionService.CartePossedee::idCarte).getContent()));
 
         model.addAttribute(
                 "retour",

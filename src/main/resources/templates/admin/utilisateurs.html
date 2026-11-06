@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Utilisateurs et permissions — Gestion SWU</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/admin-utilisateurs.css(v=1)}">
+</head>
+<body>
+<header th:replace="~{fragments/header :: header('admin')}"></header>
+
+<main class="utilisateurs-page">
+    <nav class="utilisateurs-fil" aria-label="Fil d’Ariane">
+        <a th:href="@{/admin}">Administration</a><span aria-hidden="true">/</span>
+        <span aria-current="page">Utilisateurs</span>
+    </nav>
+
+    <div class="utilisateurs-entete">
+        <div>
+            <p class="eyebrow">GESTION DES ACCÈS</p>
+            <h1>Utilisateurs <span>& permissions.</span></h1>
+            <p>Attribuez les rôles et gérez l’accès aux comptes de l’application.</p>
+        </div>
+        <a class="utilisateurs-retour" th:href="@{/admin}">← Administration</a>
+    </div>
+
+    <div class="utilisateurs-statistiques" aria-label="État des comptes">
+        <div><span>Comptes enregistrés</span><strong th:text="${resultat.total}">0</strong></div>
+        <div><span>Comptes actifs</span><strong th:text="${resultat.actifs}">0</strong></div>
+        <div><span>Administrateurs actifs</span><strong th:text="${resultat.adminsActifs}">0</strong></div>
+    </div>
+
+    <p class="utilisateurs-notice utilisateurs-succes" th:if="${succesUtilisateurs != null}"
+       th:text="${succesUtilisateurs}" role="status"></p>
+    <p class="utilisateurs-notice utilisateurs-erreur" th:if="${erreurUtilisateurs != null}"
+       th:text="${erreurUtilisateurs}" role="alert"></p>
+
+    <section class="utilisateurs-panneau" aria-labelledby="utilisateurs-liste-titre">
+        <div class="utilisateurs-panneau-entete">
+            <div>
+                <h2 id="utilisateurs-liste-titre">Les comptes</h2>
+                <p th:text="${resultat.utilisateurs.totalElements + ' résultat(s)'}"></p>
+            </div>
+            <span class="utilisateurs-actualisation">Droits actualisés à la prochaine requête</span>
+        </div>
+
+        <form class="utilisateurs-filtres" th:action="@{/admin/utilisateurs}" method="get">
+            <div>
+                <label for="q">Rechercher un compte</label>
+                <input type="search" id="q" name="q" th:value="${q}"
+                       maxlength="100" placeholder="Pseudo ou adresse e-mail…">
+            </div>
+            <div>
+                <label for="roleFiltre">Rôle</label>
+                <select id="roleFiltre" name="role">
+                    <option value="" th:selected="${roleFiltre == ''}">Tous les rôles</option>
+                    <option value="USER" th:selected="${roleFiltre == 'USER'}">Utilisateur</option>
+                    <option value="ADMIN" th:selected="${roleFiltre == 'ADMIN'}">Administrateur</option>
+                </select>
+            </div>
+            <div>
+                <label for="etatFiltre">État</label>
+                <select id="etatFiltre" name="etat">
+                    <option value="" th:selected="${etatFiltre == ''}">Tous les comptes</option>
+                    <option value="actif" th:selected="${etatFiltre == 'actif'}">Actifs</option>
+                    <option value="inactif" th:selected="${etatFiltre == 'inactif'}">Désactivés</option>
+                </select>
+            </div>
+            <button type="submit">Filtrer</button>
+            <a th:href="@{/admin/utilisateurs}">Réinitialiser</a>
+        </form>
+
+        <div class="utilisateurs-legende" aria-hidden="true">
+            <span>COMPTE</span><span>RÔLE</span><span>ÉTAT</span><span>ACTION</span>
+        </div>
+
+        <p th:if="${resultat.utilisateurs.empty}" class="utilisateurs-vide">Aucun compte ne correspond à cette recherche.</p>
+
+        <ul class="utilisateurs-liste">
+            <li th:each="utilisateur : ${resultat.utilisateurs.content}"
+                th:classappend="${!utilisateur.actif} ? 'utilisateur-inactif' : ''">
+                <form class="utilisateur-ligne" th:action="@{/admin/utilisateurs/acces}" method="post">
+                    <input type="hidden" name="utilisateurId" th:value="${utilisateur.id}">
+
+                    <div class="utilisateur-identite">
+                        <span class="utilisateur-avatar" aria-hidden="true"
+                              th:text="${#strings.toUpperCase(#strings.substring(utilisateur.pseudo, 0, 1))}"></span>
+                        <div>
+                            <p class="utilisateur-nom"><strong th:text="${utilisateur.pseudo}"></strong>
+                                <span th:if="${utilisateur.moi}" class="utilisateur-vous">Vous</span>
+                            </p>
+                            <p class="utilisateur-email" th:text="${utilisateur.email}"></p>
+                            <p class="utilisateur-date" th:if="${utilisateur.dateCreation != null}"
+                               th:text="${'Inscrit le ' + utilisateur.dateCreation}"></p>
+                            <p th:if="${utilisateur.dernierAdministrateurActif}" class="utilisateur-protege">
+                                Dernier administrateur actif · protégé
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="utilisateur-champ">
+                        <label th:for="${'role-' + utilisateur.id}">Rôle</label>
+                        <select name="role" th:id="${'role-' + utilisateur.id}"
+                                th:disabled="${utilisateur.dernierAdministrateurActif}">
+                            <option value="USER" th:selected="${utilisateur.role == 'USER'}">Utilisateur</option>
+                            <option value="ADMIN" th:selected="${utilisateur.role == 'ADMIN'}">Administrateur</option>
+                        </select>
+                    </div>
+
+                    <div class="utilisateur-champ">
+                        <label th:for="${'actif-' + utilisateur.id}">État</label>
+                        <select name="actif" th:id="${'actif-' + utilisateur.id}"
+                                th:disabled="${utilisateur.dernierAdministrateurActif}">
+                            <option value="true" th:selected="${utilisateur.actif}">Actif</option>
+                            <option value="false" th:selected="${!utilisateur.actif}">Désactivé</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="utilisateur-enregistrer"
+                            th:disabled="${utilisateur.dernierAdministrateurActif}"
+                            th:attr="aria-label=${'Enregistrer les accès de ' + utilisateur.pseudo}">
+                        Enregistrer
+                    </button>
+                </form>
+            </li>
+        </ul>
+
+        <nav class="utilisateurs-pagination" th:if="${resultat.utilisateurs.totalPages > 1}"
+             aria-label="Pagination des utilisateurs">
+            <a th:if="${resultat.utilisateurs.hasPrevious()}"
+               th:href="@{/admin/utilisateurs(q=${q},role=${roleFiltre},etat=${etatFiltre},page=${resultat.utilisateurs.number - 1})}">← Précédent</a>
+            <span th:text="${'Page ' + (resultat.utilisateurs.number + 1) + ' sur ' + resultat.utilisateurs.totalPages}"></span>
+            <a th:if="${resultat.utilisateurs.hasNext()}"
+               th:href="@{/admin/utilisateurs(q=${q},role=${roleFiltre},etat=${etatFiltre},page=${resultat.utilisateurs.number + 1})}">Suivant →</a>
+        </nav>
+    </section>
+
+    <section class="utilisateurs-roles" aria-labelledby="utilisateurs-roles-titre">
+        <h2 id="utilisateurs-roles-titre">À quoi donnent accès les rôles ?</h2>
+        <div><strong>USER</strong><p>Compte personnel, collection, catalogue, ajout rapide et scanner.</p></div>
+        <div><strong>ADMIN</strong><p>Les mêmes fonctions, plus la gestion des extensions, des imports et des accès utilisateurs.</p></div>
+        <p class="utilisateurs-note">Désactiver un compte bloque ses accès sans supprimer ses cartes. Un administrateur doit toujours rester actif.</p>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

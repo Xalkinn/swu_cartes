@@ -37,6 +37,18 @@ public class Carte {
     @Column(name = "image_verso", columnDefinition = "TEXT")
     private String imageVerso;
 
+    @Column(name = "type_carte", length = 40)
+    private String typeCarte;
+
+    public String getTypeCarte() { return typeCarte; }
+
+    public void actualiserType(String typeCarte) {
+        if (typeCarte == null || typeCarte.isBlank() || typeCarte.length() > 40) {
+            throw new IllegalArgumentException("Type de carte invalide.");
+        }
+        this.typeCarte = typeCarte;
+    }
+
     @Column(name = "cout")
     private Integer cout;
 

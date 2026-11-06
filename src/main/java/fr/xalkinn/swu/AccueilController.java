@@ -16,12 +16,12 @@ public class AccueilController {
     @GetMapping("/espace")
     public String espacePersonnel(Model model) {
         model.addAttribute("pageActive", "espace");
-        return "accueil";
+        return "espace";
     }
 
     @GetMapping("/admin")
     public String administration(Model model) {
         model.addAttribute("pageActive", "admin");
-        return "accueil";
+        return "admin/index";
     }
 }

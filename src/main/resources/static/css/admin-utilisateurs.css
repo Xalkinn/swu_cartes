@@ -1,0 +1,548 @@
+.utilisateurs-page {
+    position: relative;
+    flex: 1;
+    width: min(1180px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 28px 0 48px;
+}
+
+.utilisateurs-page, .utilisateurs-page * {
+    box-sizing: border-box;
+}
+
+.utilisateurs-page a {
+    text-decoration: none;
+}
+
+.utilisateurs-fil {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 28px;
+    color: #b7c5da;
+    font-size: 11px;
+}
+
+.utilisateurs-fil a {
+    color: #91a4c0;
+}
+
+.utilisateurs-fil > span:first-of-type {
+    color: #52667f;
+}
+
+.utilisateurs-entete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 26px;
+}
+
+.utilisateurs-entete h1 {
+    margin: 0 0 12px;
+    font-size: clamp(28px, 3.7vw, 39px);
+    line-height: 1.2;
+}
+
+.utilisateurs-entete > div > p:last-child {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.utilisateurs-retour {
+    flex-shrink: 0;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.utilisateurs-statistiques {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 17px;
+    margin-bottom: 24px;
+}
+
+.utilisateurs-statistiques > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 21px 24px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(13, 24, 42, .94);
+}
+
+.utilisateurs-statistiques span {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.utilisateurs-statistiques strong {
+    color: var(--gold);
+    font-size: 30px;
+    font-weight: 650;
+    line-height: 1;
+}
+
+.utilisateurs-panneau {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: rgba(11, 22, 39, .96);
+}
+
+.utilisateurs-panneau-entete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+.utilisateurs-panneau-entete h2 {
+    margin: 0 0 6px;
+    font-size: 22px;
+}
+
+.utilisateurs-panneau-entete p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.utilisateurs-actualisation {
+    padding: 6px 9px;
+    border: 1px solid #34455e;
+    border-radius: 6px;
+    color: #8fa5c3;
+    font-size: 10px;
+}
+
+.utilisateurs-filtres {
+    display: grid;
+    grid-template-columns: minmax(170px, 1.6fr) 1fr 1fr auto auto;
+    align-items: end;
+    gap: 12px;
+    padding: 22px 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+.utilisateurs-filtres > div {
+    min-width: 0;
+}
+
+.utilisateurs-filtres label {
+    margin: 0 0 8px;
+    color: #bfccdf;
+    font-size: 11px;
+}
+
+.utilisateurs-page input:not([type="hidden"]), .utilisateurs-page select {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid #33455f;
+    border-radius: 8px;
+    background: #091423;
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    color-scheme: dark;
+}
+
+.utilisateurs-page select:disabled {
+    color: #99a9bf;
+    opacity: .65;
+    cursor: not-allowed;
+}
+
+.utilisateurs-page button {
+    width: auto;
+    min-height: 42px;
+    margin: 0;
+    padding: 11px 15px;
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    background: var(--gold);
+    color: #17140d;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.utilisateurs-page button:hover:not(:disabled) {
+    background: #ffe2a0;
+}
+
+.utilisateurs-page button:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+}
+
+.utilisateurs-filtres > a {
+    padding: 12px 0;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.utilisateurs-legende, .utilisateur-ligne {
+    display: grid;
+    grid-template-columns: minmax(210px, 1fr) 175px 145px 105px;
+    gap: 18px;
+    align-items: center;
+}
+
+.utilisateurs-legende {
+    padding: 13px 24px;
+    background: rgba(96, 127, 174, .04);
+    color: #7f95b2;
+    font-size: 9px;
+    font-weight: 650;
+    letter-spacing: 1.2px;
+}
+
+.utilisateurs-liste {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.utilisateurs-liste > li {
+    padding: 20px 24px;
+    border-top: 1px solid rgba(164, 184, 214, .12);
+}
+
+.utilisateur-ligne {
+    margin: 0;
+}
+
+.utilisateur-identite {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+}
+
+.utilisateur-identite > div {
+    min-width: 0;
+}
+
+.utilisateur-avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 39px;
+    width: 39px;
+    height: 39px;
+    border: 1px solid #42536c;
+    border-radius: 11px;
+    background: #192a41;
+    color: #bdcfe7;
+    font-size: 17px;
+    font-weight: 650;
+}
+
+.utilisateur-nom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 4px;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.utilisateur-nom strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.utilisateur-vous {
+    padding: 2px 6px;
+    border: 1px solid rgba(244, 206, 120, .2);
+    border-radius: 4px;
+    color: var(--gold);
+    font-size: 9px;
+}
+
+.utilisateur-email {
+    margin: 0;
+    color: #98aac4;
+    font-size: 11px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+.utilisateur-date {
+    margin: 5px 0 0;
+    color: #6e84a2;
+    font-size: 9px;
+}
+
+.utilisateur-protege {
+    margin: 7px 0 0;
+    color: #cdb572;
+    font-size: 9px;
+    line-height: 1.6;
+}
+
+.utilisateur-champ {
+    min-width: 0;
+}
+
+.utilisateur-champ label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    padding: 0;
+    margin: -1px;
+    border: 0;
+    clip-path: inset(50%);
+}
+
+.utilisateurs-page .utilisateur-enregistrer {
+    font-size: 11px;
+    padding: 11px 12px;
+}
+
+.utilisateur-inactif {
+    background: rgba(150, 75, 100, .035);
+}
+
+.utilisateur-inactif .utilisateur-avatar {
+    color: #bb9eae;
+    background: #282234;
+    border-color: #57445d;
+}
+
+.utilisateurs-vide {
+    margin: 0;
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.utilisateurs-notice {
+    padding: 14px 18px;
+    border: 1px solid;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.utilisateurs-succes {
+    border-color: #3a715b;
+    background: #132c23;
+    color: #bbefd4;
+}
+
+.utilisateurs-erreur {
+    border-color: #825269;
+    background: #2b1c2c;
+    color: #ffc6d6;
+}
+
+.utilisateurs-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+}
+
+.utilisateurs-pagination a {
+    color: var(--gold);
+}
+
+.utilisateurs-pagination span {
+    color: var(--muted);
+}
+
+.utilisateurs-roles {
+    margin-top: 26px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    background: rgba(13, 24, 42, .6);
+}
+
+.utilisateurs-roles h2 {
+    margin: 0 0 18px;
+    font-size: 18px;
+}
+
+.utilisateurs-roles > div {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-top: 12px;
+}
+
+.utilisateurs-roles > div > strong {
+    flex: 0 0 55px;
+    padding: 4px 6px;
+    border: 1px solid #34455f;
+    border-radius: 5px;
+    color: var(--gold);
+    text-align: center;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.utilisateurs-roles p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.utilisateurs-roles .utilisateurs-note {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    color: #8297b4;
+    font-size: 11px;
+}
+
+.utilisateurs-page a:focus-visible, .utilisateurs-page select:focus-visible, .utilisateurs-page button:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 4px;
+}
+
+@media (max-width: 1000px) {
+    .utilisateurs-legende, .utilisateur-ligne {
+        grid-template-columns: minmax(180px, 1fr) 145px 120px 100px;
+        gap: 12px;
+    }
+
+    .utilisateurs-filtres {
+        grid-template-columns: 1.5fr 1fr 1fr;
+    }
+
+    .utilisateurs-filtres > button, .utilisateurs-filtres > a {
+        justify-self: start;
+    }
+}
+
+@media (max-width: 760px) {
+    .utilisateurs-entete {
+        align-items: flex-start;
+    }
+
+    .utilisateurs-retour, .utilisateurs-actualisation {
+        display: none;
+    }
+
+    .utilisateurs-statistiques {
+        gap: 10px;
+    }
+
+    .utilisateurs-statistiques > div {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 17px;
+    }
+
+    .utilisateurs-statistiques span {
+        min-height: 32px;
+        font-size: 10px;
+        line-height: 1.6;
+    }
+
+    .utilisateurs-statistiques strong {
+        font-size: 27px;
+    }
+
+    .utilisateurs-legende {
+        display: none;
+    }
+
+    .utilisateur-ligne {
+        grid-template-columns: 1fr 1fr auto;
+        align-items: end;
+        gap: 16px 12px;
+    }
+
+    .utilisateur-identite {
+        grid-column: 1/-1;
+    }
+
+    .utilisateur-champ label {
+        position: static;
+        display: block;
+        width: auto;
+        height: auto;
+        margin: 0 0 8px;
+        padding: 0;
+        clip-path: none;
+        color: #a5b7d1;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .utilisateurs-page {
+        width: calc(100% - 24px);
+    }
+
+    .utilisateurs-entete h1 {
+        font-size: 30px;
+    }
+
+    .utilisateurs-statistiques {
+        gap: 7px;
+    }
+
+    .utilisateurs-statistiques > div {
+        padding: 14px 11px;
+    }
+
+    .utilisateurs-filtres {
+        grid-template-columns: 1fr 1fr;
+        padding: 19px;
+    }
+
+    .utilisateurs-filtres > div:first-child {
+        grid-column: 1/-1;
+    }
+
+    .utilisateurs-filtres > a {
+        justify-self: end;
+    }
+
+    .utilisateurs-panneau-entete, .utilisateurs-liste > li {
+        padding: 19px;
+    }
+
+    .utilisateur-ligne {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .utilisateurs-page .utilisateur-enregistrer {
+        grid-column: 1/-1;
+        justify-self: stretch;
+    }
+
+    .utilisateurs-page input:not([type="hidden"]), .utilisateurs-page select {
+        font-size: 16px;
+    }
+
+    .utilisateurs-roles {
+        padding: 20px;
+    }
+}

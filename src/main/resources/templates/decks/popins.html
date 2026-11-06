@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+<article th:fragment="carte(ligne, manquante, categorie)" class="deck-galerie-carte"
+         th:classappend="${manquante} ? 'deck-galerie-recherche' : ''">
+    <div class="deck-galerie-visuel">
+        <th:block th:if="${manquante}">
+            <th:block
+                    th:replace="~{fragments/recherches :: coeur(${ligne.carte.id}, ${ligne.carte.titre}, ${recherchesSelection.contains(ligne.carte.id)}, ${'/decks/' + vue.id + '#deck-dialog-manquantes'})}"></th:block>
+        </th:block>
+        <button th:if="${!#strings.isEmpty(ligne.carte.image)}" class="deck-galerie-image" type="button"
+                aria-haspopup="dialog" aria-controls="deck-dialog-zoom"
+                th:attr="data-deck-zoom-src=${ligne.carte.image},data-deck-zoom-title=${ligne.carte.titre},data-deck-zoom-subtitle=${ligne.carte.sousTitre},data-deck-zoom-reference=${ligne.carte.reference},aria-label=${'Agrandir ' + ligne.carte.titre}">
+            <img th:src="${ligne.carte.image}" th:alt="${ligne.carte.titre}" loading="lazy" decoding="async">
+            <span class="deck-galerie-agrandir">Agrandir ↗</span>
+        </button>
+        <div class="deck-galerie-sans-image" th:if="${#strings.isEmpty(ligne.carte.image)}"><span
+                aria-hidden="true">✦</span>
+            <p>Image indisponible</p></div>
+        <span class="deck-galerie-quantite" th:classappend="${manquante} ? 'deck-galerie-quantite-manquante' : ''"
+              th:text="${manquante ? ligne.manquantes + ' à trouver' : '× ' + ligne.quantite}"></span>
+    </div>
+    <div class="deck-galerie-infos">
+        <p class="deck-galerie-reference" th:text="${ligne.carte.reference}"></p>
+        <p class="deck-galerie-categorie" th:if="${categorie == 'Leader' or categorie == 'Base'}"
+           th:text="${categorie}"></p>
+        <h4 th:text="${ligne.carte.titre}"></h4>
+        <p class="deck-galerie-sous-titre" th:text="${ligne.carte.sousTitre}"></p>
+        <dl class="deck-galerie-stock">
+            <div>
+                <dt>Dans le deck</dt>
+                <dd th:text="${ligne.quantite}"></dd>
+            </div>
+            <div>
+                <dt>Possédés</dt>
+                <dd th:text="${ligne.possedees}"></dd>
+            </div>
+            <div th:if="${ligne.manquantes > 0}" class="deck-galerie-stock-manquant">
+                <dt>À trouver</dt>
+                <dd th:text="${ligne.manquantes}"></dd>
+            </div>
+        </dl>
+        <div class="deck-galerie-marche" th:if="${manquante}">
+            <!-- Futur point de branchement : identifiant standard + quantité recherchée.
+                 Aucun lien ni demande envoyée tant que le marché n'existe pas. -->
+            <button type="button" disabled
+                    th:attr="data-deck-market-card-id=${ligne.carte.id},data-deck-market-quantity=${ligne.manquantes},aria-describedby=${'deck-marche-attente-' + ligne.carte.id}">
+                Rechercher sur le marché ↗
+            </button>
+            <small th:id="${'deck-marche-attente-' + ligne.carte.id}">Bientôt disponible</small>
+        </div>
+    </div>
+</article>
+</body>
+</html>

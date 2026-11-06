@@ -1,0 +1,15 @@
+<!DOCTYPE html><html lang="fr" xmlns:th="http://www.thymeleaf.org"><body>
+<form th:fragment="coeur(carteId, titre, selectionne, retour)" class="coeur-form" th:action="@{/recherches/cartes}" method="post"
+      th:attr="data-carte-id=${carteId},data-recherche-url=@{/api/recherches/cartes},data-titre=${titre}">
+    <input type="hidden" name="carteId" th:value="${carteId}"><input type="hidden" name="recherche" th:value="${!selectionne}"><input type="hidden" name="retour" th:value="${retour}">
+    <button class="recherche-coeur" type="submit" th:classappend="${selectionne} ? 'recherche-coeur-actif' : ''"
+            th:attr="aria-pressed=${selectionne},aria-label=${(selectionne ? 'Retirer de mes recherches : ' : 'Rechercher : ') + titre},title=${selectionne ? 'Retirer de mes recherches' : 'Ajouter à mes recherches'}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.6 5.6 0 0 0-7.9 0L12 5.5l-.9-.9a5.6 5.6 0 0 0-7.9 7.9L12 21l8.8-8.5a5.6 5.6 0 0 0 0-7.9Z"/></svg>
+    </button>
+</form>
+<th:block th:fragment="messages">
+    <p th:if="${succesRecherche}" class="recherche-notice" th:text="${succesRecherche}" role="status"></p>
+    <p th:if="${erreurRecherche}" class="recherche-notice recherche-notice-erreur" th:text="${erreurRecherche}" role="alert"></p>
+    <p id="recherches-message" class="recherche-message" role="status" aria-live="polite" hidden></p>
+</th:block>
+</body></html>

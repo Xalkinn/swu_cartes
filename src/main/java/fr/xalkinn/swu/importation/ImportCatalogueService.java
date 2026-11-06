@@ -96,6 +96,7 @@ public class ImportCatalogueService {
                 carte.actualiserImages(source.imageRecto(), source.imageVerso());
                 carte.actualiserFiltres(source.cout(), source.affinites());
                 carte.actualiserHyperspace(source.hyperspace());
+                carte.actualiserType(source.typeCarte());
                 cartesImportees.put(source.id(), carte);
             }
 
@@ -232,7 +233,7 @@ public class ImportCatalogueService {
                         recupererImage(attributs.get("artBack")),
                         recupererCout(attributs.get("cost")),
                         recupererAffinites(attributs), hyperspace,
-                        recupererIdentifiantStandard(attributs, hyperspace)));
+                        recupererIdentifiantStandard(attributs, hyperspace), recupererType(attributs)));
             }
             page++;
         } while (page <= nombrePages);
@@ -325,10 +326,19 @@ public class ImportCatalogueService {
         return nombre.intValue();
     }
 
+    private static String recupererType(Map<?, ?> attributs) {
+        Map<?, ?> data = objet(objet(attributs.get("type")).get("data"));
+        String type = texte(objet(data.get("attributes")).get("value")).strip();
+        if (type.isEmpty() || type.length() > 40) {
+            throw new IllegalStateException("Le type d'une carte est absent ou invalide. Import annulé.");
+        }
+        return type;
+    }
+
     private record CarteSource(
             String id, String titre, String sousTitre, Integer numero,
             String imageRecto, String imageVerso, Integer cout,
-            Map<String, Integer> affinites, boolean hyperspace, String identifiantStandard
+            Map<String, Integer> affinites, boolean hyperspace, String identifiantStandard, String typeCarte
     ) {}
 
     public record BilanImport(String codeExtension, int ajouts, int misesAJour) {}

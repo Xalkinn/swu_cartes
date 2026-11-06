@@ -1,0 +1,61 @@
+.admin-page {
+    flex: 1;
+    display: grid;
+    place-items: center;
+    width: min(720px, calc(100% - 36px));
+    margin: 0 auto;
+    padding: 60px 0;
+}
+
+.admin-panneau {
+    width: 100%;
+    padding: clamp(24px, 5vw, 44px);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    background: rgba(11, 22, 39, .94);
+}
+
+.admin-panneau h1 {
+    margin: 12px 0 30px;
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.2;
+}
+
+.admin-actions {
+    display: grid;
+    gap: 14px;
+}
+
+.admin-bouton {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 17px 20px;
+    border: 1px solid var(--gold);
+    border-radius: 11px;
+    background: var(--gold);
+    color: #17140d;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.admin-bouton:hover {
+    background: #ffe2a0;
+}
+
+.admin-bouton-secondaire {
+    border-color: var(--border);
+    background: #132338;
+    color: var(--text);
+}
+
+.admin-bouton-secondaire:hover {
+    background: #20344d;
+}
+
+.admin-bouton:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 4px;
+}

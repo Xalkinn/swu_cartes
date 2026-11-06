@@ -35,4 +35,5 @@ public interface CarteRepository
             String codeExtension,
             Integer numero
     );
+    long countByTypeCarteIsNull();
 }

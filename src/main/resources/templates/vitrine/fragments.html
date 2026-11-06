@@ -1,0 +1,6 @@
+<!DOCTYPE html><html lang="fr" xmlns:th="http://www.thymeleaf.org"><body>
+<article th:fragment="carte(titre,sousTitre,reference,image,quantite)" class="vitrine-carte">
+<div class="vitrine-carte-image"><img th:if="${!#strings.isEmpty(image)}" th:src="${image}" th:alt="${titre}" loading="lazy"><span th:if="${#strings.isEmpty(image)}">Image indisponible</span></div>
+<div class="vitrine-carte-texte"><p class="vitrine-reference" th:text="${reference}"></p><h3 th:text="${titre}"></h3><p class="vitrine-sous-titre" th:text="${sousTitre}"></p><strong class="vitrine-quantite" th:if="${quantite != null}" th:text="${quantite + ' exemplaire(s)'}"></strong></div></article>
+<nav th:fragment="pagination(resultat,joueurId,rubrique)" class="vitrine-pagination" th:if="${resultat.totalPages > 1}" aria-label="Pagination de la vitrine"><a th:if="${resultat.hasPrevious()}" th:href="@{/joueurs/{id}(id=${joueurId},rubrique=${rubrique},page=${resultat.number - 1})}">← Précédent</a><span th:text="${'Page ' + (resultat.number + 1) + ' sur ' + resultat.totalPages}"></span><a th:if="${resultat.hasNext()}" th:href="@{/joueurs/{id}(id=${joueurId},rubrique=${rubrique},page=${resultat.number + 1})}">Suivant →</a></nav>
+</body></html>

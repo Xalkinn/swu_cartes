@@ -1,7 +1,6 @@
 package fr.xalkinn.swu.utilisateur;
 
 import jakarta.persistence.*;
-
 import java.time.Instant;
 
 @Entity
@@ -27,56 +26,42 @@ public class Utilisateur {
     @Column(nullable = false)
     private boolean actif = true;
 
-    // La date est générée par MySQL lors de l'insertion.
-    @Column(
-            name = "date_creation",
-            nullable = false,
-            insertable = false,
-            updatable = false
-    )
+    @Column(name = "date_creation", nullable = false, insertable = false, updatable = false)
     private Instant dateCreation;
 
-    // Constructeur obligatoire pour JPA.
-    protected Utilisateur() {
-    }
+    protected Utilisateur() {}
 
-    // Une inscription crée toujours un compte USER actif.
-    // Le mot de passe doit être haché AVANT cet appel.
-    public Utilisateur(
-            String pseudo,
-            String email,
-            String motDePasseHash
-    ) {
+    public Utilisateur(String pseudo, String email, String motDePasseHash) {
         this.pseudo = pseudo;
         this.email = email;
         this.motDePasseHash = motDePasseHash;
     }
 
-    public Long getId() {
-        return id;
+    // Les champs sont validés par le service avant l'appel.
+    // Les paramètres du compte n'utilisent que cette méthode de profil.
+    public void modifierProfil(String pseudo, String email) {
+        this.pseudo = pseudo;
+        this.email = email;
     }
 
-    public String getPseudo() {
-        return pseudo;
+    public void modifierMotDePasseHash(String motDePasseHash) {
+        this.motDePasseHash = motDePasseHash;
     }
 
-    public String getEmail() {
-        return email;
+    // Réservé au service d'administration, qui contrôle les droits et le dernier administrateur.
+    public void modifierAcces(String role, boolean actif) {
+        if (!"USER".equals(role) && !"ADMIN".equals(role)) {
+            throw new IllegalArgumentException("Rôle invalide.");
+        }
+        this.role = role;
+        this.actif = actif;
     }
 
-    public String getMotDePasseHash() {
-        return motDePasseHash;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public boolean isActif() {
-        return actif;
-    }
-
-    public Instant getDateCreation() {
-        return dateCreation;
-    }
+    public Long getId() { return id; }
+    public String getPseudo() { return pseudo; }
+    public String getEmail() { return email; }
+    public String getMotDePasseHash() { return motDePasseHash; }
+    public String getRole() { return role; }
+    public boolean isActif() { return actif; }
+    public Instant getDateCreation() { return dateCreation; }
 }

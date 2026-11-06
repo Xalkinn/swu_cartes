@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
+import fr.xalkinn.swu.recherche.RechercheService;
+import fr.xalkinn.swu.securite.UtilisateurConnecte;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.util.List;
 
 @Controller
@@ -22,14 +25,18 @@ public class CatalogueController {
     private final ExtensionRepository extensionRepository;
     private final CollectionService collectionService;
 
+    private final RechercheService rechercheService;
+
     public CatalogueController(
             CatalogueService catalogueService,
             ExtensionRepository extensionRepository,
-            CollectionService collectionService
+            CollectionService collectionService,
+            RechercheService rechercheService
     ) {
         this.catalogueService = catalogueService;
         this.extensionRepository = extensionRepository;
         this.collectionService = collectionService;
+        this.rechercheService = rechercheService;
     }
 
     @GetMapping("/catalogue")
@@ -54,6 +61,7 @@ public class CatalogueController {
             @RequestParam(name = "page", defaultValue = "0")
             int page,
 
+            @AuthenticationPrincipal UtilisateurConnecte utilisateurConnecte,
             Principal principal,
             HttpServletRequest requete,
             Model model
@@ -105,6 +113,7 @@ public class CatalogueController {
 
         model.addAttribute("resultat", resultat);
         model.addAttribute("cartes", resultat.getContent());
+        model.addAttribute("recherchesSelection", rechercheService.selection(utilisateurConnecte.getUtilisateurId(), resultat.map(CatalogueService.CarteAffichee::id).getContent()));
         model.addAttribute(
                 "quantites",
                 collectionService.quantites(

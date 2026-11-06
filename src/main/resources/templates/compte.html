@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Paramètres du compte — Gestion SWU</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/compte.css}">
+    <script th:src="@{/js/compte.js}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header('compte')}"></header>
+
+<svg class="compte-symboles" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="compte-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></symbol>
+    <symbol id="compte-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4m-4 5v2"/></symbol>
+    <symbol id="compte-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="compte-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+    <symbol id="compte-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+</svg>
+
+<main class="compte-page">
+
+    <nav class="compte-fil" aria-label="Fil d’Ariane">
+        <a th:href="@{/espace}">Mon espace</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">Paramètres du compte</span>
+    </nav>
+
+    <div class="compte-entete">
+        <div>
+            <p class="compte-eyebrow">MON COMPTE</p>
+            <h1>Paramètres du compte<span>.</span></h1>
+            <p>Vos informations personnelles et vos préférences de connexion.</p>
+        </div>
+        <a class="compte-retour" th:href="@{/espace}">
+            <span aria-hidden="true">←</span> Mon espace
+        </a>
+    </div>
+
+    <section class="compte-profil" aria-labelledby="compte-pseudo">
+        <span class="compte-avatar" aria-hidden="true"
+              th:text="${#strings.toUpperCase(#strings.substring(compte.pseudo, 0, 1))}">X</span>
+        <div class="compte-profil-texte">
+            <span class="compte-profil-label">VOTRE PROFIL</span>
+            <h2 id="compte-pseudo" th:text="${compte.pseudo}">Votre pseudo</h2>
+            <p th:text="${compte.email}">Votre adresse e-mail</p>
+        </div>
+        <div class="compte-profil-meta">
+            <span class="compte-badge">
+                <span aria-hidden="true"></span>
+                <span th:text="${compte.role == 'ADMIN' ? 'Administrateur' : 'Membre'}">Membre</span>
+            </span>
+            <p th:if="${compte.dateCreation != null}">
+                Membre depuis le <span th:text="${compte.dateCreation}"></span>
+            </p>
+        </div>
+    </section>
+
+    <p th:if="${succesCompte != null}" class="compte-notice compte-succes" role="status">
+        <svg aria-hidden="true"><use href="#compte-check"/></svg>
+        <span th:text="${succesCompte}"></span>
+    </p>
+
+    <form class="compte-formulaire" th:action="@{/compte}" method="post"
+          th:object="${formulaireCompte}">
+
+        <div th:if="${#fields.hasAnyErrors()}" class="compte-notice compte-erreur" role="alert">
+            <div>
+                <strong>Les modifications n’ont pas été enregistrées.</strong>
+                <p>Vérifiez les champs indiqués ci-dessous.</p>
+                <p th:each="erreur : ${#fields.globalErrors()}" th:text="${erreur}"></p>
+            </div>
+        </div>
+
+        <fieldset class="compte-carte">
+            <legend class="compte-sr-only">Informations personnelles</legend>
+            <div class="compte-section-entete">
+                <span class="compte-section-icone"><svg aria-hidden="true"><use href="#compte-user"/></svg></span>
+                <div>
+                    <h2>Informations personnelles</h2>
+                    <p>Les identifiants qui vous permettent de retrouver votre espace.</p>
+                </div>
+            </div>
+
+            <div class="compte-champs">
+                <div class="compte-champ">
+                    <label for="pseudo">Pseudo <span>Obligatoire</span></label>
+                    <input id="pseudo" type="text" th:field="*{pseudo}"
+                           minlength="3" maxlength="50" autocomplete="nickname" required
+                           th:attr="aria-invalid=${#fields.hasErrors('pseudo')},
+                               aria-describedby=${#fields.hasErrors('pseudo') ? 'pseudo-aide pseudo-erreur' : 'pseudo-aide'}">
+                    <small id="pseudo-aide">3 à 50 caractères. Également utilisable à la connexion.</small>
+                    <p id="pseudo-erreur" th:if="${#fields.hasErrors('pseudo')}"
+                       th:errors="*{pseudo}" class="compte-erreur-champ"></p>
+                </div>
+
+                <div class="compte-champ">
+                    <label for="email">Adresse e-mail <span>Obligatoire</span></label>
+                    <input id="email" type="email" th:field="*{email}"
+                           maxlength="254" autocomplete="email" autocapitalize="none"
+                           spellcheck="false" required
+                           th:attr="aria-invalid=${#fields.hasErrors('email')},
+                               aria-describedby=${#fields.hasErrors('email') ? 'email-aide email-erreur' : 'email-aide'}">
+                    <small id="email-aide">Une nouvelle adresse nécessitera une reconnexion.</small>
+                    <p id="email-erreur" th:if="${#fields.hasErrors('email')}"
+                       th:errors="*{email}" class="compte-erreur-champ"></p>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="compte-carte">
+            <legend class="compte-sr-only">Modifier le mot de passe, facultatif</legend>
+            <div class="compte-section-entete">
+                <span class="compte-section-icone"><svg aria-hidden="true"><use href="#compte-lock"/></svg></span>
+                <div>
+                    <h2>Mot de passe <span class="compte-optionnel">Facultatif</span></h2>
+                    <p>Laissez ces champs vides pour conserver votre mot de passe actuel.</p>
+                </div>
+            </div>
+
+            <div class="compte-champs">
+                <div class="compte-champ">
+                    <label for="nouveauMotDePasse">Nouveau mot de passe</label>
+                    <div class="compte-password">
+                        <!-- Aucun mot de passe n'est renvoyé dans la valeur du champ. -->
+                        <input id="nouveauMotDePasse" name="nouveauMotDePasse" type="password"
+                               minlength="12" maxlength="72" autocomplete="new-password"
+                               placeholder="Choisissez un nouveau mot de passe"
+                               th:attr="aria-invalid=${#fields.hasErrors('nouveauMotDePasse')},
+                                   aria-describedby=${#fields.hasErrors('nouveauMotDePasse') ? 'nouveau-aide nouveau-erreur' : 'nouveau-aide'}">
+                        <button type="button" class="compte-voir-password"
+                                data-password-toggle="nouveauMotDePasse" data-password-label="nouveau mot de passe"
+                                aria-controls="nouveauMotDePasse" aria-pressed="false"
+                                aria-label="Afficher le nouveau mot de passe" hidden>
+                            <svg aria-hidden="true"><use href="#compte-eye"/></svg>
+                        </button>
+                    </div>
+                    <small id="nouveau-aide">Au moins 12 caractères. Une phrase de passe est possible.</small>
+                    <p id="nouveau-erreur" th:if="${#fields.hasErrors('nouveauMotDePasse')}"
+                       th:errors="*{nouveauMotDePasse}" class="compte-erreur-champ"></p>
+                </div>
+
+                <div class="compte-champ">
+                    <label for="confirmationMotDePasse">Confirmer le mot de passe</label>
+                    <div class="compte-password">
+                        <input id="confirmationMotDePasse" name="confirmationMotDePasse" type="password"
+                               maxlength="72" autocomplete="new-password" placeholder="Saisissez-le à nouveau"
+                               th:attr="aria-invalid=${#fields.hasErrors('confirmationMotDePasse')},
+                                   aria-describedby=${#fields.hasErrors('confirmationMotDePasse') ? 'confirmation-erreur' : null}">
+                        <button type="button" class="compte-voir-password"
+                                data-password-toggle="confirmationMotDePasse" data-password-label="mot de passe de confirmation"
+                                aria-controls="confirmationMotDePasse" aria-pressed="false"
+                                aria-label="Afficher le mot de passe de confirmation" hidden>
+                            <svg aria-hidden="true"><use href="#compte-eye"/></svg>
+                        </button>
+                    </div>
+                    <p id="confirmation-erreur" th:if="${#fields.hasErrors('confirmationMotDePasse')}"
+                       th:errors="*{confirmationMotDePasse}" class="compte-erreur-champ"></p>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="compte-carte compte-carte-confirmation">
+            <legend class="compte-sr-only">Confirmer les modifications avec le mot de passe actuel</legend>
+            <div class="compte-validation-texte">
+                <span class="compte-section-icone"><svg aria-hidden="true"><use href="#compte-check"/></svg></span>
+                <div>
+                    <h2>Confirmer les modifications</h2>
+                    <p>Pour protéger votre compte, saisissez votre mot de passe actuel.</p>
+                </div>
+            </div>
+            <div class="compte-champ">
+                <label for="motDePasseActuel">Mot de passe actuel <span>Obligatoire</span></label>
+                <div class="compte-password">
+                    <input id="motDePasseActuel" name="motDePasseActuel" type="password"
+                           maxlength="1024" autocomplete="current-password" required
+                           placeholder="Votre mot de passe actuel"
+                           th:attr="aria-invalid=${#fields.hasErrors('motDePasseActuel')},
+                               aria-describedby=${#fields.hasErrors('motDePasseActuel') ? 'actuel-erreur' : null}">
+                    <button type="button" class="compte-voir-password"
+                            data-password-toggle="motDePasseActuel" data-password-label="mot de passe actuel"
+                            aria-controls="motDePasseActuel" aria-pressed="false"
+                            aria-label="Afficher le mot de passe actuel" hidden>
+                        <svg aria-hidden="true"><use href="#compte-eye"/></svg>
+                    </button>
+                </div>
+                <p id="actuel-erreur" th:if="${#fields.hasErrors('motDePasseActuel')}"
+                   th:errors="*{motDePasseActuel}" class="compte-erreur-champ"></p>
+            </div>
+        </fieldset>
+
+        <div class="compte-actions">
+            <p><svg aria-hidden="true"><use href="#compte-lock"/></svg>
+                Un changement d’e-mail ou de mot de passe nécessite une reconnexion.</p>
+            <div>
+                <a th:href="@{/espace}">Annuler</a>
+                <button type="submit" class="compte-enregistrer">
+                    Enregistrer <svg aria-hidden="true"><use href="#compte-arrow"/></svg>
+                </button>
+            </div>
+        </div>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

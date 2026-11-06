@@ -13,6 +13,8 @@
           th:href="@{/css/collection.css(v=2)}">
 
     <script th:src="@{/js/collection.js(v=1)}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/recherches.css(v=1)}">
+    <script th:src="@{/js/recherches.js(v=1)}" defer></script>
 </head>
 
 <body>
@@ -21,6 +23,7 @@
 </header>
 
 <main class="collection-page">
+    <th:block th:replace="~{fragments/recherches :: messages}"></th:block>
 
     <p class="eyebrow">VOTRE ESPACE PERSONNEL</p>
 
@@ -32,6 +35,7 @@
     </p>
 
     <div class="collection-liens">
+        <a class="collection-lien" th:href="@{/recherches}">Mes recherches →</a>
         <a class="collection-lien" th:href="@{/catalogue}">
             Parcourir le catalogue →
         </a>
@@ -64,6 +68,8 @@
 
         <article th:each="carte : ${resultat.content}"
                  class="collection-carte">
+            <th:block th:replace="~{fragments/recherches :: coeur(${carte.idCarte}, ${carte.titre}, ${recherchesSelection.contains(carte.idCarte)}, ${retour})}"></th:block>
+
 
             <button type="button"
                     class="collection-ouvrir"

@@ -14,6 +14,8 @@
 
     <!-- Boutons de gestion de la collection -->
     <link rel="stylesheet" th:href="@{/css/collection.css(v=1)}">
+    <link rel="stylesheet" th:href="@{/css/recherches.css(v=1)}">
+    <script th:src="@{/js/recherches.js(v=1)}" defer></script>
 </head>
 
 <body>
@@ -21,10 +23,12 @@
 <header th:replace="~{fragments/header :: header('catalogue')}"></header>
 
 <main class="catalogue-page">
+    <th:block th:replace="~{fragments/recherches :: messages}"></th:block>
 
     <p class="eyebrow">STAR WARS UNLIMITED</p>
 
     <h1>Le <span>catalogue.</span></h1>
+    <p class="recherches-acces"><a th:href="@{/recherches}">Voir mes recherches →</a><span>Un cœur rempli indique une carte recherchée.</span></p>
 
     <!-- =====================================
          RECHERCHE ET FILTRES
@@ -203,6 +207,8 @@
         <article
                 th:each="carte : ${cartes}"
                 class="catalogue-carte">
+            <th:block th:replace="~{fragments/recherches :: coeur(${carte.id}, ${carte.titre}, ${recherchesSelection.contains(carte.id)}, ${retourCatalogue})}"></th:block>
+
 
             <!-- Images -->
 

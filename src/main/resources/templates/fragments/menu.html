@@ -1,85 +1,42 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<body>
-
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"><body>
 <nav th:fragment="menu(pageActive)" aria-label="Navigation principale">
-    <ul class="site-menu">
-
-        <li>
-            <a th:href="@{/}"
-               th:attr="aria-current=${pageActive == 'accueil' ? 'page' : null}">
-                Accueil
-            </a>
-        </li>
-
-        <!-- Visiteurs non connectés -->
-        <li th:if="${!connecte}">
-            <a th:href="@{/login}"
-               th:attr="aria-current=${pageActive == 'connexion' ? 'page' : null}">
-                Connexion
-            </a>
-        </li>
-
-        <li th:if="${!connecte}">
-            <a th:href="@{/inscription}"
-               th:attr="aria-current=${pageActive == 'inscription' ? 'page' : null}">
-                Inscription
-            </a>
-        </li>
-
-        <!-- Utilisateurs connectés -->
-        <li th:if="${connecte}">
-            <a th:href="@{/espace}"
-               th:attr="aria-current=${pageActive == 'espace' ? 'page' : null}">
-                Mon espace
-            </a>
-        </li>
-
-        <li th:if="${connecte}">
-            <a th:href="@{/catalogue}"
-               th:attr="aria-current=${pageActive == 'catalogue' ? 'page' : null}">
-                Catalogue
-            </a>
-        </li>
-
-        <li th:if="${connecte}">
-            <a th:href="@{/collection}"
-               th:attr="aria-current=${pageActive == 'collection' ? 'page' : null}">
-                Ma collection
-            </a>
-        </li>
-
-        <a th:if="${connecte}"
-           th:href="@{/collection/ajout-rapide}">
-            Ajout rapide
-        </a>
-
-        <li th:if="${connecte}">
-            <a th:href="@{/scan}"
-               th:attr="aria-current=${pageActive == 'scan' ? 'page' : null}">
-                Scanner
-            </a>
-        </li>
-
-        <!-- Administrateurs uniquement -->
-        <li th:if="${administrateur}">
-            <a th:href="@{/admin}"
-               th:attr="aria-current=${pageActive == 'admin' ? 'page' : null}">
-                Administration
-            </a>
-        </li>
-
-        <li th:if="${connecte}">
-            <!-- Un formulaire POST conserve la protection CSRF. -->
-            <form th:action="@{/logout}" method="post" class="logout-form">
-                <button type="submit" class="menu-logout">
-                    Déconnexion
-                </button>
-            </form>
-        </li>
-
-    </ul>
-</nav>
-
-</body>
-</html>
+<ul class="site-menu">
+    <li><a th:href="@{/}" th:attr="aria-current=${pageActive == 'accueil' ? 'page' : null}">Accueil</a></li>
+    <li th:if="${connecte}"><a th:href="@{/catalogue}" th:attr="aria-current=${pageActive == 'catalogue' ? 'page' : null}">Les cartes</a></li>
+    <li th:if="${connecte}">
+        <details class="menu-groupe" th:classappend="${pageActive == 'collection' or pageActive == 'ajout-rapide' or pageActive == 'scan'} ? 'menu-groupe-actif' : ''">
+            <summary>Ma collection</summary>
+            <ul class="menu-sous-menu">
+                <li><a th:href="@{/collection}" th:attr="aria-current=${pageActive == 'collection' ? 'page' : null}"><span>Consulter ma collection</span><small>Mes cartes et leurs variantes</small></a></li>
+                <li><a th:href="@{/collection/ajout-rapide}" th:attr="aria-current=${pageActive == 'ajout-rapide' ? 'page' : null}"><span>Ajout rapide</span><small>Ajouter avec le numéro de carte</small></a></li>
+                <li><a th:href="@{/scan}" th:attr="aria-current=${pageActive == 'scan' ? 'page' : null}"><span>Scanner une carte</span><small>Utiliser une photo</small></a></li>
+            </ul>
+        </details>
+    </li>
+    <li>
+        <details class="menu-groupe" th:classappend="${pageActive == 'joueurs' or pageActive == 'decks' or pageActive == 'vitrine' or pageActive == 'recherches'} ? 'menu-groupe-actif' : ''">
+            <summary>Communauté</summary>
+            <ul class="menu-sous-menu">
+                <li><a th:href="@{/joueurs}" th:attr="aria-current=${pageActive == 'joueurs' ? 'page' : null}"><span>Les joueurs</span><small>Découvrir les vitrines publiques</small></a></li>
+                <li th:if="${connecte}"><a th:href="@{/decks}" th:attr="aria-current=${pageActive == 'decks' ? 'page' : null}"><span>Mes decks</span><small>Construire et retrouver mes listes</small></a></li>
+                <li th:if="${connecte}"><a th:href="@{/ma-vitrine}" th:attr="aria-current=${pageActive == 'vitrine' ? 'page' : null}"><span>Ma vitrine</span><small>Choisir ce que je partage</small></a></li>
+                <li th:if="${connecte}"><a th:href="@{/recherches}" th:attr="aria-current=${pageActive == 'recherches' ? 'page' : null}"><span>Mes recherches</span><small>Les cartes marquées d’un cœur</small></a></li>
+            </ul>
+        </details>
+    </li>
+    <li th:if="${administrateur}"><a th:href="@{/admin}" th:attr="aria-current=${pageActive == 'admin' ? 'page' : null}">Administration</a></li>
+    <li th:if="${connecte}">
+        <details class="menu-groupe menu-compte" th:classappend="${pageActive == 'espace' or pageActive == 'compte'} ? 'menu-groupe-actif' : ''">
+            <summary>Mon compte</summary>
+            <ul class="menu-sous-menu">
+                <li><a th:href="@{/espace}" th:attr="aria-current=${pageActive == 'espace' ? 'page' : null}"><span>Mon espace</span><small>Retrouver mon espace personnel</small></a></li>
+                <li><a th:href="@{/compte}" th:attr="aria-current=${pageActive == 'compte' ? 'page' : null}"><span>Paramètres du compte</span><small>Mon pseudo, mon e-mail et mon mot de passe</small></a></li>
+                <li class="menu-separation"><form th:action="@{/logout}" method="post" class="logout-form"><button type="submit" class="menu-logout">Déconnexion</button></form></li>
+            </ul>
+        </details>
+    </li>
+    <li th:if="${!connecte}"><a th:href="@{/login}" th:attr="aria-current=${pageActive == 'connexion' ? 'page' : null}">Connexion</a></li>
+    <li th:if="${!connecte}"><a th:href="@{/inscription}" class="menu-inscription" th:attr="aria-current=${pageActive == 'inscription' ? 'page' : null}">Inscription</a></li>
+</ul>
+</nav></body></html>

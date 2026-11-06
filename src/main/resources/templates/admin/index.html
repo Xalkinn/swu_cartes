@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Administration — Gestion SWU</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css(v=2)}">
+</head>
+<body>
+<header th:replace="~{fragments/header :: header('admin')}"></header>
+<main class="admin-page">
+    <section class="admin-panneau" aria-labelledby="admin-titre">
+        <p class="eyebrow">ADMINISTRATION</p>
+        <h1 id="admin-titre">Les commandes <span>de votre galaxie.</span></h1>
+        <nav class="admin-actions" aria-label="Outils d’administration">
+            <a class="admin-bouton" th:href="@{/admin/utilisateurs}">Utilisateurs et permissions <span aria-hidden="true">→</span></a>
+            <a class="admin-bouton" th:href="@{/admin/extensions}">Gérer les extensions <span aria-hidden="true">→</span></a>
+            <a class="admin-bouton" th:href="@{/admin/import/extensions}">Importer ou actualiser les cartes <span aria-hidden="true">→</span></a>
+            <a class="admin-bouton admin-bouton-secondaire" th:href="@{/catalogue}">Consulter le catalogue <span aria-hidden="true">→</span></a>
+        </nav>
+    </section>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

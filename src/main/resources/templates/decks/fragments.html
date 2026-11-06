@@ -1,0 +1,27 @@
+<!DOCTYPE html><html lang="fr" xmlns:th="http://www.thymeleaf.org"><body>
+<th:block th:fragment="filtresCaches">
+    <input type="hidden" name="q" th:value="${filtres.q}">
+    <input type="hidden" name="extensionId" th:if="${filtres.extensionId != null}" th:value="${filtres.extensionId}">
+    <input type="hidden" name="coutMin" th:if="${filtres.coutMin != null}" th:value="${filtres.coutMin}">
+    <input type="hidden" name="coutMax" th:if="${filtres.coutMax != null}" th:value="${filtres.coutMax}">
+    <input type="hidden" name="mode" th:value="${filtres.mode}">
+    <input type="hidden" name="zone" th:value="${filtres.zone}">
+    <input type="hidden" name="page" th:value="${filtres.page}">
+    <input type="hidden" name="affinites" th:each="code : ${filtres.affinites}" th:value="${code}">
+</th:block>
+<section th:fragment="emplacement(ligne, emplacement, titre)" class="deck-emplacement">
+    <div class="deck-emplacement-entete"><h3 th:text="${titre}"></h3>
+        <a th:href="@{/decks/{id}(id=${vue.id},zone=${emplacement})} + '#recherche'" th:text="${ligne == null ? 'Choisir →' : 'Changer →'}"></a></div>
+    <div th:if="${ligne == null}" class="deck-emplacement-vide"><span aria-hidden="true">+</span><p th:text="${'Choisissez votre ' + #strings.toLowerCase(titre)}"></p></div>
+    <th:block th:if="${ligne != null}">
+        <img th:if="${!#strings.isEmpty(ligne.carte.image)}" th:src="${ligne.carte.image}" th:alt="${ligne.carte.titre}" loading="lazy">
+        <p class="deck-reference" th:text="${ligne.carte.reference}"></p>
+        <h4 th:text="${ligne.carte.titre}"></h4><p class="deck-sous-titre" th:text="${ligne.carte.sousTitre}"></p>
+        <p class="deck-stock" th:classappend="${ligne.manquantes > 0} ? 'deck-stock-manquant' : ''" th:text="${ligne.manquantes > 0 ? 'À trouver dans votre collection' : 'Dans votre collection'}"></p>
+        <form th:action="@{/decks/{id}/choisir(id=${vue.id})}" method="post">
+            <input type="hidden" name="emplacement" th:value="${emplacement}">
+            <button class="deck-texte-bouton" type="submit" th:attr="aria-label=${'Retirer le ' + #strings.toLowerCase(titre)}">Retirer</button>
+        </form>
+    </th:block>
+</section>
+</body></html>
