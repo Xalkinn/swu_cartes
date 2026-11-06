@@ -14,7 +14,7 @@
 
     <!-- Boutons de gestion de la collection -->
     <link rel="stylesheet" th:href="@{/css/collection.css(v=1)}">
-    <link rel="stylesheet" th:href="@{/css/recherches.css(v=1)}">
+    <link rel="stylesheet" th:href="@{/css/recherches.css(v=3)}">
     <script th:src="@{/js/recherches.js(v=1)}" defer></script>
 </head>
 
@@ -28,7 +28,12 @@
     <p class="eyebrow">STAR WARS UNLIMITED</p>
 
     <h1>Le <span>catalogue.</span></h1>
-    <p class="recherches-acces"><a th:href="@{/recherches}">Voir mes recherches →</a><span>Un cœur rempli indique une carte recherchée.</span></p>
+    <p class="recherches-acces"><a class="recherches-acces-bouton" th:href="@{/recherches}">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20.8 4.6a5.6 5.6 0 0 0-7.9 0L12 5.5l-.9-.9a5.6 5.6 0 0 0-7.9 7.9L12 21l8.8-8.5a5.6 5.6 0 0 0 0-7.9Z"/>
+        </svg>
+        Voir mes recherches <span class="recherches-acces-fleche" aria-hidden="true">→</span>
+    </a><span>Un cœur rempli indique une carte recherchée.</span></p>
 
     <!-- =====================================
          RECHERCHE ET FILTRES
@@ -207,7 +212,8 @@
         <article
                 th:each="carte : ${cartes}"
                 class="catalogue-carte">
-            <th:block th:replace="~{fragments/recherches :: coeur(${carte.id}, ${carte.titre}, ${recherchesSelection.contains(carte.id)}, ${retourCatalogue})}"></th:block>
+            <th:block
+                    th:replace="~{fragments/recherches :: coeur(${carte.id}, ${carte.titre}, ${recherchesSelection.contains(carte.id)}, ${retourCatalogue})}"></th:block>
 
 
             <!-- Images -->

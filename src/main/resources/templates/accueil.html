@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Votre tableau de bord — Gestion SWU</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
-    <link rel="stylesheet" th:href="@{/css/accueil.css(v=dashboard1)}">
+    <link rel="stylesheet" th:href="@{/css/accueil.css(v=visuel2)}">
     <script th:src="@{/js/accueil.js(v=dashboard1)}" defer></script>
 </head>
 <body>
@@ -17,6 +17,9 @@
     <symbol id="acc-coupe" viewBox="0 0 24 24"><path d="M7 3h10v5a5 5 0 0 1-10 0V3ZM7 5H3v3a4 4 0 0 0 5 4m9-7h4v3a4 4 0 0 1-5 4M12 13v5m-4 3h8m-6-3h4v3h-4Z"/></symbol>
     <symbol id="acc-cartes" viewBox="0 0 24 24"><rect x="8" y="5" width="12" height="16" rx="2"/><path d="M5 18H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2M11 10h6m-6 4h6"/></symbol>
     <symbol id="acc-flamme" viewBox="0 0 24 24"><path d="M13 2c1 6-4 5-3 9 1 2 3 1 4-2 4 3 6 5 5 8a7 7 0 0 1-14-1c0-5 5-7 8-14Z"/></symbol>
+    <symbol id="acc-decor-plus" viewBox="0 0 100 100"><path d="M50 18v64M18 50h64"/></symbol>
+    <symbol id="acc-decor-cartes" viewBox="0 0 100 100"><rect x="18" y="18" width="47" height="65" rx="6" transform="rotate(-18 41.5 50.5)"/><rect x="31" y="14" width="47" height="65" rx="6" transform="rotate(10 54.5 46.5)"/><rect x="30" y="23" width="47" height="65" rx="6"/><path d="M40 39h27M40 70h19M40 77h12"/></symbol>
+    <symbol id="acc-decor-boite" viewBox="0 0 100 100"><path d="m17 30 33-15 33 15v47L50 93 17 77V30Zm0 0 33 16 33-16M50 46v47M17 42l33 16 33-16M34 23l33 16"/><path d="m61 66 12-6v12l-12 6V66Z"/></symbol>
     <symbol id="acc-plus" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 12h8m-4-4v8"/></symbol>
     <symbol id="acc-collection" viewBox="0 0 24 24"><path d="m3 7 9-5 9 5-9 5-9-5Zm0 5 9 5 9-5M3 17l9 5 9-5"/></symbol>
     <symbol id="acc-deck" viewBox="0 0 24 24"><path d="m4 8 8-4 8 4v12H4V8Zm0 0 8 4 8-4M12 12v8M8 2h8"/></symbol>
@@ -115,26 +118,21 @@
         <div class="accueil-raccourcis">
             <a class="accueil-raccourci accueil-raccourci-ajout"
                th:href="${connecte} ? @{/collection/ajout-rapide} : @{/login}">
-                <span class="accueil-raccourci-icone"><svg aria-hidden="true"><use href="#acc-plus"/></svg></span>
-                <h3>Ajouter vos nouvelles cartes</h3>
-                <p><br>Et elle rejoint votre collection</p>
-                <span class="accueil-raccourci-lien">Ajout rapide <svg aria-hidden="true"><use href="#acc-fleche"/></svg></span>
+                <svg class="accueil-raccourci-decor" aria-hidden="true" focusable="false"><use href="#acc-decor-plus"/></svg>
+                <h3>Ajouter des cartes</h3>
+                <span class="accueil-raccourci-fleche" aria-hidden="true"><svg><use href="#acc-fleche"/></svg></span>
             </a>
-
             <a class="accueil-raccourci accueil-raccourci-collection"
                th:href="${connecte} ? @{/collection} : @{/login}">
-                <span class="accueil-raccourci-icone"><svg aria-hidden="true"><use href="#acc-collection"/></svg></span>
-                <h3>Votre collection</h3>
-                <p>Vos cartes, vos variantes. <br>Retrouvez chaque exemplaire</p>
-                <span class="accueil-raccourci-lien">Ouvrir ma collection <svg aria-hidden="true"><use href="#acc-fleche"/></svg></span>
+                <svg class="accueil-raccourci-decor" aria-hidden="true" focusable="false"><use href="#acc-decor-cartes"/></svg>
+                <h3>Ma collection</h3>
+                <span class="accueil-raccourci-fleche" aria-hidden="true"><svg><use href="#acc-fleche"/></svg></span>
             </a>
-
             <a class="accueil-raccourci accueil-raccourci-decks"
                th:href="${connecte} ? @{/decks} : @{/login}">
-                <span class="accueil-raccourci-icone"><svg aria-hidden="true"><use href="#acc-deck"/></svg></span>
-                <h3>Votre prochaine stratégie</h3>
-                <p>Un espace pour construire <br>et retrouver tous vos decks</p>
-                <span class="accueil-raccourci-lien">Mes decks <svg aria-hidden="true"><use href="#acc-fleche"/></svg></span>
+                <svg class="accueil-raccourci-decor" aria-hidden="true" focusable="false"><use href="#acc-decor-boite"/></svg>
+                <h3>Mes decks</h3>
+                <span class="accueil-raccourci-fleche" aria-hidden="true"><svg><use href="#acc-fleche"/></svg></span>
             </a>
         </div>
     </section>

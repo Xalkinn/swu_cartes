@@ -493,106 +493,69 @@
 .accueil-dashboard .accueil-raccourci {
     position: relative;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
     min-width: 0;
-    min-height: 230px;
+    min-height: 155px;
     overflow: hidden;
-    padding: 25px;
+    isolation: isolate;
+    padding: 26px;
     border: 1px solid var(--acc-bord);
     border-radius: 16px;
-    background: linear-gradient(130deg, #142338, #101a2a);
+    background: #142338;
     text-align: left;
     transition: transform .2s, border-color .2s;
 }
 
-.accueil-dashboard .accueil-raccourci-ajout {
-    border-color: rgba(245, 208, 128, .28);
-    background: radial-gradient(ellipse at 100% 0%, rgba(175, 132, 55, .14), transparent 75%), #171e2a;
-}
-
-.accueil-dashboard .accueil-raccourci-collection {
-    background: radial-gradient(ellipse at 100% 0%, rgba(60, 122, 195, .16), transparent 75%), #101f32;
-}
-
-.accueil-dashboard .accueil-raccourci-decks {
-    background: radial-gradient(ellipse at 100% 0%, rgba(125, 99, 189, .13), transparent 75%), #171c2e;
-}
-
-.accueil-raccourci:hover {
-    transform: translateY(-4px);
-    border-color: rgba(245, 208, 128, .55);
-}
-
-.accueil-raccourci-icone {
-    display: grid;
-    width: 43px;
-    height: 43px;
-    margin-bottom: 20px;
-    place-items: center;
-    border: 1px solid rgba(245, 208, 128, .22);
-    border-radius: 12px;
-    background: rgba(245, 208, 128, .055);
-    color: var(--acc-or);
-}
-
-.accueil-raccourci-icone svg {
-    width: 23px;
-    height: 23px;
-}
-
-.accueil-raccourci-collection .accueil-raccourci-icone {
-    border-color: rgba(140, 184, 245, .22);
-    background: rgba(140, 184, 245, .055);
-    color: #a4c8ff;
-}
-
-.accueil-raccourci-decks .accueil-raccourci-icone {
-    border-color: rgba(179, 158, 225, .22);
-    background: rgba(179, 158, 225, .055);
-    color: #bba9e3;
-}
-
-.accueil-raccourci-numero {
+/* Les mêmes anneaux discrets que sur les tuiles de la communauté. */
+.accueil-raccourci::after {
     position: absolute;
-    top: 23px;
-    right: 24px;
-    color: rgba(164, 184, 210, .16);
-    font-size: 37px;
-    font-weight: 300;
-    letter-spacing: -2px;
+    z-index: -2;
+    top: -75px;
+    right: -45px;
+    width: 185px;
+    height: 185px;
+    border: 1px solid rgba(255,255,255,.065);
+    border-radius: 50%;
+    content: "";
+    box-shadow: 0 0 0 22px rgba(255,255,255,.018), 0 0 0 48px rgba(255,255,255,.012);
+    pointer-events: none;
 }
-
-.accueil-raccourci h3 {
-    margin: 0 0 10px;
-    font-size: 19px;
-    font-weight: 700;
-    letter-spacing: -.4px;
+.accueil-dashboard .accueil-raccourci-ajout {
+    border-color: rgba(245,208,128,.28);
+    background: radial-gradient(ellipse at 100% 0%,rgba(175,132,55,.18),transparent 75%),#171e2a;
 }
-
-.accueil-raccourci p {
-    margin: 0 0 23px;
-    color: #8c9eb7;
-    font-size: 12px;
-    line-height: 1.8;
+.accueil-dashboard .accueil-raccourci-collection {
+    background: radial-gradient(ellipse at 100% 0%,rgba(60,122,195,.2),transparent 75%),#101f32;
 }
-
-.accueil-raccourci-lien {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    width: 100%;
-    margin-top: auto;
-    color: var(--acc-or);
-    font-size: 12px;
-    font-weight: 700;
+.accueil-dashboard .accueil-raccourci-decks {
+    background: radial-gradient(ellipse at 100% 0%,rgba(125,99,189,.19),transparent 75%),#171c2e;
 }
-
-.accueil-raccourci-lien svg {
-    width: 18px;
-    height: 18px;
+.accueil-raccourci:hover { transform: translateY(-3px); border-color: rgba(245,208,128,.6); }
+.accueil-raccourci:focus-visible { outline: 2px solid var(--acc-or); outline-offset: 5px; }
+.accueil-dashboard .accueil-raccourci-decor {
+    position: absolute;
+    z-index: -1;
+    top: -6px;
+    right: 16px;
+    width: 145px;
+    height: 145px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    color: #f4ce78;
+    opacity: .23;
+    pointer-events: none;
 }
+.accueil-raccourci-ajout .accueil-raccourci-decor { stroke-width: 4.5; transform: rotate(8deg); }
+.accueil-raccourci-collection .accueil-raccourci-decor { color: #99c7ff; transform: rotate(-5deg); }
+.accueil-raccourci-decks .accueil-raccourci-decor { color: #c5b1f1; transform: rotate(8deg); }
+.accueil-raccourci h3 { position: relative; margin: 0; max-width: 78%; color: #edf2fa; font-size: 22px; font-weight: 700; letter-spacing: -.5px; line-height: 1.3; }
+.accueil-raccourci-fleche { display: grid; flex: 0 0 32px; place-items: center; width: 32px; height: 32px; border: 1px solid rgba(207,220,240,.22); border-radius: 50%; color: #d4deed; }
+.accueil-raccourci-fleche svg { width: 16px; height: 16px; }
 
 .accueil-inline-badge {
     padding: 4px 7px;
@@ -833,36 +796,18 @@
     }
 
     .accueil-dashboard .accueil-raccourci {
-        min-height: 0;
-        padding: 22px 23px 22px 88px;
+        min-height: 130px;
+        padding: 22px 23px;
     }
 
-    .accueil-raccourci-icone {
-        position: absolute;
-        left: 22px;
-        top: 24px;
-        margin: 0;
-    }
 
-    .accueil-raccourci-numero {
-        right: 20px;
-        top: 12px;
-        font-size: 28px;
-    }
 
     .accueil-raccourci h3 {
         padding-right: 25px;
         font-size: 18px;
     }
 
-    .accueil-raccourci p {
-        margin-bottom: 15px;
-        font-size: 12px;
-    }
 
-    .accueil-raccourci p br {
-        display: none;
-    }
 
     .accueil-espace {
         margin-top: 28px;
