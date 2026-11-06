@@ -1,0 +1,478 @@
+/* ==========================================
+   PAGE CATALOGUE
+   Les couleurs et le fond viennent d'app.css.
+   ========================================== */
+
+.catalogue-page {
+    position: relative;
+    flex: 1;
+    width: min(1200px, calc(100% - 48px));
+    margin: 0 auto;
+    padding: 48px 0 64px;
+}
+
+/* ==========================================
+   FILTRES
+   ========================================== */
+
+.catalogue-filtres {
+    width: 100%;
+    max-width: none;
+    margin: 32px 0;
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: rgba(12, 21, 37, .94);
+}
+
+.filtres-ligne {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 2fr)
+        minmax(0, 2fr)
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+    gap: 18px;
+}
+
+.filtre-champ {
+    min-width: 0;
+}
+
+.catalogue-filtres label {
+    display: block;
+    margin: 0 0 8px;
+    font-size: .85rem;
+    font-weight: 600;
+}
+
+/* Champs texte, recherche et nombres */
+
+.catalogue-filtres input:not([type="checkbox"]) {
+    display: block;
+    width: 100%;
+    min-height: 50px;
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px solid #35445d;
+    border-radius: 10px;
+    background: #091221;
+    color: var(--text);
+    font: inherit;
+    font-size: 1rem;
+}
+
+.catalogue-filtres input::placeholder {
+    color: #7f90aa;
+}
+
+/* Listes déroulantes */
+
+.catalogue-filtres select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 50px;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid #35445d;
+    border-radius: 10px;
+    background: #091221;
+    color: var(--text);
+    font: inherit;
+    font-size: .9rem;
+}
+
+/* Groupe des affinités */
+
+.filtres-affinites {
+    min-width: 0;
+    margin: 24px 0 0;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.filtres-affinites legend {
+    padding: 0 8px;
+    color: var(--muted);
+    font-size: .85rem;
+}
+
+.affinites-choix {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.catalogue-filtres .affinite-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: .8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+            border-color .2s,
+            background .2s;
+}
+
+.catalogue-filtres .affinite-option:hover {
+    border-color: var(--gold);
+}
+
+.catalogue-filtres .affinite-option:has(input:checked) {
+    border-color: var(--gold);
+    background: rgba(244, 206, 120, .08);
+}
+
+/* Annule les dimensions générales des input
+   pour conserver de petites cases à cocher. */
+
+.catalogue-filtres input[type="checkbox"] {
+    display: inline-block;
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    accent-color: var(--gold);
+    cursor: pointer;
+}
+
+.pastille-affinite {
+    display: inline-block;
+    flex: 0 0 13px;
+    width: 13px;
+    height: 13px;
+    border: 1px solid #8994a6;
+    border-radius: 50%;
+}
+
+/* Actions du formulaire */
+
+.filtres-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.catalogue-filtres .filtres-actions button {
+    width: auto;
+    min-height: 48px;
+    margin: 0;
+    padding: 12px 24px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--gold);
+    color: #17130a;
+    font: inherit;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.catalogue-filtres .filtres-actions button:hover {
+    background: #ffe2a0;
+}
+
+.filtres-actions a {
+    color: var(--muted);
+    font-size: .85rem;
+    text-underline-offset: 4px;
+}
+
+.filtres-actions a:hover {
+    color: var(--gold);
+}
+
+/* ==========================================
+   RÉSULTATS
+   ========================================== */
+
+.catalogue-compteur,
+.catalogue-vide {
+    color: var(--muted);
+    line-height: 1.7;
+}
+
+.catalogue-compteur {
+    margin: 24px 0;
+}
+
+.catalogue-vide {
+    padding: 24px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    text-align: center;
+}
+
+.catalogue-page > .notice {
+    margin: 24px 0;
+}
+
+/* Grille des cartes */
+
+.catalogue-grille {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: start;
+    gap: 22px;
+}
+
+.catalogue-carte {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: rgba(12, 21, 37, .94);
+}
+
+/* Images et deuxième face */
+
+.catalogue-images {
+    padding: 14px;
+    background: rgba(0, 0, 0, .18);
+}
+
+.catalogue-images img {
+    display: block;
+    width: 100%;
+    height: 310px;
+    object-fit: contain;
+}
+
+.catalogue-images summary {
+    margin-top: 12px;
+    padding: 8px 0;
+    color: var(--gold);
+    font-size: .8rem;
+    cursor: pointer;
+}
+
+.catalogue-images details[open] summary {
+    margin-bottom: 12px;
+}
+
+.catalogue-sans-image {
+    display: grid;
+    place-items: center;
+    min-height: 310px;
+    margin: 0;
+    color: var(--muted);
+    text-align: center;
+}
+
+/* Informations de la carte */
+
+.catalogue-informations {
+    padding: 20px;
+    overflow-wrap: anywhere;
+}
+
+.catalogue-reference {
+    margin: 0 0 12px;
+    color: var(--gold);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+}
+
+.catalogue-informations h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.4;
+}
+
+.catalogue-sous-titre {
+    margin: 8px 0;
+    color: var(--muted);
+    text-transform: lowercase;
+    line-height: 1.5;
+}
+
+.catalogue-cout {
+    margin: 16px 0 0;
+    font-size: .85rem;
+    line-height: 1.6;
+}
+
+.catalogue-affinites {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 14px;
+}
+
+.affinite-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 5px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: .7rem;
+    line-height: 1.5;
+}
+
+.affinite-badge strong {
+    color: var(--text);
+    white-space: nowrap;
+}
+
+.catalogue-extension {
+    margin: 16px 0 0;
+    color: var(--muted);
+    font-size: .75rem;
+    line-height: 1.5;
+}
+
+/* ==========================================
+   PAGINATION
+   ========================================== */
+
+.catalogue-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-top: 36px;
+}
+
+.catalogue-pagination a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--gold);
+    text-decoration: none;
+}
+
+.catalogue-pagination a:hover {
+    border-color: var(--gold);
+    background: rgba(244, 206, 120, .08);
+}
+
+.catalogue-pagination span {
+    color: var(--muted);
+    font-size: .85rem;
+}
+
+/* ==========================================
+   ACCESSIBILITÉ
+   ========================================== */
+
+.catalogue-page input:focus-visible,
+.catalogue-page select:focus-visible,
+.catalogue-page button:focus-visible,
+.catalogue-page a:focus-visible,
+.catalogue-page summary:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: 4px;
+}
+
+.catalogue-page button:disabled,
+.catalogue-page select:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+/* ==========================================
+   TABLETTE
+   ========================================== */
+
+@media (max-width: 1050px) {
+    .catalogue-grille {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .filtres-ligne {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .catalogue-page {
+        padding-top: 32px;
+    }
+
+    .catalogue-grille {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .catalogue-images img,
+    .catalogue-sans-image {
+        height: 250px;
+        min-height: 250px;
+    }
+}
+
+/* ==========================================
+   TÉLÉPHONE
+   ========================================== */
+
+@media (max-width: 600px) {
+    .catalogue-filtres {
+        padding: 18px;
+    }
+
+    .filtres-ligne {
+        grid-template-columns: 1fr;
+    }
+
+    .filtres-affinites {
+        padding: 14px;
+    }
+
+    .affinites-choix {
+        flex-direction: column;
+    }
+
+    .filtres-actions {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .catalogue-filtres .filtres-actions button {
+        width: 100%;
+    }
+
+    .filtres-actions a {
+        padding: 8px 0;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .catalogue-grille {
+        grid-template-columns: 1fr;
+    }
+
+    .catalogue-images img,
+    .catalogue-sans-image {
+        height: 350px;
+        min-height: 350px;
+    }
+
+    .catalogue-pagination {
+        gap: 14px;
+    }
+}

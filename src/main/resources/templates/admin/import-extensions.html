@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Importer une extension — Gestion SWU</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/import-extensions.css}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header('admin')}"></header>
+
+<main class="import-extension-page">
+
+    <a class="import-extension-back" th:href="@{/admin}">
+        ← Administration
+    </a>
+
+    <p class="eyebrow">CATALOGUE FRANÇAIS</p>
+
+    <h1>Importer <span>une extension.</span></h1>
+
+    <p class="intro">
+        Ajoutez les fiches de base françaises au catalogue :
+        titre, sous-titre, numéro et extension.
+    </p>
+
+    <p th:if="${succes}"
+       th:text="${succes}"
+       class="notice notice-success"
+       role="status">
+        Import terminé
+    </p>
+
+    <p th:if="${erreur}"
+       th:text="${erreur}"
+       class="notice"
+       role="alert">
+        Erreur d’import
+    </p>
+
+    <section class="panel import-extension-panel"
+             aria-labelledby="titre-formulaire">
+
+        <h2 id="titre-formulaire">Choisir une extension</h2>
+
+        <div th:if="${#lists.isEmpty(extensions)}">
+            <p class="import-extension-help">
+                Créez d’abord une extension avec son code officiel.
+            </p>
+
+            <a th:href="@{/admin/extensions}" class="import-extension-link">
+                Gérer les extensions →
+            </a>
+        </div>
+
+        <form th:unless="${#lists.isEmpty(extensions)}"
+              th:action="@{/admin/import/extensions}"
+              method="post">
+
+            <label for="extensionId">Extension à importer</label>
+
+            <select id="extensionId" name="extensionId" required>
+                <option value="" selected disabled>
+                    Sélectionner une extension
+                </option>
+
+                <option th:each="extension : ${extensions}"
+                        th:value="${extension.id}"
+                        th:text="${extension.code + ' — ' + extension.nom}">
+                    Extension
+                </option>
+            </select>
+
+            <p class="import-extension-help">
+                Les nouvelles cartes seront ajoutées.
+                Les fiches déjà présentes seront mises à jour.
+                Les variantes alternatives ne sont pas importées.
+            </p>
+
+            <button type="submit">
+                Importer les cartes françaises →
+            </button>
+
+            <p class="import-extension-help">
+                Le chargement peut prendre quelques instants.
+                Attendez le résultat avant de relancer un import.
+            </p>
+
+        </form>
+    </section>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

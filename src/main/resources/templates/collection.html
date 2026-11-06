@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <title>Ma collection — Gestion SWU</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet"
+          th:href="@{/css/collection.css(v=2)}">
+
+    <script th:src="@{/js/collection.js(v=1)}" defer></script>
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header('collection')}">
+</header>
+
+<main class="collection-page">
+
+    <p class="eyebrow">VOTRE ESPACE PERSONNEL</p>
+
+    <h1>Ma <span>collection.</span></h1>
+
+    <p class="collection-intro">
+        Toutes les versions d’une même carte sont regroupées.
+        Cliquez sur une carte pour consulter vos exemplaires.
+    </p>
+
+    <div class="collection-liens">
+        <a class="collection-lien" th:href="@{/catalogue}">
+            Parcourir le catalogue →
+        </a>
+
+        <a class="collection-lien"
+           th:href="@{/collection/ajout-rapide}">
+            Ajout rapide →
+        </a>
+    </div>
+
+    <p th:if="${erreurCollection}"
+       th:text="${erreurCollection}"
+       class="notice"
+       role="alert">
+    </p>
+
+    <p class="collection-intro"
+       th:text="${resultat.totalElements
+           + ' carte(s) différente(s) dans votre collection'}">
+    </p>
+
+    <p th:if="${resultat.totalElements == 0}"
+       class="collection-vide">
+        Votre collection est vide.
+        Ajoutez votre première carte depuis le catalogue.
+    </p>
+
+    <section class="collection-grille"
+             aria-label="Mes cartes">
+
+        <article th:each="carte : ${resultat.content}"
+                 class="collection-carte">
+
+            <button type="button"
+                    class="collection-ouvrir"
+                    th:attr="
+                        data-dialog-id=${'versions-' + carte.idCarte},
+                        aria-controls=${'versions-' + carte.idCarte},
+                        aria-label=${'Voir les versions possédées de '
+                            + carte.titre}"
+                    aria-haspopup="dialog">
+
+                <img th:if="${!#strings.isEmpty(carte.imageRecto)}"
+                     th:src="${carte.imageRecto}"
+                     th:alt="${carte.titre}"
+                     loading="lazy">
+
+                <span th:if="${#strings.isEmpty(carte.imageRecto)}"
+                      class="collection-image-absente">
+                    Image indisponible
+                </span>
+
+                <span class="collection-informations">
+
+                    <span class="collection-reference"
+                          th:text="${carte.codeExtension
+                              + ' · ' + carte.numeroAffiche}">
+                    </span>
+
+                    <span class="collection-titre"
+                          th:text="${carte.titre}">
+                    </span>
+
+                    <span class="collection-sous-titre"
+                          th:if="${!#strings.isEmpty(carte.sousTitre)}"
+                          th:text="${carte.sousTitre}">
+                    </span>
+
+                    <span class="collection-total">
+                        <strong th:text="${carte.quantite}">3</strong>
+                        exemplaire(s)
+                    </span>
+
+                    <span class="collection-detail-foil"
+                          th:text="${'Dont ' + carte.quantiteFoil
+                              + ' foil(s)'}">
+                    </span>
+
+                    <span class="collection-voir">
+                        Voir mes versions →
+                    </span>
+
+                </span>
+            </button>
+
+            <dialog class="versions-dialog"
+                    th:id="${'versions-' + carte.idCarte}"
+                    th:attr="aria-labelledby=${'titre-versions-'
+                        + carte.idCarte}">
+
+                <div class="versions-entete">
+
+                    <div>
+                        <p class="collection-reference"
+                           th:text="${carte.codeExtension
+                               + ' · ' + carte.numeroAffiche}">
+                        </p>
+
+                        <h2 th:id="${'titre-versions-' + carte.idCarte}"
+                            th:text="${carte.titre}">
+                        </h2>
+
+                        <p class="collection-sous-titre"
+                           th:if="${!#strings.isEmpty(carte.sousTitre)}"
+                           th:text="${carte.sousTitre}">
+                        </p>
+                    </div>
+
+                    <button type="button"
+                            class="versions-fermer"
+                            data-fermer-dialog
+                            aria-label="Fermer la fenêtre"
+                            autofocus>
+                        ✕
+                    </button>
+                </div>
+
+                <p class="versions-total">
+                    <strong th:text="${carte.quantite}">3</strong>
+                    exemplaire(s) au total,
+                    dont
+                    <strong th:text="${carte.quantiteFoil}">1</strong>
+                    foil(s).
+                </p>
+
+                <div class="versions-liste">
+
+                    <article th:each="version : ${carte.versions}"
+                             class="version-ligne">
+
+                        <img th:if="${!#strings.isEmpty(version.imageRecto)}"
+                             th:src="${version.imageRecto}"
+                             th:alt="${carte.titre
+                                 + ' — ' + version.libelle}"
+                             loading="lazy">
+
+                        <div class="version-informations">
+
+                            <h3 th:text="${version.libelle}">
+                            </h3>
+
+                            <p class="collection-reference"
+                               th:text="${carte.codeExtension
+                                   + ' · ' + version.numeroAffiche}">
+                            </p>
+
+                            <p class="version-quantite">
+                                <strong th:text="${version.quantite}">
+                                    1
+                                </strong>
+                                exemplaire(s)
+                            </p>
+                        </div>
+
+                        <form th:action="@{/collection/ajuster}"
+                              method="post"
+                              class="version-actions">
+
+                            <input type="hidden"
+                                   name="carteId"
+                                   th:value="${version.idCarte}">
+
+                            <input type="hidden"
+                                   name="foil"
+                                   th:value="${version.foil}">
+
+                            <input type="hidden"
+                                   name="retour"
+                                   th:value="${retour}">
+
+                            <button type="submit"
+                                    name="variation"
+                                    value="-1"
+                                    th:attr="aria-label=${'Retirer un exemplaire '
+                                        + version.libelle + ' de '
+                                        + carte.titre}">
+                                −1
+                            </button>
+
+                            <button type="submit"
+                                    name="variation"
+                                    value="1"
+                                    th:disabled="${version.totalSurCarte >= 9999}"
+                                    th:attr="aria-label=${'Ajouter un exemplaire '
+                                        + version.libelle + ' de '
+                                        + carte.titre}">
+                                +1
+                            </button>
+                        </form>
+                    </article>
+                </div>
+
+                <p class="versions-aide">
+                    Pour ajouter une version que vous ne possédez pas
+                    encore, utilisez l’ajout rapide.
+                </p>
+
+            </dialog>
+        </article>
+    </section>
+
+    <nav th:if="${resultat.totalPages > 1}"
+         class="collection-pagination"
+         aria-label="Pagination de ma collection">
+
+        <a th:if="${resultat.hasPrevious()}"
+           th:href="@{/collection(page=${resultat.number - 1})}">
+            ← Précédent
+        </a>
+
+        <span th:text="${'Page ' + (resultat.number + 1)
+            + ' sur ' + resultat.totalPages}">
+        </span>
+
+        <a th:if="${resultat.hasNext()}"
+           th:href="@{/collection(page=${resultat.number + 1})}">
+            Suivant →
+        </a>
+    </nav>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Test du catalogue français — Gestion SWU</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/import.css}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header('admin')}"></header>
+
+<main class="import-page">
+
+    <a class="import-back" th:href="@{/admin}">
+        ← Administration
+    </a>
+
+    <p class="eyebrow">CATALOGUE OFFICIEL</p>
+
+    <h1>Les cartes <span>en français.</span></h1>
+
+    <p class="intro">
+        Vérifiez la connexion à la source et prévisualisez deux cartes.
+        Aucune donnée n’est enregistrée dans la base.
+    </p>
+
+    <form th:action="@{/admin/import}" method="post" class="import-form">
+        <button type="submit">
+            Charger deux cartes françaises →
+        </button>
+    </form>
+
+    <p th:if="${erreur}"
+       th:text="${erreur}"
+       class="notice"
+       role="alert">
+        Erreur de connexion
+    </p>
+
+    <p th:if="${testEffectue and !#lists.isEmpty(cartes)}"
+       class="notice notice-success"
+       role="status">
+        La connexion fonctionne : les cartes reçues sont en français.
+    </p>
+
+    <p th:if="${testEffectue and #lists.isEmpty(cartes)}"
+       class="notice"
+       role="status">
+        La source a répondu, mais aucune carte n’a été reçue.
+    </p>
+
+    <section class="import-grid" aria-label="Aperçu des cartes">
+
+        <article th:each="carte : ${cartes}" class="panel import-card">
+
+            <div class="card-images">
+                <img th:if="${!#strings.isEmpty(carte.imageRecto)}"
+                     th:src="${carte.imageRecto}"
+                     th:alt="${'Face 1 — ' + carte.nom}"
+                     loading="lazy">
+
+                <img th:if="${!#strings.isEmpty(carte.imageVerso)}"
+                     th:src="${carte.imageVerso}"
+                     th:alt="${'Face 2 — ' + carte.nom}"
+                     loading="lazy">
+            </div>
+
+            <div class="card-details">
+                <p class="eyebrow"
+                   th:text="${carte.codeExtension + ' · ' + carte.numero}">
+                    Extension et numéro
+                </p>
+
+                <h2 th:text="${carte.nom}">Nom de la carte</h2>
+
+                <p class="card-subtitle"
+                   th:text="${carte.sousTitre}">
+                    Sous-titre
+                </p>
+
+                <p class="card-extension"
+                   th:text="${carte.extension}">
+                    Extension
+                </p>
+
+                <!-- Affichage en texte pour éviter d'exécuter
+                     du HTML provenant de la source externe. -->
+                <p class="card-text"
+                   th:text="${carte.texte}">
+                    Capacité de la carte
+                </p>
+
+                <span class="language-badge">FR</span>
+            </div>
+
+        </article>
+
+    </section>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

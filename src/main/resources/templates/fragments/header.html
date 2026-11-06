@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<header th:fragment="header(pageActive)" class="site-header">
+    <div class="header-inner">
+
+        <a class="brand" th:href="@{/}" aria-label="Gestion SWU — Accueil">
+            <span class="brand-icon" aria-hidden="true">✦</span>
+            GESTION SWU
+        </a>
+
+        <!-- Le menu reste dans son propre fichier. -->
+        <nav th:replace="~{fragments/menu :: menu(${pageActive})}"></nav>
+
+    </div>
+</header>
+
+</body>
+</html>

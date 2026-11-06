@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Catalogue — Gestion SWU</title>
+
+    <!-- Styles communs -->
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+
+    <!-- Styles du catalogue -->
+    <link rel="stylesheet" th:href="@{/css/catalogue.css(v=4)}">
+
+    <!-- Boutons de gestion de la collection -->
+    <link rel="stylesheet" th:href="@{/css/collection.css(v=1)}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header('catalogue')}"></header>
+
+<main class="catalogue-page">
+
+    <p class="eyebrow">STAR WARS UNLIMITED</p>
+
+    <h1>Le <span>catalogue.</span></h1>
+
+    <!-- =====================================
+         RECHERCHE ET FILTRES
+         ===================================== -->
+
+    <form th:action="@{/catalogue}"
+          method="get"
+          class="catalogue-filtres">
+
+        <div class="filtres-ligne">
+
+            <div class="filtre-champ filtre-recherche">
+                <label for="q">Rechercher une carte</label>
+
+                <input
+                        type="search"
+                        id="q"
+                        name="q"
+                        th:value="${recherche}"
+                        placeholder="Titre ou sous-titre…"
+                        maxlength="100"
+                >
+            </div>
+
+            <div class="filtre-champ">
+                <label for="extensionId">Extension</label>
+
+                <select id="extensionId" name="extensionId">
+                    <option value="">Toutes les extensions</option>
+
+                    <option
+                            th:each="extension : ${extensions}"
+                            th:value="${extension.id}"
+                            th:selected="${extension.id == extensionSelectionnee}"
+                            th:text="${extension.code + ' — ' + extension.nom}">
+                        Extension
+                    </option>
+                </select>
+            </div>
+
+            <div class="filtre-champ filtre-cout">
+                <label for="coutMin">Coût minimum</label>
+
+                <input
+                        type="number"
+                        id="coutMin"
+                        name="coutMin"
+                        min="0"
+                        step="1"
+                        placeholder="Sans limite"
+                        th:value="${coutMin}"
+                >
+            </div>
+
+            <div class="filtre-champ filtre-cout">
+                <label for="coutMax">Coût maximum</label>
+
+                <input
+                        type="number"
+                        id="coutMax"
+                        name="coutMax"
+                        min="0"
+                        step="1"
+                        placeholder="Sans limite"
+                        th:value="${coutMax}"
+                >
+            </div>
+
+        </div>
+
+        <fieldset class="filtres-affinites">
+            <legend>Affinités</legend>
+
+            <div class="affinites-choix">
+
+                <label
+                        th:each="affinite : ${affinitesDisponibles}"
+                        class="affinite-option">
+
+                    <input
+                            type="checkbox"
+                            name="affinites"
+                            th:value="${affinite.name()}"
+                            th:checked="${selectionAffinites.contains(affinite.name())}"
+                    >
+
+                    <span
+                            class="pastille-affinite"
+                            th:style="${'background-color:' + affinite.couleur}"
+                            aria-hidden="true">
+                    </span>
+
+                    <span th:text="${affinite.libelle}">
+                        Affinité
+                    </span>
+
+                </label>
+
+            </div>
+
+            <label for="mode">Combiner les affinités</label>
+
+            <select id="mode" name="mode">
+
+                <option
+                        value="TOUTES"
+                        th:selected="${mode == 'TOUTES'}">
+                    Toutes les affinités cochées
+                </option>
+
+                <option
+                        value="UNE"
+                        th:selected="${mode == 'UNE'}">
+                    Au moins une affinité cochée
+                </option>
+
+                <option
+                        value="SANS"
+                        th:selected="${mode == 'SANS'}">
+                    Sans affinité — ignore les couleurs cochées
+                </option>
+
+            </select>
+        </fieldset>
+
+        <div class="filtres-actions">
+            <button type="submit">Rechercher →</button>
+
+            <a th:href="@{/catalogue}">
+                Réinitialiser les filtres
+            </a>
+        </div>
+
+    </form>
+
+    <!-- =====================================
+         MESSAGES ET COMPTEUR
+         ===================================== -->
+
+    <p
+            th:if="${erreur}"
+            th:text="${erreur}"
+            class="notice"
+            role="alert">
+        Erreur de recherche
+    </p>
+
+    <p
+            th:if="${erreurCollection}"
+            th:text="${erreurCollection}"
+            class="notice"
+            role="alert">
+        Erreur de modification de la collection
+    </p>
+
+    <p
+            class="catalogue-compteur"
+            th:text="${resultat.totalElements + ' carte(s) trouvée(s)'}">
+        Nombre de résultats
+    </p>
+
+    <p
+            th:if="${#lists.isEmpty(cartes) and erreur == null}"
+            class="catalogue-vide">
+        Aucune carte ne correspond à ces critères.
+    </p>
+
+    <!-- =====================================
+         GRILLE DES CARTES
+         ===================================== -->
+
+    <section
+            class="catalogue-grille"
+            aria-label="Résultats de recherche">
+
+        <article
+                th:each="carte : ${cartes}"
+                class="catalogue-carte">
+
+            <!-- Images -->
+
+            <div class="catalogue-images">
+
+                <img
+                        th:if="${!#strings.isEmpty(carte.imageRecto)}"
+                        th:src="${carte.imageRecto}"
+                        th:alt="${'Face 1 — ' + carte.titre}"
+                        loading="lazy"
+                >
+
+                <p
+                        th:if="${#strings.isEmpty(carte.imageRecto)}"
+                        class="catalogue-sans-image">
+                    Image indisponible
+                </p>
+
+                <details
+                        th:if="${!#strings.isEmpty(carte.imageVerso)}">
+
+                    <summary>Voir l’autre face</summary>
+
+                    <img
+                            th:src="${carte.imageVerso}"
+                            th:alt="${'Face 2 — ' + carte.titre}"
+                            loading="lazy"
+                    >
+
+                </details>
+
+            </div>
+
+            <!-- Informations -->
+
+            <div class="catalogue-informations">
+
+                <p
+                        class="catalogue-reference"
+                        th:text="${carte.codeExtension + ' · ' + carte.numeroAffiche}">
+                    SOR · 005
+                </p>
+
+                <h2 th:text="${carte.titre}">
+                    Titre de la carte
+                </h2>
+
+                <p
+                        th:if="${!#strings.isEmpty(carte.sousTitre)}"
+                        class="catalogue-sous-titre"
+                        th:text="${carte.sousTitre}">
+                    sous-titre
+                </p>
+
+                <p
+                        class="catalogue-cout"
+                        th:text="${carte.cout != null
+                        ? 'Coût : ' + carte.cout
+                        : 'Coût : non renseigné'}">
+                    Coût
+                </p>
+
+                <!-- Affinités et nombre de symboles -->
+
+                <div class="catalogue-affinites">
+
+                    <th:block
+                            th:each="affinite : ${affinitesDisponibles}">
+
+                        <span
+                                th:if="${carte.affinites.containsKey(affinite.name())}"
+                                class="affinite-badge">
+
+                            <span
+                                    class="pastille-affinite"
+                                    th:style="${'background-color:' + affinite.couleur}"
+                                    aria-hidden="true">
+                            </span>
+
+                            <span th:text="${affinite.libelle}">
+                                Affinité
+                            </span>
+
+                            <strong
+                                    th:if="${carte.affinites.get(affinite.name()) > 1}"
+                                    th:text="${'×' + carte.affinites.get(affinite.name())}">
+                                ×2
+                            </strong>
+
+                        </span>
+
+                    </th:block>
+
+                    <span
+                            th:if="${carte.affinites.isEmpty()}"
+                            class="affinite-badge">
+                        Sans affinité
+                    </span>
+
+                </div>
+
+                <p
+                        class="catalogue-extension"
+                        th:text="${carte.nomExtension}">
+                    Extension
+                </p>
+
+                <!-- Collection personnelle -->
+
+                <div
+                        class="possession"
+                        th:with="quantite=${quantites.getOrDefault(carte.id, 0)}">
+
+                    <p class="possession-compteur">
+                        Dans ma collection :
+                        <strong th:text="${quantite}">0</strong>
+                    </p>
+
+                    <!-- Thymeleaf ajoute le jeton CSRF au formulaire POST. -->
+                    <form
+                            th:action="@{/collection/ajuster}"
+                            method="post"
+                            class="possession-actions">
+
+                        <input
+                                type="hidden"
+                                name="carteId"
+                                th:value="${carte.id}"
+                        >
+
+                        <input
+                                type="hidden"
+                                name="retour"
+                                th:value="${retourCatalogue}"
+                        >
+
+                        <button
+                                type="submit"
+                                name="variation"
+                                value="-1"
+                                th:disabled="${quantite == 0}"
+                                th:attr="aria-label=${'Retirer un exemplaire de ' + carte.titre}">
+                            −1
+                        </button>
+
+                        <button
+                                type="submit"
+                                name="variation"
+                                value="1"
+                                th:disabled="${quantite >= 9999}"
+                                th:attr="aria-label=${'Ajouter un exemplaire de ' + carte.titre}">
+                            +1
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </article>
+
+    </section>
+
+    <!-- =====================================
+         PAGINATION AVEC CONSERVATION DES FILTRES
+         ===================================== -->
+
+    <nav
+            th:if="${resultat.totalPages > 1}"
+            class="catalogue-pagination"
+            aria-label="Pagination du catalogue">
+
+        <a
+                th:if="${resultat.hasPrevious()}"
+                th:href="@{/catalogue(
+                q=${recherche},
+                extensionId=${extensionSelectionnee},
+                coutMin=${coutMin},
+                coutMax=${coutMax},
+                affinites=${selectionAffinites},
+                mode=${mode},
+                page=${resultat.number - 1}
+            )}">
+            ← Précédent
+        </a>
+
+        <span
+                aria-live="polite"
+                th:text="${'Page ' + (resultat.number + 1)
+                + ' sur ' + resultat.totalPages}">
+            Page
+        </span>
+
+        <a
+                th:if="${resultat.hasNext()}"
+                th:href="@{/catalogue(
+                q=${recherche},
+                extensionId=${extensionSelectionnee},
+                coutMin=${coutMin},
+                coutMax=${coutMax},
+                affinites=${selectionAffinites},
+                mode=${mode},
+                page=${resultat.number + 1}
+            )}">
+            Suivant →
+        </a>
+
+    </nav>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

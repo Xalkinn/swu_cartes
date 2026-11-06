@@ -1,0 +1,118 @@
+/* ==========================================
+   Accueil et espace personnel
+   ========================================== */
+
+.dashboard {
+    position: relative;
+    flex: 1;
+    width: min(1050px, calc(100% - 48px));
+    margin: 0 auto;
+    padding: 64px 0;
+}
+
+.dashboard .intro {
+    max-width: 580px;
+}
+
+/* Boutons d'accès */
+
+.dashboard .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 30px;
+}
+
+.dashboard .action-primary,
+.dashboard .action-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.dashboard .action-primary {
+    color: #17130a;
+    background: var(--gold);
+}
+
+.dashboard .action-primary:hover {
+    background: #ffe2a0;
+}
+
+.dashboard .action-secondary {
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+.dashboard .action-secondary:hover {
+    background: rgba(255, 255, 255, .05);
+}
+
+/* Cartes des fonctionnalités */
+
+.dashboard .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 48px;
+}
+
+.dashboard .feature-card {
+    min-width: 0;
+    padding: 28px;
+}
+
+.dashboard .feature-card h2 {
+    margin-top: 22px;
+    font-size: 1.3rem;
+}
+
+.dashboard .feature-card p {
+    margin-bottom: 0;
+    color: var(--muted);
+    line-height: 1.7;
+}
+
+.dashboard .status-badge {
+    display: inline-block;
+    padding: 5px 9px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: .7rem;
+}
+
+/* Informations du compte */
+
+.dashboard .account-panel {
+    max-width: 580px;
+    margin-top: 28px;
+}
+
+.dashboard .account-label {
+    margin: 24px 0 6px;
+    color: var(--muted);
+    font-size: .8rem;
+}
+
+.dashboard .account-value {
+    margin-top: 0;
+    overflow-wrap: anywhere;
+}
+
+/* Affichage sur téléphone et tablette */
+
+@media (max-width: 760px) {
+    .dashboard {
+        padding: 36px 0;
+    }
+
+    .dashboard .feature-grid {
+        grid-template-columns: 1fr;
+    }
+}

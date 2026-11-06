@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <title>Ajout rapide · Gestion SWU</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet"
+          th:href="@{/css/ajout-rapide.css(v=1)}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header('collection')}">
+</header>
+
+<main class="ajout-rapide-page">
+
+    <p class="rapide-surtitre">MA COLLECTION</p>
+
+    <h1>Ajouter <span>rapidement.</span></h1>
+
+    <p class="rapide-introduction">
+        Choisissez une extension et une finition.
+        Saisissez le numéro imprimé sur votre carte,
+        puis appuyez sur Entrée.
+    </p>
+
+    <div class="rapide-layout">
+
+        <section class="rapide-panneau">
+
+            <h2>Une carte, un numéro.</h2>
+
+            <div th:if="${erreurAjout != null}"
+                 class="rapide-message rapide-erreur"
+                 role="alert"
+                 th:text="${erreurAjout}">
+            </div>
+
+            <form th:action="@{/collection/ajout-rapide}"
+                  method="post"
+                  class="rapide-formulaire">
+
+                <div class="rapide-champ">
+                    <label for="extensionId">Extension</label>
+
+                    <select id="extensionId"
+                            name="extensionId"
+                            required>
+
+                        <option value=""
+                                th:selected="${extensionId == null}">
+                            Sélectionnez une extension
+                        </option>
+
+                        <option th:each="extension : ${extensions}"
+                                th:value="${extension.id}"
+                                th:selected="${extension.id == extensionId}"
+                                th:text="${extension.code + ' — ' + extension.nom}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="rapide-champ">
+                    <label for="finition">Finition</label>
+
+                    <select id="finition"
+                            name="finition"
+                            required>
+
+                        <option th:each="choix : ${finitions}"
+                                th:value="${choix.name()}"
+                                th:selected="${choix == finition}"
+                                th:text="${choix.libelle}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="rapide-champ">
+                    <label for="numero">Numéro de la carte</label>
+
+                    <input id="numero"
+                           name="numero"
+                           type="text"
+                           inputmode="numeric"
+                           pattern="[0-9]{1,5}"
+                           maxlength="5"
+                           autocomplete="off"
+                           placeholder="Ex. : 166"
+                           aria-describedby="numero-aide"
+                           th:value="${numero}"
+                           autofocus
+                           required>
+
+                    <small id="numero-aide">
+                        Pour 166/252, saisissez simplement 166.
+                        Pour une hyperspace, utilisez son propre numéro.
+                    </small>
+                </div>
+
+                <button type="submit" class="rapide-ajouter">
+                    Ajouter à ma collection →
+                </button>
+
+                <p class="rapide-raccourci">
+                    Appuyez sur <kbd>Entrée</kbd> pour ajouter un exemplaire.
+                </p>
+            </form>
+        </section>
+
+        <aside class="rapide-panneau rapide-confirmation"
+               aria-live="polite">
+
+            <th:block th:if="${derniereCarte != null}">
+
+                <p class="rapide-surtitre rapide-succes">
+                    ✓ CARTE AJOUTÉE
+                </p>
+
+                <img th:if="${derniereCarte.image != null}"
+                     class="rapide-image"
+                     th:src="${derniereCarte.image}"
+                     th:alt="${derniereCarte.titre}">
+
+                <p class="rapide-reference"
+                   th:text="${derniereCarte.extension
+                       + ' · ' + derniereCarte.numero}">
+                </p>
+
+                <h2 th:text="${derniereCarte.titre}"></h2>
+
+                <p class="rapide-sous-titre"
+                   th:if="${derniereCarte.sousTitre != null}"
+                   th:text="${derniereCarte.sousTitre}">
+                </p>
+
+                <span class="rapide-badge"
+                      th:text="${finitionAjoutee}">
+                </span>
+
+                <p class="rapide-total">
+                    <strong th:text="${totalPossede}">4</strong>
+                    exemplaire(s), dont
+                    <strong th:text="${totalFoil}">2</strong>
+                    foil(s).
+                </p>
+
+                <p class="rapide-aide">
+                    Vous pouvez saisir le numéro suivant.
+                </p>
+
+            </th:block>
+
+            <th:block th:if="${derniereCarte == null}">
+
+                <div class="rapide-etoile" aria-hidden="true">✦</div>
+
+                <h2>Prêt pour le prochain ajout.</h2>
+
+                <p class="rapide-aide">
+                    La dernière carte ajoutée apparaîtra ici,
+                    avec sa quantité dans votre collection.
+                </p>
+
+                <p class="rapide-aide">
+                    Les exemplaires foils sont inclus dans le total
+                    de la version sélectionnée.
+                </p>
+
+            </th:block>
+
+        </aside>
+    </div>
+
+    <!-- Si le numéro correspond à plusieurs cartes,
+         l'utilisateur choisit explicitement avant tout ajout. -->
+    <section th:if="${candidats != null}"
+             class="rapide-panneau rapide-ambiguite">
+
+        <h2>Quelle carte souhaitez-vous ajouter ?</h2>
+
+        <p class="rapide-aide">
+            Plusieurs cartes correspondent à cette référence.
+            Aucune carte n’a encore été ajoutée.
+        </p>
+
+        <div class="rapide-candidats">
+
+            <article th:each="carte : ${candidats}"
+                     class="rapide-candidat">
+
+                <img th:if="${carte.image != null}"
+                     th:src="${carte.image}"
+                     th:alt="${carte.titre}"
+                     loading="lazy">
+
+                <p class="rapide-reference"
+                   th:text="${carte.extension + ' · ' + carte.numero}">
+                </p>
+
+                <h3 th:text="${carte.titre}"></h3>
+
+                <p class="rapide-sous-titre"
+                   th:if="${carte.sousTitre != null}"
+                   th:text="${carte.sousTitre}">
+                </p>
+
+                <form th:action="@{/collection/ajout-rapide}"
+                      method="post">
+
+                    <input type="hidden"
+                           name="extensionId"
+                           th:value="${extensionId}">
+
+                    <input type="hidden"
+                           name="numero"
+                           th:value="${numero}">
+
+                    <input type="hidden"
+                           name="finition"
+                           th:value="${finition.name()}">
+
+                    <input type="hidden"
+                           name="carteId"
+                           th:value="${carte.id}">
+
+                    <button type="submit">
+                        Ajouter cette carte →
+                    </button>
+
+                </form>
+            </article>
+
+        </div>
+    </section>
+
+    <a class="rapide-retour" th:href="@{/collection}">
+        ← Voir ma collection
+    </a>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

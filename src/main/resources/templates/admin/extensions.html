@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Extensions — Administration Gestion SWU</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/extensions.css}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header('admin')}"></header>
+
+<main class="extensions-page">
+
+    <a class="admin-back" th:href="@{/admin}">
+        ← Administration
+    </a>
+
+    <p class="eyebrow">CATALOGUE SWU</p>
+    <h1>Les <span>extensions.</span></h1>
+
+    <p class="intro">
+        Ajoutez les extensions qui serviront à classer les cartes du catalogue.
+    </p>
+
+    <div class="extensions-grid">
+
+        <section class="panel" aria-labelledby="titre-ajout">
+            <h2 id="titre-ajout">Ajouter une extension</h2>
+
+            <p th:if="${param.ajoute}"
+               class="notice notice-success"
+               role="status">
+                L’extension a été ajoutée.
+            </p>
+
+            <form th:action="@{/admin/extensions}"
+                  th:object="${formulaire}"
+                  method="post">
+
+                <div th:if="${#fields.hasAnyErrors()}"
+                     class="notice"
+                     role="alert">
+                    <ul>
+                        <li th:each="erreur : ${#fields.allErrors()}"
+                            th:text="${erreur}">
+                            Erreur de saisie
+                        </li>
+                    </ul>
+                </div>
+
+                <label for="code">Code de l’extension</label>
+                <input
+                        type="text"
+                        id="code"
+                        th:field="*{code}"
+                        placeholder="Ex. : SOR"
+                        minlength="2"
+                        maxlength="12"
+                        pattern="[a-zA-Z0-9-]{2,12}"
+                        aria-describedby="aide-code"
+                        required
+                >
+                <small id="aide-code" class="extension-help">
+                    Code unique, enregistré en majuscules.
+                </small>
+
+                <label for="nom">Nom de l’extension</label>
+                <input
+                        type="text"
+                        id="nom"
+                        th:field="*{nom}"
+                        placeholder="Nom complet"
+                        maxlength="150"
+                        required
+                >
+
+                <label for="dateSortie">Date de sortie — facultative</label>
+                <input
+                        type="date"
+                        id="dateSortie"
+                        th:field="*{dateSortie}"
+                >
+
+                <button type="submit">Ajouter l’extension →</button>
+            </form>
+        </section>
+
+        <section class="panel" aria-labelledby="titre-liste">
+            <div class="extensions-list-heading">
+                <h2 id="titre-liste">Extensions enregistrées</h2>
+                <span class="extension-count"
+                      th:text="${#lists.size(extensions)}">
+                    0
+                </span>
+            </div>
+
+            <p th:if="${#lists.isEmpty(extensions)}" class="empty-state">
+                Aucune extension pour le moment.
+                Ajoutez la première avec le formulaire.
+            </p>
+
+            <div th:unless="${#lists.isEmpty(extensions)}"
+                 class="table-scroll"
+                 role="region"
+                 aria-label="Liste des extensions"
+                 tabindex="0">
+
+                <table>
+                    <thead>
+                    <tr>
+                        <th scope="col">Code</th>
+                        <th scope="col">Nom</th>
+                        <th scope="col">Sortie</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="extension : ${extensions}">
+                        <td>
+                            <span class="extension-code"
+                                  th:text="${extension.code}">
+                                CODE
+                            </span>
+                        </td>
+
+                        <td th:text="${extension.nom}">
+                            Nom
+                        </td>
+
+                        <td th:text="${extension.dateSortie != null
+                            ? #temporals.format(extension.dateSortie, 'dd/MM/yyyy')
+                            : 'Non renseignée'}">
+                            Date
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,148 @@
+.import-page {
+    width: min(1000px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 48px 0 64px;
+}
+
+.import-page, .import-page * { box-sizing: border-box; }
+.import-eyebrow {
+    margin: 0 0 16px;
+    color: var(--gold, #f4ce78);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+.import-page h1 {
+    margin: 0 0 20px;
+    font-size: clamp(36px, 6vw, 58px);
+    line-height: 1.1;
+    letter-spacing: -2px;
+}
+.import-page h1 span { color: var(--gold, #f4ce78); }
+.import-intro, .import-aide {
+    color: var(--muted, #a9b8cd);
+    line-height: 1.8;
+}
+.import-intro { max-width: 740px; margin-bottom: 30px; }
+.import-aide { font-size: 14px; }
+.import-panneau {
+    margin-top: 24px;
+    padding: 28px;
+    border: 1px solid rgba(169, 184, 205, .22);
+    border-radius: 22px;
+    background: rgba(10, 20, 35, .94);
+    color: var(--text, #e7edf6);
+}
+.import-panneau h2 { margin: 0 0 16px; font-size: 24px; }
+.import-page form { margin-top: 24px; }
+.import-page label { display: block; margin-bottom: 10px; font-weight: 700; }
+.import-page select {
+    width: 100%;
+    min-height: 52px;
+    padding: 12px 15px;
+    border: 1px solid #35465f;
+    border-radius: 12px;
+    background: #081221;
+    color: var(--text, #e7edf6);
+    color-scheme: dark;
+    font: inherit;
+}
+.import-boutons { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 22px; }
+.import-page .import-boutons button {
+    flex: 1 1 250px;
+    width: auto;
+    min-height: 52px;
+    margin: 0;
+    padding: 14px 18px;
+    border: 1px solid var(--gold, #f4ce78);
+    border-radius: 12px;
+    background: var(--gold, #f4ce78);
+    color: #17130b;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+}
+.import-page .import-boutons .import-bouton-global {
+    background: rgba(244, 206, 120, .08);
+    color: var(--gold, #f4ce78);
+}
+.import-page .import-boutons button:hover:not(:disabled) {
+    background: #ffe19b;
+    color: #17130b;
+}
+.import-page button:disabled { opacity: .5; cursor: not-allowed; }
+.import-page [aria-busy="true"] button:disabled { cursor: wait; }
+.import-page button:focus-visible,
+.import-page select:focus-visible,
+.import-page a:focus-visible {
+    outline: 2px solid var(--gold, #f4ce78);
+    outline-offset: 4px;
+}
+.import-attente[hidden] { display: none !important; }
+.import-attente {
+    margin-top: 24px;
+    padding: 20px;
+    border: 1px solid rgba(244, 206, 120, .35);
+    border-radius: 16px;
+    background: rgba(244, 206, 120, .04);
+}
+.import-attente-entete { display: flex; align-items: flex-start; gap: 16px; }
+.import-attente-entete strong { color: var(--gold, #f4ce78); }
+.import-attente-entete p {
+    margin: 8px 0 0;
+    color: var(--muted, #a9b8cd);
+    font-size: 13px;
+    line-height: 1.7;
+}
+.import-spinner {
+    display: inline-block;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgba(244, 206, 120, .2);
+    border-top-color: var(--gold, #f4ce78);
+    border-radius: 50%;
+    animation: import-tourner 850ms linear infinite;
+}
+.import-progression {
+    display: block;
+    width: 100%;
+    height: 10px;
+    margin: 22px 0 14px;
+    accent-color: var(--gold, #f4ce78);
+}
+.import-notice {
+    margin: 24px 0;
+    padding: 18px 20px;
+    border: 1px solid;
+    border-radius: 14px;
+    line-height: 1.7;
+}
+.import-notice h2 { margin: 0 0 8px; font-size: 20px; }
+.import-notice p { margin: 0; }
+.import-notice-succes { color: #93e5b5; border-color: #365e4a; background: #10251c; }
+.import-notice-erreur { color: #ffc1c1; border-color: #6a393f; background: #2a151c; }
+.import-bilan-liste { display: grid; gap: 12px; margin: 20px 0 0; padding: 0; list-style: none; }
+.import-bilan-liste li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    padding: 14px;
+    border: 1px solid #2c3c52;
+    border-radius: 10px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+.import-bilan-liste strong { color: var(--gold, #f4ce78); }
+.import-global-succes { color: #93e5b5; }
+.import-global-erreur { color: #ffc1c1; }
+.import-retour { display: inline-block; margin-top: 28px; color: var(--gold, #f4ce78); }
+@keyframes import-tourner { to { transform: rotate(360deg); } }
+@media (max-width: 600px) {
+    .import-page { width: calc(100% - 24px); padding-top: 30px; }
+    .import-panneau { padding: 20px; }
+    .import-attente { padding: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .import-spinner { animation: none; border-style: dotted; }
+}

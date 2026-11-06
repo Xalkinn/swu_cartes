@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<nav th:fragment="menu(pageActive)" aria-label="Navigation principale">
+    <ul class="site-menu">
+
+        <li>
+            <a th:href="@{/}"
+               th:attr="aria-current=${pageActive == 'accueil' ? 'page' : null}">
+                Accueil
+            </a>
+        </li>
+
+        <!-- Visiteurs non connectés -->
+        <li th:if="${!connecte}">
+            <a th:href="@{/login}"
+               th:attr="aria-current=${pageActive == 'connexion' ? 'page' : null}">
+                Connexion
+            </a>
+        </li>
+
+        <li th:if="${!connecte}">
+            <a th:href="@{/inscription}"
+               th:attr="aria-current=${pageActive == 'inscription' ? 'page' : null}">
+                Inscription
+            </a>
+        </li>
+
+        <!-- Utilisateurs connectés -->
+        <li th:if="${connecte}">
+            <a th:href="@{/espace}"
+               th:attr="aria-current=${pageActive == 'espace' ? 'page' : null}">
+                Mon espace
+            </a>
+        </li>
+
+        <li th:if="${connecte}">
+            <a th:href="@{/catalogue}"
+               th:attr="aria-current=${pageActive == 'catalogue' ? 'page' : null}">
+                Catalogue
+            </a>
+        </li>
+
+        <li th:if="${connecte}">
+            <a th:href="@{/collection}"
+               th:attr="aria-current=${pageActive == 'collection' ? 'page' : null}">
+                Ma collection
+            </a>
+        </li>
+
+        <a th:if="${connecte}"
+           th:href="@{/collection/ajout-rapide}">
+            Ajout rapide
+        </a>
+
+        <li th:if="${connecte}">
+            <a th:href="@{/scan}"
+               th:attr="aria-current=${pageActive == 'scan' ? 'page' : null}">
+                Scanner
+            </a>
+        </li>
+
+        <!-- Administrateurs uniquement -->
+        <li th:if="${administrateur}">
+            <a th:href="@{/admin}"
+               th:attr="aria-current=${pageActive == 'admin' ? 'page' : null}">
+                Administration
+            </a>
+        </li>
+
+        <li th:if="${connecte}">
+            <!-- Un formulaire POST conserve la protection CSRF. -->
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <button type="submit" class="menu-logout">
+                    Déconnexion
+                </button>
+            </form>
+        </li>
+
+    </ul>
+</nav>
+
+</body>
+</html>

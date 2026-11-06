@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title th:text="${pageActive == 'admin'
+        ? 'Administration — Gestion SWU'
+        : (pageActive == 'espace'
+        ? 'Mon espace — Gestion SWU'
+        : 'Accueil — Gestion SWU')}">
+        Gestion SWU
+    </title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/accueil.css}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header(${pageActive})}"></header>
+
+<main class="dashboard">
+
+    <!-- Accueil public -->
+    <section th:if="${pageActive == 'accueil'}" class="welcome">
+        <p class="eyebrow">STAR WARS UNLIMITED</p>
+
+        <h1>
+            Votre galaxie.<br>
+            <span>Votre collection.</span>
+        </h1>
+
+        <p class="intro">
+            Bienvenue sur Gestion SWU, votre espace pour organiser
+            votre collection de cartes.
+        </p>
+
+        <div class="actions" th:if="${!connecte}">
+            <a class="action-primary" th:href="@{/inscription}">
+                Créer mon compte →
+            </a>
+
+            <a class="action-secondary" th:href="@{/login}">
+                Se connecter
+            </a>
+        </div>
+
+        <div class="actions" th:if="${connecte}">
+            <a class="action-primary" th:href="@{/espace}">
+                Accéder à mon espace →
+            </a>
+        </div>
+    </section>
+
+    <!-- Espace personnel protégé -->
+    <section th:if="${pageActive == 'espace'}">
+        <p class="eyebrow">VOTRE ESPACE PERSONNEL</p>
+
+        <h1>Bienvenue <span>à bord.</span></h1>
+
+        <div class="panel account-panel">
+            <h2>Mon compte</h2>
+
+            <p class="account-label">Adresse e-mail</p>
+            <p class="account-value" th:text="${emailConnecte}">
+                Adresse e-mail
+            </p>
+
+            <p class="account-label">Rôle</p>
+            <p th:text="${administrateur ? 'Administrateur' : 'Utilisateur'}">
+                Utilisateur
+            </p>
+        </div>
+    </section>
+
+    <!-- Première page d'administration -->
+    <section th:if="${pageActive == 'admin'}">
+        <p class="eyebrow">ADMINISTRATION</p>
+
+        <h1>Préparons <span>le catalogue.</span></h1>
+
+        <p class="intro">
+            Cet espace accueillera la gestion des extensions,
+            des cartes et de leurs variantes.
+        </p>
+
+        <div class="actions">
+            <a class="action-primary" th:href="@{/admin/extensions}">
+                Gérer les extensions →
+            </a>
+            <a class="action-secondary" th:href="@{/admin/import}">
+                Tester le catalogue français →
+            </a>
+            <a class="action-primary" th:href="@{/admin/import/extensions}">
+                Importer une extension →
+            </a>
+        </div>
+    </section>
+
+    <section class="feature-grid" aria-label="Fonctionnalités à venir">
+
+        <article class="panel feature-card">
+            <span class="status-badge">À venir</span>
+            <h2>Le catalogue</h2>
+            <p>
+                Retrouvez les cartes et leurs différentes éditions.
+            </p>
+        </article>
+
+        <article class="panel feature-card">
+            <span class="status-badge">À venir</span>
+            <h2>Ma collection</h2>
+            <p>
+                Gérez vos exemplaires, leurs langues et leurs variantes.
+            </p>
+        </article>
+
+        <article class="panel feature-card">
+            <span class="status-badge">À venir</span>
+            <h2>Le scan</h2>
+            <p>
+                Photographiez une carte pour faciliter son ajout.
+            </p>
+        </article>
+
+    </section>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>
