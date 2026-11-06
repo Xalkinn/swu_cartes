@@ -4,7 +4,8 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Mes decks — Gestion SWU</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
-    <link rel="stylesheet" th:href="@{/css/decks.css(v=1)}">
+    <link rel="stylesheet" th:href="@{/css/decks.css(v=2)}">
+    <link rel="stylesheet" th:href="@{/css/deck-tuile.css(v=1)}">
 </head>
 <body>
 <header th:replace="~{fragments/header :: header('decks')}"></header>
@@ -25,20 +26,9 @@
                 <a href="#nouveau-deck">Préparer mon premier deck →</a>
             </div>
             <div class="decks-grille">
-                <a class="decks-carte" th:each="deck : ${resultat.content}" th:href="@{/decks/{id}(id=${deck.id})}">
-                    <div class="decks-visuel">
-                        <img th:if="${deck.leader != null and !#strings.isEmpty(deck.leader.image)}"
-                             th:src="${deck.leader.image}" th:alt="${deck.leader.titre}" loading="lazy">
-                        <span class="decks-visuel-vide" th:if="${deck.leader == null or #strings.isEmpty(deck.leader.image)}" aria-hidden="true">✦</span>
-                        <span class="decks-etiquette" th:text="${deck.leader == null or deck.base == null ? 'À construire' : 'Deck personnel'}"></span>
-                    </div>
-                    <div class="decks-carte-contenu">
-                        <h3 th:text="${deck.nom}"></h3>
-                        <p th:text="${deck.leader == null ? 'Leader à choisir' : deck.leader.titre}"></p>
-                        <p class="decks-base" th:text="${deck.base == null ? 'Base à choisir' : deck.base.titre}"></p>
-                        <div class="decks-carte-pied"><span><strong th:text="${deck.total}"></strong> cartes</span><span>Ouvrir →</span></div>
-                    </div>
-                </a>
+                <th:block th:each="deck : ${resultat.content}">
+                    <th:block th:replace="~{fragments/deck :: carte(${deck}, @{/decks/{id}(id=${deck.id})})}"></th:block>
+                </th:block>
             </div>
             <nav th:if="${resultat.totalPages > 1}" class="decks-pagination" aria-label="Pagination des decks">
                 <a th:if="${resultat.hasPrevious()}" th:href="@{/decks(page=${resultat.number - 1})}">← Précédent</a>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org"><body>
-<nav th:fragment="menu(pageActive)" aria-label="Navigation principale">
+<nav th:fragment="menu(pageActive)" id="navigation-principale" aria-label="Navigation principale">
 <ul class="site-menu">
     <li><a th:href="@{/}" th:attr="aria-current=${pageActive == 'accueil' ? 'page' : null}">Accueil</a></li>
     <li th:if="${connecte}"><a th:href="@{/catalogue}" th:attr="aria-current=${pageActive == 'catalogue' ? 'page' : null}">Les cartes</a></li>

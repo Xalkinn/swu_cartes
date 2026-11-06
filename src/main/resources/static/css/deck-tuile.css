@@ -1,0 +1,184 @@
+/* Composant partagé : fragments/deck :: carte. */
+.decks-carte, .decks-carte * {
+    box-sizing: border-box;
+}
+
+a.decks-carte, .vitrine-page a.decks-carte {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: #0d192b;
+    color: var(--text);
+    text-decoration: none;
+    transition: transform .15s, border-color .15s;
+}
+
+a.decks-carte:hover {
+    transform: translateY(-3px);
+    border-color: var(--gold);
+}
+
+a.decks-carte:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 4px;
+}
+
+.decks-carte .decks-visuel {
+    position: relative;
+    display: block;
+    height: 245px;
+    padding: 0;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 65% 20%, #355878, #15263c 60%, #101b2b);
+}
+
+.decks-carte .decks-orbite {
+    position: absolute;
+    width: 240px;
+    height: 240px;
+    top: -50px;
+    right: -60px;
+    border: 1px solid #b4c8e31a;
+    border-radius: 50%;
+    box-shadow: 0 0 0 23px #bfd3ed07, 0 0 0 50px #bfd3ed05;
+}
+
+.decks-carte .decks-image-leader, .decks-carte .decks-image-base {
+    position: absolute;
+    display: grid;
+    grid-template: minmax(0, 1fr)/minmax(0, 1fr);
+    place-items: center;
+    min-width: 0;
+    padding: 7px;
+    border: 1px solid #7087a3;
+    border-radius: 10px;
+    background: #0a1421;
+    box-shadow: 0 12px 25px #0007;
+}
+
+.decks-carte .decks-image-leader {
+    z-index: 1;
+    left: 18px;
+    top: 45px;
+    width: 67%;
+    height: 163px;
+    transform: rotate(-6deg);
+}
+
+.decks-carte .decks-image-base {
+    z-index: 2;
+    right: 14px;
+    top: 99px;
+    width: 46%;
+    height: 113px;
+    transform: rotate(7deg);
+    border-color: #8a805d;
+}
+
+.decks-carte .decks-visuel img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 5px;
+}
+
+.decks-carte .decks-image-attente {
+    padding: 10px;
+    color: #839ab7;
+    font-size: 13px;
+    text-align: center;
+    line-height: 1.7;
+}
+
+.decks-carte .decks-role-image {
+    position: absolute;
+    left: 8px;
+    bottom: 7px;
+    padding: 4px 5px;
+    border: 1px solid #a9bfd544;
+    border-radius: 4px;
+    color: #cbd9ec;
+    background: #07111fe8;
+    font-size: 8px;
+    letter-spacing: .8px;
+}
+
+.decks-carte .decks-etiquette {
+    position: absolute;
+    z-index: 3;
+    left: 14px;
+    top: 14px;
+    padding: 5px 8px;
+    border: 1px solid #4b5f77;
+    border-radius: 5px;
+    background: #0a1426e8;
+    color: #d6dfec;
+    font-size: 10px;
+}
+
+.decks-carte .decks-carte-contenu {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 22px;
+}
+
+.decks-carte h3 {
+    margin: 0 0 19px;
+    font-size: 23px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.decks-carte .decks-leader, .decks-carte .decks-base {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 0 0 11px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.decks-carte .decks-leader > span, .decks-carte .decks-base > span {
+    flex: 0 0 42px;
+    color: #7f96b4;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+}
+
+.decks-carte .decks-leader > strong, .decks-carte .decks-base > strong {
+    color: #bccde3;
+    font-size: 12px;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.decks-carte .decks-carte-pied {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 17px;
+    border-top: 1px solid #a9bdd522;
+    color: var(--gold);
+    font-size: 12px;
+}
+
+.decks-carte .decks-carte-pied strong {
+    font-size: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    a.decks-carte {
+        transition: none;
+    }
+}

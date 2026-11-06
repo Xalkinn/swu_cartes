@@ -1,20 +1,13 @@
-<!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<body>
-
+<!DOCTYPE html><html lang="fr" xmlns:th="http://www.thymeleaf.org"><body>
 <header th:fragment="header(pageActive)" class="site-header">
+    <link rel="stylesheet" th:href="@{/css/navigation.css(v=1)}">
+    <script th:src="@{/js/navigation.js(v=1)}" defer></script>
+    <script th:src="@{/js/position-retour.js(v=2)}" defer></script>
     <div class="header-inner">
-
-        <a class="brand" th:href="@{/}" aria-label="Gestion SWU — Accueil">
-            <span class="brand-icon" aria-hidden="true">✦</span>
-            GESTION SWU
-        </a>
-
-        <!-- Le menu reste dans son propre fichier. -->
+        <a class="brand" th:href="@{/}" aria-label="Gestion SWU — Accueil"><span class="brand-icon" aria-hidden="true">✦</span>GESTION SWU</a>
+        <button type="button" class="navigation-bascule" aria-expanded="false" aria-controls="navigation-principale" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Menu</span>
+        </button>
         <nav th:replace="~{fragments/menu :: menu(${pageActive})}"></nav>
-
     </div>
-</header>
-
-</body>
-</html>
+</header></body></html>

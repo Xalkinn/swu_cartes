@@ -12,7 +12,11 @@
 <section th:fragment="emplacement(ligne, emplacement, titre)" class="deck-emplacement">
     <div class="deck-emplacement-entete"><h3 th:text="${titre}"></h3>
         <a th:href="@{/decks/{id}(id=${vue.id},zone=${emplacement})} + '#recherche'" th:text="${ligne == null ? 'Choisir →' : 'Changer →'}"></a></div>
-    <div th:if="${ligne == null}" class="deck-emplacement-vide"><span aria-hidden="true">+</span><p th:text="${'Choisissez votre ' + #strings.toLowerCase(titre)}"></p></div>
+    <a th:if="${ligne == null}" class="deck-emplacement-vide"
+       th:href="@{/decks/{id}(id=${vue.id},zone=${emplacement})} + '#recherche'"
+       th:attr="aria-label=${'Choisir le ' + #strings.toLowerCase(titre)}">
+        <span aria-hidden="true">+</span><span class="deck-emplacement-invitation" th:text="${'Choisissez votre ' + #strings.toLowerCase(titre)}"></span>
+    </a>
     <th:block th:if="${ligne != null}">
         <img th:if="${!#strings.isEmpty(ligne.carte.image)}" th:src="${ligne.carte.image}" th:alt="${ligne.carte.titre}" loading="lazy">
         <p class="deck-reference" th:text="${ligne.carte.reference}"></p>
@@ -20,6 +24,7 @@
         <p class="deck-stock" th:classappend="${ligne.manquantes > 0} ? 'deck-stock-manquant' : ''" th:text="${ligne.manquantes > 0 ? 'À trouver dans votre collection' : 'Dans votre collection'}"></p>
         <form th:action="@{/decks/{id}/choisir(id=${vue.id})}" method="post">
             <input type="hidden" name="emplacement" th:value="${emplacement}">
+            <th:block th:replace="~{decks/fragments :: filtresCaches}"></th:block>
             <button class="deck-texte-bouton" type="submit" th:attr="aria-label=${'Retirer le ' + #strings.toLowerCase(titre)}">Retirer</button>
         </form>
     </th:block>

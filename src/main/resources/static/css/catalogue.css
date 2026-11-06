@@ -476,3 +476,34 @@
         gap: 14px;
     }
 }
+/* Recherche toujours visible et filtres avancés repliables. */
+.catalogue-recherche-formulaire { margin: 25px 0 0; padding: 0; }
+.catalogue-recherche-rapide { display: grid; grid-template-columns: minmax(220px,1.4fr) minmax(190px,1fr) auto; gap: 16px; align-items: end; padding: 22px; border: 1px solid var(--border); border-radius: 14px 14px 0 0; background: #0c192c; }
+.catalogue-recherche-rapide > div,.catalogue-filtres-interieur > div { min-width: 0; }
+.catalogue-recherche-formulaire label { display: block; margin: 0 0 9px; color: #b9c9df; font-size: 12px; }
+.catalogue-recherche-formulaire input:not([type="checkbox"]),.catalogue-recherche-formulaire select { width: 100%; min-width: 0; min-height: 45px; margin: 0; padding: 12px; border: 1px solid #364c68; border-radius: 8px; color: var(--text); background: #091524; font: inherit; font-size: 14px; }
+.catalogue-recherche-formulaire button { width: auto; min-height: 45px; margin: 0; padding: 12px 21px; border-radius: 8px; font-size: 13px; }
+.catalogue-filtres-panneau { overflow: hidden; margin: 0 0 20px; border: 1px solid var(--border); border-top: 0; border-radius: 0 0 14px 14px; background: #0b1627; }
+.catalogue-filtres-panneau > summary { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 13px 22px; color: #b6c9e2; font-size: 13px; cursor: pointer; list-style: none; }
+.catalogue-filtres-panneau > summary::-webkit-details-marker { display: none; }
+.catalogue-filtres-panneau > summary > svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.catalogue-filtres-compte { min-width: 23px; padding: 3px 7px; border-radius: 5px; background: #f4ce781a; color: var(--gold); text-align: center; font-size: 11px; }
+.catalogue-filtres-signe { margin-left: auto; font-size: 19px; transition: transform .15s; }
+.catalogue-filtres-panneau[open] .catalogue-filtres-signe { transform: rotate(180deg); }
+.catalogue-filtres-interieur { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 21px 25px; padding: 22px; border-top: 1px solid var(--border); }
+.catalogue-couts { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.catalogue-affinites-compactes { grid-column: 1/-1; grid-row: 2; min-width: 0; margin: 0; padding: 0; border: 0; }
+.catalogue-affinites-compactes legend { margin-bottom: 12px; padding: 0; color: #b9c9df; font-size: 12px; }
+.catalogue-affinites-compactes .affinites-options { display: flex; flex-wrap: wrap; gap: 9px; }
+.catalogue-affinites-compactes label { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; margin: 0; padding: 9px 11px; border: 1px solid #344a67; border-radius: 8px; background: #102038; font-size: 12px; cursor: pointer; }
+.catalogue-recherche-formulaire input[type="checkbox"] { width: 16px; height: 16px; min-height: 0; margin: 0; padding: 0; accent-color: var(--gold); }
+.catalogue-affinites-compactes .affinite-pastille { width: 9px; height: 9px; border: 1px solid #8799af; border-radius: 50%; }
+.catalogue-recherche-formulaire .catalogue-appliquer { grid-column: 1/-1; justify-self: start; }
+.catalogue-filtres-actifs { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin: 20px 0 26px; }
+.catalogue-filtres-actifs > span { color: #91a8c4; font-size: 11px; }
+.catalogue-page .catalogue-filtre-actif { display: inline-flex; align-items: center; gap: 11px; max-width: 100%; padding: 8px 11px; border: 1px solid #49617e; border-radius: 8px; background: #172840; color: #dce7f5; font-size: 12px; text-decoration: none; }
+.catalogue-filtre-actif > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.catalogue-page .catalogue-effacer { margin-left: 8px; color: var(--gold); font-size: 12px; text-decoration: none; }
+.catalogue-filtres-panneau > summary:focus-visible,.catalogue-filtre-actif:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+@media(max-width:800px) { .catalogue-recherche-rapide { grid-template-columns: 1fr 1fr; } .catalogue-recherche-rapide > button { grid-column: 1/-1; justify-self: start; } .catalogue-filtres-interieur { grid-template-columns: 1fr; } .catalogue-affinites-compactes { grid-row: auto; } }
+@media(max-width:480px) { .catalogue-recherche-rapide { grid-template-columns: 1fr; padding: 17px; } .catalogue-recherche-rapide > button { width: 100%; } .catalogue-filtres-interieur { padding: 17px; } .catalogue-recherche-formulaire input:not([type="checkbox"]),.catalogue-recherche-formulaire select { font-size: 16px; } }

@@ -10,7 +10,7 @@
         if (!message) return;
         const dialog = [...document.querySelectorAll('dialog[open]')].pop();
         // Un élément en dehors du <dialog> serait caché derrière sa couche modale.
-        const destination = dialog?.querySelector('.deck-dialog-entete > div');
+        const destination = dialog?.querySelector('.deck-dialog-entete > div, .carte-dialog-entete > div');
         if (destination) destination.append(message);
         else messageParent?.append(message);
         message.classList.toggle('recherche-message-dialog', Boolean(destination));
@@ -52,7 +52,7 @@
             });
             notice(state.recherche ? 'Carte ajoutée à vos recherches.' : 'Carte retirée de vos recherches.');
             // Recalcule aussi la pagination et le compteur de la liste après un retrait.
-            if (!state.recherche && form.closest('[data-liste-recherches]')) window.location.reload();
+            if (!state.recherche && (form.closest('[data-liste-recherches]') || form.closest('[data-collection-recherches="true"]'))) window.location.reload();
         } catch (error) {
             notice(error.message || 'Erreur de connexion. Réessayez.', true);
         } finally {

@@ -10,12 +10,15 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 
     <!-- Styles du catalogue -->
-    <link rel="stylesheet" th:href="@{/css/catalogue.css(v=4)}">
+    <link rel="stylesheet" th:href="@{/css/catalogue.css(v=5)}">
 
     <!-- Boutons de gestion de la collection -->
     <link rel="stylesheet" th:href="@{/css/collection.css(v=1)}">
     <link rel="stylesheet" th:href="@{/css/recherches.css(v=3)}">
-    <script th:src="@{/js/recherches.js(v=1)}" defer></script>
+    <script th:src="@{/js/recherches.js(v=4)}" defer></script>
+    <script th:src="@{/js/filtres.js(v=1)}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/galerie-cartes.css(v=1)}">
+    <script th:src="@{/js/galerie-cartes.js(v=1)}" defer></script>
 </head>
 
 <body>
@@ -29,9 +32,7 @@
 
     <h1>Le <span>catalogue.</span></h1>
     <p class="recherches-acces"><a class="recherches-acces-bouton" th:href="@{/recherches}">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M20.8 4.6a5.6 5.6 0 0 0-7.9 0L12 5.5l-.9-.9a5.6 5.6 0 0 0-7.9 7.9L12 21l8.8-8.5a5.6 5.6 0 0 0 0-7.9Z"/>
-        </svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.6 5.6 0 0 0-7.9 0L12 5.5l-.9-.9a5.6 5.6 0 0 0-7.9 7.9L12 21l8.8-8.5a5.6 5.6 0 0 0 0-7.9Z"/></svg>
         Voir mes recherches <span class="recherches-acces-fleche" aria-hidden="true">→</span>
     </a><span>Un cœur rempli indique une carte recherchée.</span></p>
 
@@ -39,135 +40,25 @@
          RECHERCHE ET FILTRES
          ===================================== -->
 
-    <form th:action="@{/catalogue}"
-          method="get"
-          class="catalogue-filtres">
-
-        <div class="filtres-ligne">
-
-            <div class="filtre-champ filtre-recherche">
-                <label for="q">Rechercher une carte</label>
-
-                <input
-                        type="search"
-                        id="q"
-                        name="q"
-                        th:value="${recherche}"
-                        placeholder="Titre ou sous-titre…"
-                        maxlength="100"
-                >
-            </div>
-
-            <div class="filtre-champ">
-                <label for="extensionId">Extension</label>
-
-                <select id="extensionId" name="extensionId">
-                    <option value="">Toutes les extensions</option>
-
-                    <option
-                            th:each="extension : ${extensions}"
-                            th:value="${extension.id}"
-                            th:selected="${extension.id == extensionSelectionnee}"
-                            th:text="${extension.code + ' — ' + extension.nom}">
-                        Extension
-                    </option>
-                </select>
-            </div>
-
-            <div class="filtre-champ filtre-cout">
-                <label for="coutMin">Coût minimum</label>
-
-                <input
-                        type="number"
-                        id="coutMin"
-                        name="coutMin"
-                        min="0"
-                        step="1"
-                        placeholder="Sans limite"
-                        th:value="${coutMin}"
-                >
-            </div>
-
-            <div class="filtre-champ filtre-cout">
-                <label for="coutMax">Coût maximum</label>
-
-                <input
-                        type="number"
-                        id="coutMax"
-                        name="coutMax"
-                        min="0"
-                        step="1"
-                        placeholder="Sans limite"
-                        th:value="${coutMax}"
-                >
-            </div>
-
-        </div>
-
-        <fieldset class="filtres-affinites">
-            <legend>Affinités</legend>
-
-            <div class="affinites-choix">
-
-                <label
-                        th:each="affinite : ${affinitesDisponibles}"
-                        class="affinite-option">
-
-                    <input
-                            type="checkbox"
-                            name="affinites"
-                            th:value="${affinite.name()}"
-                            th:checked="${selectionAffinites.contains(affinite.name())}"
-                    >
-
-                    <span
-                            class="pastille-affinite"
-                            th:style="${'background-color:' + affinite.couleur}"
-                            aria-hidden="true">
-                    </span>
-
-                    <span th:text="${affinite.libelle}">
-                        Affinité
-                    </span>
-
-                </label>
-
-            </div>
-
-            <label for="mode">Combiner les affinités</label>
-
-            <select id="mode" name="mode">
-
-                <option
-                        value="TOUTES"
-                        th:selected="${mode == 'TOUTES'}">
-                    Toutes les affinités cochées
-                </option>
-
-                <option
-                        value="UNE"
-                        th:selected="${mode == 'UNE'}">
-                    Au moins une affinité cochée
-                </option>
-
-                <option
-                        value="SANS"
-                        th:selected="${mode == 'SANS'}">
-                    Sans affinité — ignore les couleurs cochées
-                </option>
-
-            </select>
-        </fieldset>
-
-        <div class="filtres-actions">
+    <form th:action="@{/catalogue}" method="get" class="catalogue-recherche-formulaire">
+        <div class="catalogue-recherche-rapide">
+            <div><label for="q">Rechercher une carte</label><input type="search" id="q" name="q" th:value="${recherche}" maxlength="100" placeholder="Titre ou sous-titre…"></div>
+            <div><label for="extensionId">Extension</label><select id="extensionId" name="extensionId"><option value="">Toutes les extensions</option><option th:each="extension : ${extensions}" th:value="${extension.id}" th:selected="${extension.id == extensionSelectionnee}" th:text="${extension.code + ' · ' + extension.nom}"></option></select></div>
             <button type="submit">Rechercher →</button>
-
-            <a th:href="@{/catalogue}">
-                Réinitialiser les filtres
-            </a>
         </div>
-
+        <details class="catalogue-filtres-panneau" th:open="${erreur != null}">
+            <summary><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z"/></svg><span>Filtres avancés</span><span class="catalogue-filtres-compte" th:if="${nombreFiltresAvances > 0}" th:text="${nombreFiltresAvances}"></span><svg class="catalogue-filtres-signe" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <div class="catalogue-filtres-interieur">
+                <div class="catalogue-couts"><div><label for="coutMin">Coût minimum</label><input type="number" id="coutMin" name="coutMin" min="0" th:value="${coutMin}" placeholder="Sans limite"></div><div><label for="coutMax">Coût maximum</label><input type="number" id="coutMax" name="coutMax" min="0" th:value="${coutMax}" placeholder="Sans limite"></div></div>
+                <fieldset class="catalogue-affinites-compactes"><legend>Affinités</legend><div class="affinites-options"><label th:each="affinite : ${affinitesDisponibles}"><input type="checkbox" name="affinites" th:value="${affinite.name()}" th:checked="${selectionAffinites.contains(affinite.name())}"><span class="affinite-pastille" th:style="${'background:' + affinite.couleur}"></span><span th:text="${affinite.libelle}"></span></label></div></fieldset>
+                <div class="catalogue-combinaison"><label for="mode">Combinaison des affinités</label><select id="mode" name="mode"><option value="TOUTES" th:selected="${mode == 'TOUTES'}">Toutes les affinités cochées</option><option value="UNE" th:selected="${mode == 'UNE'}">Au moins une affinité cochée</option><option value="SANS" th:selected="${mode == 'SANS'}">Sans affinité</option></select></div>
+                <button type="submit" class="catalogue-appliquer">Appliquer les filtres</button>
+            </div>
+        </details>
     </form>
+    <div class="catalogue-filtres-actifs" th:if="${!filtresActifs.empty}" aria-label="Filtres actifs">
+        <span>Votre sélection</span><a class="catalogue-filtre-actif" th:each="filtre : ${filtresActifs}" th:href="@{${filtre.url}}" th:attr="aria-label=${'Retirer le filtre ' + filtre.libelle}"><span th:text="${filtre.libelle}"></span><span aria-hidden="true">×</span></a><a class="catalogue-effacer" th:href="@{/catalogue}">Tout effacer</a>
+    </div>
 
     <!-- =====================================
          MESSAGES ET COMPTEUR
@@ -211,27 +102,20 @@
 
         <article
                 th:each="carte : ${cartes}"
-                class="catalogue-carte">
-            <th:block
-                    th:replace="~{fragments/recherches :: coeur(${carte.id}, ${carte.titre}, ${recherchesSelection.contains(carte.id)}, ${retourCatalogue})}"></th:block>
+                class="catalogue-carte" th:attr="data-catalogue-dialog=${'catalogue-carte-' + carte.id}">
+            <th:block th:replace="~{fragments/recherches :: coeur(${carte.id}, ${carte.titre}, ${recherchesSelection.contains(carte.id)}, ${retourCatalogue})}"></th:block>
 
 
             <!-- Images -->
 
             <div class="catalogue-images">
 
-                <img
-                        th:if="${!#strings.isEmpty(carte.imageRecto)}"
-                        th:src="${carte.imageRecto}"
-                        th:alt="${'Face 1 — ' + carte.titre}"
-                        loading="lazy"
-                >
-
-                <p
-                        th:if="${#strings.isEmpty(carte.imageRecto)}"
-                        class="catalogue-sans-image">
-                    Image indisponible
-                </p>
+                <button type="button" class="catalogue-apercu" aria-haspopup="dialog"
+                        th:attr="data-dialog-id=${'catalogue-carte-' + carte.id},aria-controls=${'catalogue-carte-' + carte.id},aria-label=${'Voir ' + carte.titre + ' en détail'}">
+                    <img th:if="${!#strings.isEmpty(carte.imageRecto)}" th:src="${carte.imageRecto}" th:alt="${carte.titre}" loading="lazy">
+                    <span th:if="${#strings.isEmpty(carte.imageRecto)}" class="catalogue-sans-image">Image indisponible</span>
+                    <span class="catalogue-apercu-indice">Voir la carte ↗</span>
+                </button>
 
                 <details
                         th:if="${!#strings.isEmpty(carte.imageVerso)}">
@@ -258,9 +142,8 @@
                     SOR · 005
                 </p>
 
-                <h2 th:text="${carte.titre}">
-                    Titre de la carte
-                </h2>
+                <h2><button type="button" class="catalogue-titre-ouvrir" th:text="${carte.titre}" aria-haspopup="dialog"
+                            th:attr="data-dialog-id=${'catalogue-carte-' + carte.id},aria-controls=${'catalogue-carte-' + carte.id}"></button></h2>
 
                 <p
                         th:if="${!#strings.isEmpty(carte.sousTitre)}"
@@ -375,6 +258,7 @@
 
             </div>
 
+            <th:block th:replace="~{fragments/galerie-cartes :: catalogue(${carte}, ${quantites.getOrDefault(carte.id, 0)})}"></th:block>
         </article>
 
     </section>
@@ -425,6 +309,7 @@
 
     </nav>
 
+    <th:block th:replace="~{fragments/galerie-cartes :: zoom}"></th:block>
 </main>
 
 <footer th:replace="~{fragments/footer :: footer}"></footer>

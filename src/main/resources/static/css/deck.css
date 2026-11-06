@@ -1474,3 +1474,110 @@ html.deck-dialog-ouverte {
         transition: none;
     }
 }
+
+/* Emplacements entièrement activables et liste repliable. */
+.deck-page a.deck-emplacement-vide {
+    color: #9fb4cf;
+    text-decoration: none;
+    transition: border-color .15s, background .15s;
+}
+
+.deck-page a.deck-emplacement-vide:hover {
+    border-color: var(--gold);
+    background: #f4ce780c;
+}
+
+.deck-emplacement-vide .deck-emplacement-invitation {
+    color: inherit;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.deck-composition > summary {
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+    min-height: 80px;
+}
+
+.deck-composition > summary::-webkit-details-marker {
+    display: none;
+}
+
+.deck-composition > summary:hover {
+    background: #f4ce7809;
+}
+
+.deck-composition > summary::marker {
+    content: '';
+}
+
+.deck-composition:not([open]) > summary {
+    border-bottom: 0;
+}
+
+.deck-composition h2 {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.deck-composition-total {
+    padding: 4px 9px;
+    border: 1px solid #f4ce7833;
+    border-radius: 7px;
+    background: #f4ce7810;
+    color: var(--gold);
+    font-size: 13px;
+}
+
+.deck-composition .deck-composition-indication {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: #a2b6d0;
+    font-size: 11px;
+}
+
+.deck-composition-indication svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+}
+
+.deck-composition[open] .deck-composition-indication svg {
+    transform: rotate(180deg);
+}
+
+.deck-composition .deck-composition-ouverte {
+    display: none;
+}
+
+.deck-composition[open] .deck-composition-ouverte {
+    display: inline;
+}
+
+.deck-composition[open] .deck-composition-fermee {
+    display: none;
+}
+
+.deck-composition-ajouter {
+    display: inline-block;
+    margin: 18px 23px 6px;
+    padding: 8px 0;
+    font-size: 12px;
+}
+
+@media (max-width: 600px) {
+    .deck-composition > summary {
+        gap: 10px;
+        padding: 18px 15px;
+    }
+
+    .deck-composition h2 {
+        gap: 8px;
+    }
+}

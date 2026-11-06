@@ -363,3 +363,136 @@
         transition: none;
     }
 }
+
+/* Leader et base visibles ensemble sur chaque vignette de deck. */
+.decks-visuel {
+    display: block;
+    height: 235px;
+    padding: 0;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 65% 20%, #355878, #15263c 60%, #101b2b);
+}
+
+.decks-orbite {
+    position: absolute;
+    width: 240px;
+    height: 240px;
+    top: -50px;
+    right: -60px;
+    border: 1px solid #b4c8e31a;
+    border-radius: 50%;
+    box-shadow: 0 0 0 23px #bfd3ed07, 0 0 0 50px #bfd3ed05;
+}
+
+.decks-image-leader, .decks-image-base {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    padding: 7px;
+    border: 1px solid #7087a3;
+    border-radius: 10px;
+    background: #0a1421;
+    box-shadow: 0 12px 25px #0007;
+}
+
+.decks-image-leader {
+    z-index: 1;
+    left: 18px;
+    top: 45px;
+    width: 67%;
+    height: 163px;
+    transform: rotate(-6deg);
+}
+
+.decks-image-base {
+    z-index: 2;
+    right: 14px;
+    top: 99px;
+    width: 46%;
+    height: 113px;
+    transform: rotate(7deg);
+    border-color: #8a805d;
+}
+
+.decks-visuel .decks-image-leader img, .decks-visuel .decks-image-base img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 5px;
+}
+
+.decks-image-attente {
+    padding: 10px;
+    color: #839ab7;
+    font-size: 13px;
+    text-align: center;
+    line-height: 1.7;
+}
+
+.decks-role-image {
+    position: absolute;
+    left: 8px;
+    bottom: 7px;
+    padding: 4px 5px;
+    border: 1px solid #a9bfd544;
+    border-radius: 4px;
+    color: #cbd9ec;
+    background: #07111fe8;
+    font-size: 8px;
+    letter-spacing: .8px;
+}
+
+.decks-etiquette {
+    z-index: 3;
+}
+
+.decks-carte-contenu h3 {
+    font-size: 23px;
+    margin-bottom: 19px;
+}
+
+.decks-carte .decks-leader, .decks-carte .decks-base {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 0 0 11px;
+    font-size: 12px;
+}
+
+.decks-leader > span, .decks-base > span {
+    flex: 0 0 42px;
+    color: #7f96b4;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+}
+
+.decks-leader > strong, .decks-base > strong {
+    color: #bccde3;
+    font-size: 12px;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.decks-carte-pied {
+    margin-top: auto;
+    padding-top: 17px;
+    border-top: 1px solid #a9bdd522;
+}
+
+@media (max-width: 1000px) and (min-width: 701px) {
+    .decks-visuel {
+        height: 245px;
+    }
+
+    .decks-image-leader {
+        height: 170px;
+    }
+
+    .decks-image-base {
+        top: 105px;
+        height: 120px;
+    }
+}

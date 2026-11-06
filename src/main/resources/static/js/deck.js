@@ -4,6 +4,18 @@
     if (document.documentElement.dataset.deckDialogsReady) return;
     document.documentElement.dataset.deckDialogsReady = 'true';
 
+    const composition = document.getElementById('composition');
+    const deckId = document.querySelector('[data-deck-id]')?.dataset.deckId;
+    if (composition && deckId) {
+        const key = `swu:composition:${deckId}`;
+        try { composition.open = sessionStorage.getItem(key) !== 'fermee'; } catch (_) { /* Stockage facultatif. */ }
+        composition.addEventListener('toggle', () => {
+            try { sessionStorage.setItem(key, composition.open ? 'ouverte' : 'fermee'); } catch (_) { /* Mode privé. */ }
+        });
+        // Un lien explicite vers la liste doit toujours pouvoir l’ouvrir.
+        document.querySelectorAll('a[href="#composition"]').forEach(link => link.addEventListener('click', () => { composition.open = true; }));
+    }
+
     const dialogs = [...document.querySelectorAll('dialog.deck-dialog')];
     if (!dialogs.length) return;
     const zoom = document.getElementById('deck-dialog-zoom');

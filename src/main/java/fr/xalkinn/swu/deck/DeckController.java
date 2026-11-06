@@ -90,9 +90,9 @@ public class DeckController {
     @PostMapping("/{id}/quantite")
     public String quantite(@AuthenticationPrincipal UtilisateurConnecte principal, @PathVariable Long id,
                            @RequestParam Long carteId, @RequestParam int quantite,
-                           RedirectAttributes redirect) {
+                           @ModelAttribute("filtres") RechercheDeck filtres, RedirectAttributes redirect) {
         return action(() -> service.quantite(principal.getUtilisateurId(), id, carteId, quantite),
-                "/decks/" + id + "#composition", "La composition a été mise à jour.", redirect);
+                filtres.url(id, filtres.page()).replace("#recherche", "#composition"), "La composition a été mise à jour.", redirect);
     }
     private String action(Runnable action, String retour, String succes, RedirectAttributes redirect) {
         try { action.run(); redirect.addFlashAttribute("succesDeck", succes); }

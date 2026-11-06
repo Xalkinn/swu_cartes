@@ -1,0 +1,128 @@
+.site-header {
+    z-index: 20;
+}
+
+.site-header .navigation-bascule[hidden], .site-header #navigation-principale[hidden] {
+    display: none !important;
+}
+
+.site-header .navigation-bascule {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    width: auto;
+    min-height: 43px;
+    margin: 0;
+    padding: 10px 13px;
+    border: 1px solid #3c526f;
+    border-radius: 9px;
+    background: #142338;
+    color: #e6edf7;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.navigation-bascule svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+}
+
+.site-header .navigation-bascule:hover, .site-header .navigation-bascule[aria-expanded="true"] {
+    border-color: #b99b5d;
+    background: #2c2c28;
+    color: var(--gold);
+}
+
+.site-header .navigation-bascule:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 4px;
+}
+
+@media (max-width: 1000px) {
+    .site-header .header-inner {
+        width: 100%;
+        min-height: 76px;
+        padding: 14px 20px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0 15px;
+    }
+
+    .site-header .brand {
+        white-space: nowrap;
+        font-size: 12px;
+        gap: 10px;
+        letter-spacing: 1.4px;
+    }
+
+    .site-header .brand-icon {
+        width: 36px;
+        height: 42px;
+    }
+
+    .site-header #navigation-principale {
+        width: 100%;
+        margin-top: 14px;
+        padding-top: 10px;
+        border-top: 1px solid #aec4e024;
+    }
+
+    .site-header .site-menu {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 4px;
+    }
+
+    .site-header .site-menu > li {
+        width: 100%;
+    }
+
+    .site-header .site-menu > li > a, .site-header .site-menu .menu-groupe > summary {
+        width: 100%;
+        min-height: 45px;
+        justify-content: space-between;
+        padding: 12px 14px;
+        font-size: 14px;
+    }
+
+    .site-header .site-menu .menu-sous-menu, .site-header .site-menu .menu-compte .menu-sous-menu {
+        position: static;
+        width: 100%;
+        max-width: none;
+        margin: 6px 0 9px;
+        border-radius: 10px;
+        padding: 7px;
+        box-shadow: none;
+        background: #0a1525;
+    }
+
+    .site-header .site-menu .menu-sous-menu a {
+        padding: 12px 14px;
+        min-height: 46px;
+    }
+
+    .site-header .site-menu .logout-form .menu-logout {
+        width: 100%;
+    }
+}
+
+@media (max-width: 380px) {
+    .site-header .header-inner {
+        padding: 12px 14px;
+        gap: 0 10px;
+    }
+
+    .site-header .brand {
+        font-size: 11px;
+        letter-spacing: 1px;
+    }
+}

@@ -2,13 +2,13 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${vue.nom + ' — Mes decks · Gestion SWU'}"></title>
-    <link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/deck.css(v=2)}">
-    <script th:src="@{/js/deck.js(v=2)}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/deck.css(v=3)}">
+    <script th:src="@{/js/deck.js(v=3)}" defer></script>
     <link rel="stylesheet" th:href="@{/css/recherches.css(v=2)}">
     <script th:src="@{/js/recherches.js(v=2)}" defer></script>
 </head><body>
 <header th:replace="~{fragments/header :: header('decks')}"></header>
-<main class="deck-page">
+<main class="deck-page" th:attr="data-deck-id=${vue.id}">
     <th:block th:replace="~{fragments/recherches :: messages}"></th:block>
     <a class="deck-retour" th:href="@{/decks}">← Mes decks</a>
     <div class="deck-entete"><div><p class="eyebrow">ATELIER DE CONSTRUCTION</p><h1 th:text="${vue.nom}"></h1>
@@ -48,8 +48,13 @@
             <section th:replace="~{decks/fragments :: emplacement(${vue.base}, 'BASE', 'Base')}"></section>
         </aside>
         <div class="deck-construction">
-            <section class="deck-panneau" id="composition" aria-labelledby="composition-titre">
-                <div class="deck-section-entete"><h2 id="composition-titre">Votre liste</h2><a href="#recherche">+ Ajouter des cartes</a></div>
+            <details class="deck-panneau deck-composition" id="composition" open>
+                <summary class="deck-section-entete">
+                    <h2 id="composition-titre">Votre liste <span class="deck-composition-total" th:text="${vue.total}"></span></h2>
+                    <span class="deck-composition-indication"><span class="deck-composition-fermee">Déplier</span><span class="deck-composition-ouverte">Replier</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
+                </summary>
+                <div class="deck-composition-contenu">
+                <a class="deck-composition-ajouter" href="#recherche">+ Ajouter des cartes</a>
                 <p th:if="${vue.lignes.empty}" class="deck-vide">Votre stratégie prend forme ici. Recherchez une carte ci-dessous pour commencer.</p>
                 <ul class="deck-lignes">
                     <li th:each="ligne : ${vue.lignes}">
@@ -62,6 +67,7 @@
                         </div>
                         <form class="deck-quantite" th:action="@{/decks/{id}/quantite(id=${vue.id})}" method="post">
                             <input type="hidden" name="carteId" th:value="${ligne.carte.id}">
+                            <th:block th:replace="~{decks/fragments :: filtresCaches}"></th:block>
                             <label th:for="${'quantite-' + ligne.carte.id}">Quantité</label>
                             <input type="number" name="quantite" th:id="${'quantite-' + ligne.carte.id}" th:value="${ligne.quantite}" min="0" max="99" required>
                             <button class="deck-bouton" type="submit" th:attr="aria-label=${'Enregistrer la quantité de ' + ligne.carte.titre}">OK</button>
@@ -69,7 +75,8 @@
                     </li>
                 </ul>
                 <p th:if="${!vue.lignes.empty}" class="deck-aide">Saisissez 0 pour retirer une carte de la liste.</p>
-            </section>
+                </div>
+            </details>
 
             <section class="deck-panneau deck-recherche" id="recherche" aria-labelledby="recherche-titre">
                 <div class="deck-section-entete"><h2 id="recherche-titre">Construire votre deck</h2><span>Depuis votre catalogue</span></div>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"><body>
+                <a th:fragment="carte(deck, url)" class="decks-carte" th:href="${url}" th:attr="aria-label=${'Ouvrir le deck ' + deck.nom}">
+                    <div class="decks-visuel" aria-hidden="true">
+                        <span class="decks-orbite"></span>
+                        <div class="decks-image-leader">
+                            <img th:if="${deck.leader != null and !#strings.isEmpty(deck.leader.image)}" th:src="${deck.leader.image}" alt="" loading="lazy">
+                            <span th:if="${deck.leader == null or #strings.isEmpty(deck.leader.image)}" class="decks-image-attente" th:text="${deck.leader == null ? 'Leader à choisir' : 'Image du leader indisponible'}"></span>
+                            <span class="decks-role-image">LEADER</span>
+                        </div>
+                        <div class="decks-image-base">
+                            <img th:if="${deck.base != null and !#strings.isEmpty(deck.base.image)}" th:src="${deck.base.image}" alt="" loading="lazy">
+                            <span th:if="${deck.base == null or #strings.isEmpty(deck.base.image)}" class="decks-image-attente" th:text="${deck.base == null ? 'Base à choisir' : 'Image de la base indisponible'}"></span>
+                            <span class="decks-role-image">BASE</span>
+                        </div>
+                        <span class="decks-etiquette" th:text="${deck.leader == null or deck.base == null ? 'À construire' : 'Deck personnel'}"></span>
+                    </div>
+                    <div class="decks-carte-contenu">
+                        <h3 th:text="${deck.nom}"></h3>
+                        <p class="decks-leader"><span>Leader</span><strong th:text="${deck.leader == null ? 'À choisir' : deck.leader.titre}"></strong></p>
+                        <p class="decks-base"><span>Base</span><strong th:text="${deck.base == null ? 'À choisir' : deck.base.titre}"></strong></p>
+                        <div class="decks-carte-pied"><span><strong th:text="${deck.total}"></strong> cartes</span><span>Ouvrir →</span></div>
+                    </div>
+                </a>
+</body></html>

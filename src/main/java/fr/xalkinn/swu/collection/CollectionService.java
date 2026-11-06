@@ -155,8 +155,20 @@ public class CollectionService {
 
     @Transactional(readOnly = true)
     public Page<CartePossedee> consulter(String email, int page) {
-        Page<Long> groupes = possessionRepository.trouverGroupes(
-                email,
+        return consulter(email, "", null, "TOUTES", false, page);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CartePossedee> consulter(String email, String recherche, Long extensionId,
+                                        String version, boolean recherches, int page) {
+        String q = recherche == null ? "" : recherche.strip();
+        if (q.length() > 100) throw new IllegalArgumentException("La recherche est limitée à 100 caractères.");
+        if (!List.of("TOUTES", "STANDARD", "HYPERSPACE", "FOIL", "NONFOIL").contains(version)) {
+            throw new IllegalArgumentException("Version possédée invalide.");
+        }
+        Integer numero = q.matches("[0-9]{1,6}") ? Integer.valueOf(q) : null;
+        Page<Long> groupes = possessionRepository.trouverGroupesFiltres(
+                email, q, numero, extensionId, version, recherches,
                 PageRequest.of(Math.max(0, page), 24)
         );
 
@@ -164,8 +176,8 @@ public class CollectionService {
         if (groupes.getTotalPages() > 0
                 && groupes.getNumber() >= groupes.getTotalPages()) {
 
-            groupes = possessionRepository.trouverGroupes(
-                    email,
+            groupes = possessionRepository.trouverGroupesFiltres(
+                    email, q, numero, extensionId, version, recherches,
                     PageRequest.of(groupes.getTotalPages() - 1, 24)
             );
         }
