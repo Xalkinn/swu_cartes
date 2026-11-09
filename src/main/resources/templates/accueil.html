@@ -52,14 +52,12 @@
                 <svg class="accueil-petite-fleche" aria-hidden="true"><use href="#acc-fleche"/></svg>
             </button>
 
-            <button type="button" class="accueil-communaute-carte accueil-commu-decks"
-                    data-bientot="communaute" aria-haspopup="dialog">
+            <a th:href="@{/communaute/decks}" class="accueil-communaute-carte accueil-commu-decks">
                 <svg class="accueil-icone" aria-hidden="true"><use href="#acc-cartes"/></svg>
-                <span class="accueil-bientot-badge">BIENTÔT</span>
                 <span class="accueil-communaute-titre">Decks de la commu</span>
                 <span class="accueil-communaute-description">Les idées se partagent.</span>
                 <svg class="accueil-petite-fleche" aria-hidden="true"><use href="#acc-fleche"/></svg>
-            </button>
+            </a>
 
             <button type="button" class="accueil-communaute-carte accueil-meta"
                     data-bientot="moment" aria-haspopup="dialog">

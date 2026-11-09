@@ -1,0 +1,18 @@
+<!DOCTYPE html><html lang="fr" xmlns:th="http://www.thymeleaf.org"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decks de la commu — Gestion SWU</title>
+<link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/deck-tuile.css(v=1)}"><link rel="stylesheet" th:href="@{/css/communaute.css(v=1)}">
+</head><body><header th:replace="~{fragments/header :: header('communaute-decks')}"></header>
+<main class="communaute-page">
+    <div class="communaute-entete"><div><p class="eyebrow">LES IDÉES SE PARTAGENT</p><h1>Decks de la <span>commu.</span></h1><p>Découvrez les listes publiées par les joueurs et trouvez l’inspiration pour votre prochaine partie.</p></div>
+        <a class="communaute-bouton" th:href="${connecte} ? @{/decks} : @{/login}">Partager un de mes decks →</a></div>
+    <form th:action="@{/communaute/decks}" method="get" class="communaute-recherche"><div><label for="communaute-q">Trouver un deck</label><input type="search" id="communaute-q" name="q" th:value="${q}" maxlength="100" placeholder="Nom, joueur, leader ou base…"></div><button class="communaute-bouton" type="submit">Rechercher →</button><a th:if="${!#strings.isEmpty(q)}" th:href="@{/communaute/decks}">Effacer</a></form>
+    <p th:if="${erreurCommunaute}" th:text="${erreurCommunaute}" class="communaute-notice" role="alert"></p>
+    <div class="communaute-compteur"><span th:text="${resultat.totalElements + ' deck(s) partagé(s)'}"></span><span>Derniers publiés en premier</span></div>
+    <div th:if="${resultat.empty}" class="communaute-vide"><span aria-hidden="true">✦</span><h2 th:text="${#strings.isEmpty(q) ? 'À vous d’ouvrir la partie.' : 'Aucun deck dans cette sélection.'}"></h2><p th:text="${#strings.isEmpty(q) ? 'Publiez un deck depuis votre atelier pour le partager ici.' : 'Essayez un autre nom de deck, de joueur, de leader ou de base.'}"></p></div>
+    <section class="communaute-decks" aria-label="Decks partagés"><article th:each="deck : ${resultat.content}" class="communaute-deck">
+        <th:block th:replace="~{fragments/deck :: carte(${deck}, @{/communaute/decks/{id}(id=${deck.id})})}"></th:block>
+        <p class="communaute-auteur">Par <strong th:text="${deck.auteur}"></strong></p>
+    </article></section>
+    <nav th:if="${resultat.totalPages > 1}" class="communaute-pagination" aria-label="Pagination des decks de la communauté"><a th:if="${resultat.hasPrevious()}" th:href="@{/communaute/decks(q=${q},page=${resultat.number - 1})}">← Précédent</a><span th:text="${'Page ' + (resultat.number + 1) + ' sur ' + resultat.totalPages}"></span><a th:if="${resultat.hasNext()}" th:href="@{/communaute/decks(q=${q},page=${resultat.number + 1})}">Suivant →</a></nav>
+</main><footer th:replace="~{fragments/footer :: footer}"></footer></body></html>

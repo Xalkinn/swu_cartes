@@ -1,0 +1,16 @@
+<!DOCTYPE html><html lang="fr" xmlns:th="http://www.thymeleaf.org"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title th:text="${vue.deck.nom + ' — Deck de ' + vue.deck.auteur}"></title>
+<link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/galerie-cartes.css(v=1)}"><link rel="stylesheet" th:href="@{/css/communaute.css(v=1)}"><script th:src="@{/js/galerie-cartes.js(v=1)}" defer></script>
+</head><body><header th:replace="~{fragments/header :: header('communaute-decks')}"></header>
+<main class="communaute-page">
+    <a class="communaute-retour" th:href="@{/communaute/decks}">← Decks de la commu</a>
+    <div class="communaute-entete"><div><p class="eyebrow" th:text="${'PARTAGÉ PAR ' + vue.deck.auteur}"></p><h1 th:text="${vue.deck.nom}"></h1><p class="communaute-description" th:text="${vue.deck.description}"></p></div><span class="communaute-etat">Deck public · Lecture seule</span></div>
+    <section th:if="${vue.deck.leader != null or vue.deck.base != null}" class="communaute-section"><h2>Leader &amp; base</h2><div class="communaute-cartes communaute-commandement">
+        <th:block th:if="${vue.deck.leader != null}"><article th:replace="~{communaute/fragments :: carte(${vue.deck.leader}, 1, 'Leader')}"></article></th:block>
+        <th:block th:if="${vue.deck.base != null}"><article th:replace="~{communaute/fragments :: carte(${vue.deck.base}, 1, 'Base')}"></article></th:block>
+    </div></section>
+    <section class="communaute-section"><div class="communaute-section-entete"><h2>Liste principale</h2><span th:text="${vue.deck.total + ' exemplaire(s)'}"></span></div><p th:if="${vue.lignes.empty}" class="communaute-vide">La liste principale est encore en construction.</p><div class="communaute-cartes"><th:block th:each="ligne : ${vue.lignes}"><article th:replace="~{communaute/fragments :: carte(${ligne.carte}, ${ligne.quantite}, '')}"></article></th:block></div></section>
+    <th:block th:replace="~{fragments/galerie-cartes :: zoom}"></th:block>
+</main><footer th:replace="~{fragments/footer :: footer}"></footer>
+</body></html>

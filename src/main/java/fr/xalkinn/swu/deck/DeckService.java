@@ -59,6 +59,17 @@ public class DeckService {
         verrouiller(utilisateurId, id).renommer(nom, description);
     }
 
+    @Transactional(readOnly = true)
+    public boolean estPublieDansCommunaute(Long utilisateurId, Long id) {
+        utilisateur(utilisateurId);
+        return trouver(utilisateurId, id).isPublieCommunaute();
+    }
+
+    @Transactional
+    public void publierDansCommunaute(Long utilisateurId, Long id, boolean publier) {
+        verrouiller(utilisateurId, id).publierDansCommunaute(publier);
+    }
+
     @Transactional
     public void supprimer(Long utilisateurId, Long id) {
         Deck deck = verrouiller(utilisateurId, id);

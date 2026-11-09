@@ -15,4 +15,29 @@ public interface DeckRepository extends JpaRepository<Deck, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select d from Deck d where d.id = :id and d.utilisateur.id = :utilisateurId")
     Optional<Deck> verrouiller(@Param("id") Long id, @Param("utilisateurId") Long utilisateurId);
+    @EntityGraph(attributePaths = {"leader", "base", "utilisateur"})
+    @Query(value = """
+            select d from Deck d
+            left join d.leader l left join d.base b join d.utilisateur u
+            where d.publieCommunaute = true and u.actif = true
+              and (:q = '' or locate(lower(:q), lower(d.nom)) > 0
+                   or locate(lower(:q), lower(u.pseudo)) > 0
+                   or locate(lower(:q), lower(coalesce(l.titre, ''))) > 0
+                   or locate(lower(:q), lower(coalesce(b.titre, ''))) > 0)
+            order by d.datePublicationCommunaute desc, d.id desc
+            """, countQuery = """
+            select count(d) from Deck d
+            left join d.leader l left join d.base b join d.utilisateur u
+            where d.publieCommunaute = true and u.actif = true
+              and (:q = '' or locate(lower(:q), lower(d.nom)) > 0
+                   or locate(lower(:q), lower(u.pseudo)) > 0
+                   or locate(lower(:q), lower(coalesce(l.titre, ''))) > 0
+                   or locate(lower(:q), lower(coalesce(b.titre, ''))) > 0)
+            """)
+    Page<Deck> chercherPublies(@Param("q") String q, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"leader", "base", "utilisateur"})
+    @Query("select d from Deck d where d.id = :id and d.publieCommunaute = true and d.utilisateur.actif = true")
+    Optional<Deck> trouverPublie(@Param("id") Long id);
+
 }

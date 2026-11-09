@@ -13,7 +13,7 @@
                             <span th:if="${deck.base == null or #strings.isEmpty(deck.base.image)}" class="decks-image-attente" th:text="${deck.base == null ? 'Base à choisir' : 'Image de la base indisponible'}"></span>
                             <span class="decks-role-image">BASE</span>
                         </div>
-                        <span class="decks-etiquette" th:text="${deck.leader == null or deck.base == null ? 'À construire' : 'Deck personnel'}"></span>
+                        <span class="decks-etiquette" th:text="${deck.leader == null or deck.base == null ? 'À construire' : 'Leader & base'}"></span>
                     </div>
                     <div class="decks-carte-contenu">
                         <h3 th:text="${deck.nom}"></h3>

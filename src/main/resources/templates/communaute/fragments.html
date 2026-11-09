@@ -1,0 +1,6 @@
+<!DOCTYPE html><html lang="fr" xmlns:th="http://www.thymeleaf.org"><body>
+<article th:fragment="carte(carte, quantite, categorie)" class="communaute-carte">
+    <div class="communaute-carte-image"><th:block th:replace="~{fragments/galerie-cartes :: image(${carte.image}, ${carte.titre}, ${carte.reference})}"></th:block><span class="communaute-quantite" th:text="${'× ' + quantite}"></span></div>
+    <div class="communaute-carte-infos"><p th:text="${carte.reference}"></p><span th:if="${!#strings.isEmpty(categorie)}" class="communaute-categorie" th:text="${categorie}"></span><h3 th:text="${carte.titre}"></h3><small th:text="${carte.sousTitre}"></small></div>
+</article>
+</body></html>

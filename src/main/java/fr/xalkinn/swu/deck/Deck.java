@@ -26,6 +26,11 @@ public class Deck {
     @Column(name = "date_modification", nullable = false)
     private Instant dateModification;
 
+    @Column(name = "publie_communaute", nullable = false)
+    private boolean publieCommunaute;
+    @Column(name = "date_publication_communaute")
+    private Instant datePublicationCommunaute;
+
     protected Deck() {}
     public Deck(Utilisateur utilisateur, String nom, String description) {
         this.utilisateur = utilisateur;
@@ -42,6 +47,15 @@ public class Deck {
     public void choisirLeader(Carte carte) { this.leader = carte; toucher(); }
     public void choisirBase(Carte carte) { this.base = carte; toucher(); }
     public void toucher() { this.dateModification = Instant.now(); }
+    public void publierDansCommunaute(boolean publier) {
+        if (publieCommunaute == publier) return;
+        publieCommunaute = publier;
+        datePublicationCommunaute = publier ? Instant.now() : null;
+        toucher();
+    }
+    public boolean isPublieCommunaute() { return publieCommunaute; }
+    public Instant getDatePublicationCommunaute() { return datePublicationCommunaute; }
+    public Utilisateur getUtilisateur() { return utilisateur; }
     public Long getId() { return id; }
     public String getNom() { return nom; }
     public String getDescription() { return description; }

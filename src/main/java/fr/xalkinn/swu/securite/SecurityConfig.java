@@ -53,7 +53,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(acces -> acces
                         .requestMatchers("/", "/inscription", "/error", "/css/**", "/js/**",
                                 "/images/**", "/api/accueil/actualites").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/joueurs", "/joueurs/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/joueurs", "/joueurs/**", "/communaute/decks", "/communaute/decks/**").permitAll()
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(connexion -> connexion

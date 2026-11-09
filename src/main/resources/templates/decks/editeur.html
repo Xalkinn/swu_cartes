@@ -6,6 +6,7 @@
     <script th:src="@{/js/deck.js(v=3)}" defer></script>
     <link rel="stylesheet" th:href="@{/css/recherches.css(v=2)}">
     <script th:src="@{/js/recherches.js(v=2)}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/communaute.css(v=1)}">
 </head><body>
 <header th:replace="~{fragments/header :: header('decks')}"></header>
 <main class="deck-page" th:attr="data-deck-id=${vue.id}">
@@ -25,6 +26,17 @@
     <p th:if="${erreurDeck}" class="deck-notice deck-erreur" th:text="${erreurDeck}" role="alert"></p>
     <p th:if="${vue.typesManquants}" class="deck-notice">Certaines cartes n’ont pas encore de type.
         Actualisez les extensions depuis l’administration pour les rendre disponibles dans l’éditeur.</p>
+
+    <section class="deck-publication" id="publication" aria-labelledby="publication-titre">
+        <div><p class="eyebrow">PARTAGE AVEC LES JOUEURS</p><h2 id="publication-titre" th:text="${publieCommunaute ? 'Votre deck est dans la communauté.' : 'Une idée à partager ?'}"></h2>
+            <p th:text="${publieCommunaute ? 'Le nom, les notes et la liste sont publics. Vos modifications enregistrées sont visibles sur cette page.' : 'Partagez le nom, les notes et les cartes de ce deck avec les autres joueurs.'}"></p>
+            <a th:if="${publieCommunaute}" th:href="@{/communaute/decks/{id}(id=${vue.id})}">Voir la page publique →</a></div>
+        <form th:action="@{/decks/{id}/publication(id=${vue.id})}" method="post">
+            <th:block th:replace="~{decks/fragments :: filtresCaches}"></th:block>
+            <input type="hidden" name="publier" th:value="${!publieCommunaute}">
+            <button type="submit" class="deck-bouton" th:classappend="${publieCommunaute} ? 'publication-retirer' : ''" th:text="${publieCommunaute ? 'Retirer de la communauté' : 'Publier dans la communauté'}"></button>
+        </form>
+    </section>
 
     <div class="deck-chiffres">
         <button class="deck-stat-action" type="button" data-deck-dialog-open="deck-dialog-contenu"

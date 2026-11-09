@@ -126,3 +126,89 @@
         letter-spacing: 1px;
     }
 }
+
+/* Un second niveau uniquement pour les deux méthodes d’ajout. */
+.site-header .menu-ajout {
+    position: relative;
+}
+
+.site-header .menu-ajout > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    min-height: 48px;
+    padding: 12px 14px;
+    border-radius: 7px;
+    color: #bccde3;
+    font-size: 13px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.site-header .menu-ajout > summary::-webkit-details-marker {
+    display: none;
+}
+
+.site-header .menu-ajout > summary::marker {
+    content: '';
+}
+
+.menu-ajout > summary svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+}
+
+.site-header .menu-ajout[open] > summary, .site-header .menu-ajout-actif > summary, .site-header .menu-ajout > summary:hover {
+    background: #f4ce7812;
+    color: var(--gold);
+}
+
+.site-header .menu-ajout > summary:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+
+.site-header .menu-ajout > .menu-sous-menu-ajout {
+    top: -8px;
+    left: calc(100% + 8px);
+    right: auto;
+    width: 265px;
+    margin: 0;
+    z-index: 30;
+}
+
+.site-header .menu-ajout-gauche > .menu-sous-menu-ajout {
+    left: auto;
+    right: calc(100% + 8px);
+}
+
+@media (max-width: 1000px) {
+    .site-header .menu-ajout > summary {
+        min-height: 46px;
+        font-size: 14px;
+    }
+
+    .site-header .menu-ajout > .menu-sous-menu-ajout {
+        position: static;
+        width: auto;
+        max-width: 100%;
+        margin: 5px 0 10px 14px;
+        padding: 4px 5px;
+        border: 0;
+        border-left: 1px solid #5b6c83;
+        border-radius: 0;
+        background: #0e1e32;
+    }
+
+    .menu-ajout > summary svg {
+        transform: rotate(90deg);
+    }
+
+    .menu-ajout[open] > summary svg {
+        transform: rotate(-90deg);
+    }
+}

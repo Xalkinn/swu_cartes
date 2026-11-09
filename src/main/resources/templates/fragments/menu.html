@@ -5,23 +5,31 @@
     <li><a th:href="@{/}" th:attr="aria-current=${pageActive == 'accueil' ? 'page' : null}">Accueil</a></li>
     <li th:if="${connecte}"><a th:href="@{/catalogue}" th:attr="aria-current=${pageActive == 'catalogue' ? 'page' : null}">Les cartes</a></li>
     <li th:if="${connecte}">
-        <details class="menu-groupe" th:classappend="${pageActive == 'collection' or pageActive == 'ajout-rapide' or pageActive == 'scan'} ? 'menu-groupe-actif' : ''">
+        <details class="menu-groupe" th:classappend="${pageActive == 'collection' or pageActive == 'ajout-rapide' or pageActive == 'scan' or pageActive == 'decks' or pageActive == 'vitrine' or pageActive == 'recherches'} ? 'menu-groupe-actif' : ''">
             <summary>Ma collection</summary>
             <ul class="menu-sous-menu">
                 <li><a th:href="@{/collection}" th:attr="aria-current=${pageActive == 'collection' ? 'page' : null}"><span>Consulter ma collection</span><small>Mes cartes et leurs variantes</small></a></li>
-                <li><a th:href="@{/collection/ajout-rapide}" th:attr="aria-current=${pageActive == 'ajout-rapide' ? 'page' : null}"><span>Ajout rapide</span><small>Ajouter avec le numéro de carte</small></a></li>
-                <li><a th:href="@{/scan}" th:attr="aria-current=${pageActive == 'scan' ? 'page' : null}"><span>Scanner une carte</span><small>Utiliser une photo</small></a></li>
+                <li>
+                    <details class="menu-ajout" th:classappend="${pageActive == 'ajout-rapide' or pageActive == 'scan'} ? 'menu-ajout-actif' : ''">
+                        <summary><span>Ajout de carte</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></summary>
+                        <ul class="menu-sous-menu menu-sous-menu-ajout">
+                            <li><a th:href="@{/collection/ajout-rapide}" th:attr="aria-current=${pageActive == 'ajout-rapide' ? 'page' : null}"><span>Ajout rapide</span><small>Avec le numéro de carte</small></a></li>
+                            <li><a th:href="@{/scan}" th:attr="aria-current=${pageActive == 'scan' ? 'page' : null}"><span>Scanner une carte</span><small>Utiliser une photo</small></a></li>
+                        </ul>
+                    </details>
+                </li>
+                <li><a th:href="@{/decks}" th:attr="aria-current=${pageActive == 'decks' ? 'page' : null}"><span>Mes decks</span><small>Construire et retrouver mes listes</small></a></li>
+                <li><a th:href="@{/ma-vitrine}" th:attr="aria-current=${pageActive == 'vitrine' ? 'page' : null}"><span>Ma vitrine</span><small>Choisir ce que je partage</small></a></li>
+                <li><a th:href="@{/recherches}" th:attr="aria-current=${pageActive == 'recherches' ? 'page' : null}"><span>Mes recherches</span><small>Les cartes marquées d’un cœur</small></a></li>
             </ul>
         </details>
     </li>
     <li>
-        <details class="menu-groupe" th:classappend="${pageActive == 'joueurs' or pageActive == 'decks' or pageActive == 'vitrine' or pageActive == 'recherches'} ? 'menu-groupe-actif' : ''">
+        <details class="menu-groupe" th:classappend="${pageActive == 'joueurs' or pageActive == 'communaute-decks'} ? 'menu-groupe-actif' : ''">
             <summary>Communauté</summary>
             <ul class="menu-sous-menu">
                 <li><a th:href="@{/joueurs}" th:attr="aria-current=${pageActive == 'joueurs' ? 'page' : null}"><span>Les joueurs</span><small>Découvrir les vitrines publiques</small></a></li>
-                <li th:if="${connecte}"><a th:href="@{/decks}" th:attr="aria-current=${pageActive == 'decks' ? 'page' : null}"><span>Mes decks</span><small>Construire et retrouver mes listes</small></a></li>
-                <li th:if="${connecte}"><a th:href="@{/ma-vitrine}" th:attr="aria-current=${pageActive == 'vitrine' ? 'page' : null}"><span>Ma vitrine</span><small>Choisir ce que je partage</small></a></li>
-                <li th:if="${connecte}"><a th:href="@{/recherches}" th:attr="aria-current=${pageActive == 'recherches' ? 'page' : null}"><span>Mes recherches</span><small>Les cartes marquées d’un cœur</small></a></li>
+                <li><a th:href="@{/communaute/decks}" th:attr="aria-current=${pageActive == 'communaute-decks' ? 'page' : null}"><span>Decks de la commu</span><small>Les listes partagées par les joueurs</small></a></li>
             </ul>
         </details>
     </li>

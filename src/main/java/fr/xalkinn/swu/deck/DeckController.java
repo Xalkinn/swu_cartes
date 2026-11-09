@@ -45,6 +45,7 @@ public class DeckController {
                            @ModelAttribute("filtres") RechercheDeck filtres, Model model) {
         var vue = service.consulter(principal.getUtilisateurId(), id);
         model.addAttribute("vue", vue);
+        model.addAttribute("publieCommunaute", service.estPublieDansCommunaute(principal.getUtilisateurId(), id));
         model.addAttribute("recherchesSelection", recherches.selection(principal.getUtilisateurId(),
                 vue.aTrouver().stream().map(ligne -> ligne.carte().id()).toList()));
         model.addAttribute("extensions", extensions.findAll(Sort.by("code")));
@@ -65,6 +66,14 @@ public class DeckController {
                            RedirectAttributes redirect) {
         return action(() -> service.renommer(principal.getUtilisateurId(), id, nom, description),
                 "/decks/" + id, "Les informations du deck ont été enregistrées.", redirect);
+    }
+    @PostMapping("/{id}/publication")
+    public String publication(@AuthenticationPrincipal UtilisateurConnecte principal, @PathVariable Long id,
+                              @RequestParam boolean publier, @ModelAttribute("filtres") RechercheDeck filtres,
+                              RedirectAttributes redirect) {
+        return action(() -> service.publierDansCommunaute(principal.getUtilisateurId(), id, publier),
+                filtres.url(id, filtres.page()).replace("#recherche", "#publication"),
+                publier ? "Votre deck est publié dans la communauté." : "Votre deck a été retiré de la communauté.", redirect);
     }
     @PostMapping("/{id}/supprimer")
     public String supprimer(@AuthenticationPrincipal UtilisateurConnecte principal, @PathVariable Long id,
