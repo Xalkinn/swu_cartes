@@ -7,6 +7,9 @@
     <link rel="stylesheet" th:href="@{/css/recherches.css(v=2)}">
     <script th:src="@{/js/recherches.js(v=2)}" defer></script>
     <link rel="stylesheet" th:href="@{/css/communaute.css(v=1)}">
+    <link rel="stylesheet" th:href="@{/css/filtres-cartes.css(v=1)}">
+<link rel="stylesheet" th:href="@{/css/identite-cartes.css(v=1)}">
+    <script th:src="@{/js/identite-cartes.js(v=1)}" defer></script>
 </head><body>
 <header th:replace="~{fragments/header :: header('decks')}"></header>
 <main class="deck-page" th:attr="data-deck-id=${vue.id}">
@@ -93,9 +96,9 @@
             <section class="deck-panneau deck-recherche" id="recherche" aria-labelledby="recherche-titre">
                 <div class="deck-section-entete"><h2 id="recherche-titre">Construire votre deck</h2><span>Depuis votre catalogue</span></div>
                 <nav class="deck-onglets" aria-label="Cartes à rechercher">
-                    <a th:href="@{/decks/{id}(id=${vue.id},zone='PRINCIPAL')} + '#recherche'" th:attr="aria-current=${filtres.zone.name() == 'PRINCIPAL' ? 'page' : null}">Cartes du deck</a>
-                    <a th:href="@{/decks/{id}(id=${vue.id},zone='LEADER')} + '#recherche'" th:attr="aria-current=${filtres.zone.name() == 'LEADER' ? 'page' : null}">Leaders</a>
-                    <a th:href="@{/decks/{id}(id=${vue.id},zone='BASE')} + '#recherche'" th:attr="aria-current=${filtres.zone.name() == 'BASE' ? 'page' : null}">Bases</a>
+                    <a th:href="@{${filtres.urlZone(vue.id, 'PRINCIPAL')}}" th:attr="aria-current=${filtres.zone.name() == 'PRINCIPAL' ? 'page' : null}">Cartes du deck</a>
+                    <a th:href="@{${filtres.urlZone(vue.id, 'LEADER')}}" th:attr="aria-current=${filtres.zone.name() == 'LEADER' ? 'page' : null}">Leaders</a>
+                    <a th:href="@{${filtres.urlZone(vue.id, 'BASE')}}" th:attr="aria-current=${filtres.zone.name() == 'BASE' ? 'page' : null}">Bases</a>
                 </nav>
                 <form class="deck-filtres" th:action="@{/decks/{id}(id=${vue.id})} + '#recherche'" method="get">
                     <input type="hidden" name="zone" th:value="${filtres.zone}">
@@ -103,10 +106,13 @@
                     <div><label for="extensionId">Extension</label><select id="extensionId" name="extensionId"><option value="">Toutes les extensions</option><option th:each="extension : ${extensions}" th:value="${extension.id}" th:text="${extension.code + ' · ' + extension.nom}" th:selected="${extension.id == filtres.extensionId}"></option></select></div>
                     <div><label for="coutMin">Coût minimum</label><input type="number" id="coutMin" name="coutMin" min="0" max="9999" th:value="${filtres.coutMin}" placeholder="Sans limite"></div>
                     <div><label for="coutMax">Coût maximum</label><input type="number" id="coutMax" name="coutMax" min="0" max="9999" th:value="${filtres.coutMax}" placeholder="Sans limite"></div>
+                    <th:block th:replace="~{fragments/filtres-cartes :: choix(${filtres.raretes}, ${filtres.types}, ${filtres.zone.name() == 'PRINCIPAL'})}"></th:block>
+                <th:block th:replace="~{fragments/filtres-cartes :: identite}"></th:block>
                     <fieldset><legend>Affinités</legend><div class="deck-affinites"><label th:each="affinite : ${affinitesDisponibles}"><input type="checkbox" name="affinites" th:value="${affinite.name()}" th:checked="${filtres.affinites.contains(affinite.name())}"><span class="deck-pastille" th:style="${'background:' + affinite.couleur}"></span><span th:text="${affinite.libelle}"></span></label></div></fieldset>
                     <div><label for="mode">Combinaison des affinités</label><select id="mode" name="mode"><option value="TOUTES" th:selected="${filtres.mode == 'TOUTES'}">Toutes celles cochées</option><option value="UNE" th:selected="${filtres.mode == 'UNE'}">Au moins une</option><option value="SANS" th:selected="${filtres.mode == 'SANS'}">Sans affinité</option></select></div>
                     <div class="deck-filtres-actions"><button class="deck-bouton" type="submit">Rechercher →</button><a th:href="@{/decks/{id}(id=${vue.id},zone=${filtres.zone})} + '#recherche'">Réinitialiser</a></div>
                 </form>
+                <div class="recherche-criteres-actifs" th:if="${!filtresActifsDeck.empty}" aria-label="Critères actifs du deck"><a th:each="filtre : ${filtresActifsDeck}" th:href="@{${filtre.url}}" th:attr="aria-label=${'Retirer le filtre ' + filtre.libelle}"><span th:text="${filtre.libelle}"></span><span aria-hidden="true">×</span></a><a class="recherche-tout-effacer" th:href="@{/decks/{id}(id=${vue.id},zone=${filtres.zone})} + '#recherche'">Tout effacer</a></div>
                 <p th:if="${erreurRechercheDeck}" class="deck-notice deck-erreur" th:text="${erreurRechercheDeck}" role="alert"></p>
                 <p class="deck-resultats-compteur" th:text="${resultat.totalElements + ' carte(s) trouvée(s) · références standard'}"></p>
                 <p th:if="${resultat.empty and erreurRechercheDeck == null}" class="deck-vide">Aucune carte trouvée. Modifiez les filtres ou actualisez les extensions.</p>
@@ -114,6 +120,7 @@
                     <article class="deck-carte" th:each="resultatCarte : ${resultat.content}" th:with="carte=${resultatCarte.carte}">
                         <div class="deck-carte-image"><img th:if="${!#strings.isEmpty(carte.image)}" th:src="${carte.image}" th:alt="${carte.titre}" loading="lazy"><span th:if="${#strings.isEmpty(carte.image)}">Image indisponible</span></div>
                         <p class="deck-reference" th:text="${carte.reference}"></p><h3 th:text="${carte.titre}"></h3><p class="deck-sous-titre" th:text="${carte.sousTitre}"></p>
+                        <th:block th:replace="~{fragments/filtres-cartes :: badges(${carte})}"></th:block>
                         <p class="deck-stock" th:text="${resultatCarte.possedees + ' dans votre collection'}"></p>
                         <p class="deck-deja" th:if="${resultatCarte.dansDeck > 0}" th:text="${resultatCarte.dansDeck + ' dans ce deck'}"></p>
                         <form th:if="${filtres.zone.name() == 'PRINCIPAL'}" th:action="@{/decks/{id}/ajouter(id=${vue.id})}" method="post">

@@ -47,11 +47,32 @@ public class RechercheService {
     }
     @Transactional(readOnly=true)
     public Page<CarteRecherchee> consulter(Long utilisateurId,String q,Long extensionId,int page) {
+        return consulter(utilisateurId,q,extensionId,page,FiltresIdentite.VIDE);
+    }
+    @Transactional(readOnly=true)
+    public Page<CarteRecherchee> consulter(Long utilisateurId,String q,Long extensionId,int page,FiltresIdentite identite) {
+        identite.verifier();
         utilisateur(utilisateurId);
         String texte=q==null?"":q.strip();
         if(texte.length()>100)throw new IllegalArgumentException("Recherche limitée à 100 caractères.");
-        Page<RechercheCarte> resultat=recherches.rechercher(utilisateurId,texte,extensionId,PageRequest.of(Math.max(0,page),24));
-        if(resultat.getTotalPages()>0 && resultat.getNumber()>=resultat.getTotalPages())resultat=recherches.rechercher(utilisateurId,texte,extensionId,PageRequest.of(resultat.getTotalPages()-1,24));
+        org.springframework.data.jpa.domain.Specification<RechercheCarte> specification = (r,query,cb) -> {
+            var c = r.<RechercheCarte,Carte>join("carte");
+            var conditions = new ArrayList<jakarta.persistence.criteria.Predicate>();
+            conditions.add(cb.equal(r.get("utilisateur").get("id"),utilisateurId));
+            if (!texte.isBlank()) {
+                var nom = cb.gt(cb.locate(cb.lower(c.get("titre")),texte.toLowerCase(Locale.ROOT)),0);
+                var sousTitre = cb.gt(cb.locate(cb.lower(cb.coalesce(c.<String>get("sousTitre"),"")),texte.toLowerCase(Locale.ROOT)),0);
+                if (texte.matches("[0-9]{1,6}")) conditions.add(cb.or(nom,sousTitre,cb.equal(c.get("numero"),Integer.valueOf(texte))));
+                else conditions.add(cb.or(nom,sousTitre));
+            }
+            if (extensionId != null) conditions.add(cb.equal(c.get("extension").get("id"),extensionId));
+            conditions.add(identite.condition(c,query,cb));
+            return cb.and(conditions.toArray(jakarta.persistence.criteria.Predicate[]::new));
+        };
+        Sort tri = Sort.by(Sort.Order.desc("dateAjout"),Sort.Order.desc("id"));
+        Page<RechercheCarte> resultat = recherches.findAll(specification,PageRequest.of(Math.max(0,page),24,tri));
+        if (resultat.getTotalPages()>0 && resultat.getNumber()>=resultat.getTotalPages())
+            resultat = recherches.findAll(specification,PageRequest.of(resultat.getTotalPages()-1,24,tri));
         return resultat.map(r->fiche(r.getCarte()));
     }
     private Carte reference(Carte carte){

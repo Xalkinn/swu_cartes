@@ -30,6 +30,7 @@
             <section class="carte-detail-infos" aria-label="Informations et ajout à ma collection">
                 <p class="carte-galerie-reference" th:text="${carte.nomExtension}"></p>
                 <p class="carte-detail-cout" th:text="${carte.cout == null ? 'Coût non renseigné' : 'Coût en ressources : ' + carte.cout}"></p>
+                <th:block th:replace="~{fragments/filtres-cartes :: badges(${carte})}"></th:block>
                 <div class="carte-detail-affinites">
                     <th:block th:each="affinite : ${affinitesDisponibles}">
                         <span th:if="${carte.affinites.containsKey(affinite.name())}" class="carte-detail-affinite">

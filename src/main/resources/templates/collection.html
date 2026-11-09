@@ -16,6 +16,8 @@
     <script th:src="@{/js/galerie-cartes.js(v=1)}" defer></script>
     <link rel="stylesheet" th:href="@{/css/recherches.css(v=1)}">
     <script th:src="@{/js/recherches.js(v=4)}" defer></script>
+<link rel="stylesheet" th:href="@{/css/identite-cartes.css(v=1)}">
+    <script th:src="@{/js/identite-cartes.js(v=1)}" defer></script>
 </head>
 
 <body>
@@ -23,7 +25,7 @@
 <header th:replace="~{fragments/header :: header('collection')}">
 </header>
 
-<main class="collection-page" th:attr="data-collection-recherches=${filtreRecherches}">
+<main class="collection-page" th:attr="data-collection-recherches=${filtreRecherches},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits}">
     <th:block th:replace="~{fragments/recherches :: messages}"></th:block>
 
     <p class="eyebrow">VOTRE ESPACE PERSONNEL</p>
@@ -52,6 +54,7 @@
         <div><label for="collection-extension">Extension</label><select id="collection-extension" name="extensionId"><option value="">Toutes les extensions</option><option th:each="extension : ${extensions}" th:value="${extension.id}" th:selected="${extension.id == extensionId}" th:text="${extension.code + ' · ' + extension.nom}"></option></select></div>
         <div><label for="collection-version">Version possédée</label><select id="collection-version" name="version"><option value="TOUTES" th:selected="${version == 'TOUTES'}">Toutes les versions</option><option value="STANDARD" th:selected="${version == 'STANDARD'}">Avec standard</option><option value="HYPERSPACE" th:selected="${version == 'HYPERSPACE'}">Avec hyperspace</option><option value="FOIL" th:selected="${version == 'FOIL'}">Avec foil</option><option value="NONFOIL" th:selected="${version == 'NONFOIL'}">Avec non-foil</option></select></div>
         <label class="collection-filtre-coeur"><input type="checkbox" name="recherches" value="true" th:checked="${filtreRecherches}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.6 5.6 0 0 0-7.9 0L12 5.5l-.9-.9a5.6 5.6 0 0 0-7.9 7.9L12 21l8.8-8.5a5.6 5.6 0 0 0 0-7.9Z"/></svg>Mes recherches uniquement</label>
+        <th:block th:replace="~{fragments/filtres-cartes :: identite}"></th:block>
         <div class="collection-filtres-actions"><button type="submit">Filtrer ma collection →</button><a th:href="@{/collection}">Réinitialiser</a></div>
     </form>
     <div class="collection-filtres-actifs" th:if="${!filtresActifs.empty}" aria-label="Filtres actifs"><a th:each="filtre : ${filtresActifs}" th:href="@{${filtre.url}}" th:attr="aria-label=${'Retirer le filtre ' + filtre.libelle}"><span th:text="${filtre.libelle}"></span><span aria-hidden="true">×</span></a></div>
@@ -142,7 +145,7 @@
          aria-label="Pagination de ma collection">
 
         <a th:if="${resultat.hasPrevious()}"
-           th:href="@{/collection(page=${resultat.number - 1},q=${q},extensionId=${extensionId},version=${version},recherches=${filtreRecherches})}">
+           th:href="@{/collection(page=${resultat.number - 1},q=${q},extensionId=${extensionId},version=${version},recherches=${filtreRecherches},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits})}">
             ← Précédent
         </a>
 
@@ -151,7 +154,7 @@
         </span>
 
         <a th:if="${resultat.hasNext()}"
-           th:href="@{/collection(page=${resultat.number + 1},q=${q},extensionId=${extensionId},version=${version},recherches=${filtreRecherches})}">
+           th:href="@{/collection(page=${resultat.number + 1},q=${q},extensionId=${extensionId},version=${version},recherches=${filtreRecherches},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits})}">
             Suivant →
         </a>
     </nav>

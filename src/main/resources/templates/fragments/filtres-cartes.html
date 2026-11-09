@@ -1,0 +1,38 @@
+<!DOCTYPE html><html lang="fr" xmlns:th="http://www.thymeleaf.org"><body>
+<div th:fragment="choix(selectionRaretes, selectionTypes, afficherTypes)" class="recherche-filtres-supplementaires">
+    <fieldset class="recherche-facettes"><legend>Raretés</legend><p>Une ou plusieurs raretés. Aucune sélection = toutes.</p><div class="recherche-facettes-options">
+        <label th:each="rarete : ${raretesDisponibles}"><input type="checkbox" name="raretes" th:value="${rarete.code}" th:checked="${selectionRaretes.contains(rarete.code)}"><span class="recherche-rarete-lettre" th:classappend="${'rarete-' + rarete.code}" th:text="${rarete.code == 'INCONNUE' ? '?' : rarete.code}"></span><span th:text="${rarete.libelle}"></span></label>
+    </div><p class="recherche-facettes-aide">Les cartes sans rareté importée sont « Non renseignées ». <a th:if="${administrateur}" th:href="@{/admin/import/extensions}">Actualiser les extensions →</a></p></fieldset>
+    <fieldset th:if="${afficherTypes}" class="recherche-facettes"><legend>Types de carte</legend><p>Une ou plusieurs catégories.</p><div class="recherche-facettes-options">
+        <label th:each="type : ${typesDisponibles}"><input type="checkbox" name="types" th:value="${type.code}" th:checked="${selectionTypes.contains(type.code)}"><span th:text="${type.libelle}"></span></label>
+    </div></fieldset>
+</div>
+<div th:fragment="badges(carte)" class="recherche-identite-carte"><span class="recherche-rarete-badge" th:classappend="${'rarete-' + carte.rareteCode}" th:text="${carte.rareteLibelle}"></span><span class="recherche-type-badge" th:text="${carte.typeLibelle}"></span></div>
+
+<div th:fragment="identite" class="identite-filtres">
+    <fieldset class="identite-facette"><legend>Arène</legend>
+        <p>Terrestre ou spatiale. Aucune sélection = toutes les cartes.</p>
+        <div class="identite-options">
+            <label><input type="checkbox" name="arenes" value="TERRESTRE" th:checked="${identite.arenes.contains('TERRESTRE')}"><span aria-hidden="true">◈</span> Terrestre</label>
+            <label><input type="checkbox" name="arenes" value="SPATIALE" th:checked="${identite.arenes.contains('SPATIALE')}"><span aria-hidden="true">✦</span> Spatiale</label>
+        </div>
+        <p class="identite-aide">Les cartes sans arène, comme les événements, restent visibles lorsque ce filtre est vide.</p>
+    </fieldset>
+    <fieldset class="identite-facette"><legend>Traits</legend>
+        <details class="identite-traits" th:open="${!identite.traits.empty}">
+            <summary><span>Choisir des traits</span><span class="identite-nombre" th:text="${identite.traits.size()}">0</span></summary>
+            <div class="identite-traits-contenu">
+                <p>Droïde, Séparatiste, Jedi… Jusqu’à 20 choix.</p>
+                <input class="identite-chercher" type="search" placeholder="Trouver un trait…" aria-label="Filtrer les traits proposés" data-filtre-traits autocomplete="off">
+                <div class="identite-options identite-liste-traits">
+                    <label th:each="trait : ${traitsDisponibles}"><input type="checkbox" name="traits" th:value="${trait}" th:checked="${identite.traits.contains(trait)}"><span th:text="${trait}"></span></label>
+                </div>
+                <p th:if="${traitsDisponibles.empty}" class="identite-aide">Réimportez les extensions pour charger leurs traits.</p>
+                <label class="identite-mode">Correspondance des traits
+                    <select name="modeTraits"><option value="TOUS" th:selected="${identite.modeTraits == 'TOUS'}">Tous les traits (ET)</option><option value="UN" th:selected="${identite.modeTraits == 'UN'}">Au moins un trait (OU)</option></select>
+                </label>
+            </div>
+        </details>
+    </fieldset>
+</div>
+</body></html>

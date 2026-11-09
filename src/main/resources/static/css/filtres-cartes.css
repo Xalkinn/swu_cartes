@@ -1,0 +1,206 @@
+/* Filtres communs au catalogue et à l’atelier de deck. */
+.recherche-filtres-supplementaires {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    grid-column: 1/-1;
+    gap: 22px;
+    min-width: 0;
+}
+
+.catalogue-filtres-interieur .recherche-filtres-supplementaires {
+    grid-row: 3;
+}
+
+.deck-page .deck-filtres .recherche-facettes, .catalogue-page .recherche-facettes {
+    min-width: 0;
+    grid-column: auto;
+    margin: 0;
+    padding: 18px;
+    border: 1px solid #354b67;
+    border-radius: 11px;
+    background: #102036;
+}
+
+.recherche-facettes legend {
+    padding: 0 7px;
+    color: #d3e0f2;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.recherche-facettes > p {
+    margin: 0 0 13px;
+    color: #8ea6c4;
+    font-size: 11px;
+    line-height: 1.8;
+}
+
+.recherche-facettes-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.catalogue-page .recherche-facettes-options label, .deck-page .recherche-facettes-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    margin: 0;
+    padding: 8px 10px;
+    border: 1px solid #455b78;
+    border-radius: 8px;
+    background: #0b192c;
+    color: #bcd0e8;
+    font-size: 11px;
+    line-height: 1.5;
+    cursor: pointer;
+}
+
+.recherche-facettes-options label:has(input:checked) {
+    border-color: #c8ab67;
+    background: #f4ce7810;
+    color: #f7e0ac;
+}
+
+.catalogue-page .recherche-facettes-options input[type="checkbox"], .deck-page .recherche-facettes-options input[type="checkbox"] {
+    flex: 0 0 16px;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    accent-color: var(--gold);
+}
+
+.recherche-rarete-lettre {
+    display: inline-grid;
+    place-items: center;
+    width: 21px;
+    height: 21px;
+    border: 1px solid currentColor;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.recherche-facettes .recherche-facettes-aide {
+    margin: 13px 0 0;
+    font-size: 10px;
+}
+
+.recherche-facettes-aide a {
+    display: inline-block;
+    color: var(--gold);
+    text-decoration: none;
+}
+
+.recherche-identite-carte {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 13px 0;
+}
+
+.recherche-rarete-badge, .recherche-type-badge {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    padding: 5px 8px;
+    border: 1px solid #526681;
+    border-radius: 6px;
+    background: #101d2e;
+    color: #a9bfdc;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.rarete-C {
+    color: #cda783;
+    border-color: #83624a;
+    background: #4b342629;
+}
+
+.rarete-U {
+    color: #c4d5e7;
+    border-color: #788a9e;
+    background: #b7c9df0c;
+}
+
+.rarete-R {
+    color: #8bc9fb;
+    border-color: #4a8bbd;
+    background: #34688f19;
+}
+
+.rarete-L {
+    color: #ffe09b;
+    border-color: #b7984e;
+    background: #b99b4e12;
+}
+
+.rarete-S {
+    color: #e0b8f7;
+    border-color: #9c6cba;
+    background: #80529d19;
+}
+
+.rarete-INCONNUE {
+    color: #8da1ba;
+    border-color: #506178;
+}
+
+.recherche-criteres-actifs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 0 23px 20px;
+}
+
+.deck-page .recherche-criteres-actifs a {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #455e7e;
+    border-radius: 8px;
+    background: #192b43;
+    color: #d8e5f7;
+    font-size: 11px;
+    text-decoration: none;
+}
+
+.recherche-criteres-actifs a > span:first-child {
+    overflow-wrap: anywhere;
+}
+
+.deck-page .recherche-criteres-actifs .recherche-tout-effacer {
+    border-color: transparent;
+    background: transparent;
+    color: var(--gold);
+}
+
+.recherche-facettes :is(input,a):focus-visible, .recherche-criteres-actifs a:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 4px;
+}
+
+@media (max-width: 850px) {
+    .recherche-filtres-supplementaires {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+}
+
+@media (max-width: 600px) {
+    .deck-page .deck-filtres .recherche-facettes, .catalogue-page .recherche-facettes {
+        padding: 14px;
+    }
+
+    .recherche-criteres-actifs {
+        padding: 0 15px 20px;
+    }
+}

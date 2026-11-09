@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import java.util.*;
 
-public interface RechercheCarteRepository extends JpaRepository<RechercheCarte,Long> {
+public interface RechercheCarteRepository extends JpaRepository<RechercheCarte,Long>, JpaSpecificationExecutor<RechercheCarte> {
     Optional<RechercheCarte> findByUtilisateurIdAndCarteId(Long utilisateurId,Long carteId);
     List<RechercheCarte> findByUtilisateurIdAndCarteIdIn(Long utilisateurId,Collection<Long> ids);
     @EntityGraph(attributePaths={"carte","carte.extension"})

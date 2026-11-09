@@ -126,4 +126,63 @@ public interface PossessionRepository
     Page<Long> trouverGroupesFiltres(@Param("email") String email, @Param("q") String q,
             @Param("numero") Integer numero, @Param("extensionId") Long extensionId,
             @Param("version") String version, @Param("recherches") boolean recherches, Pageable pageable);
+    // Filtre les groupes avant la pagination. Les quantités de toutes leurs versions
+    // sont ensuite chargées par trouverPossessionsDesGroupes, sans perdre d'exemplaires.
+    @Query(value = """
+            select coalesce(standard.id,c.id) from Possession p
+            join p.carte c join c.extension e left join c.carteStandard standard
+            where lower(p.utilisateur.email) = lower(:email)
+              and (:q = '' or locate(lower(:q), lower(coalesce(standard.titre,c.titre))) > 0
+                   or locate(lower(:q), lower(coalesce(standard.sousTitre,c.sousTitre,''))) > 0
+                   or (:numero is not null and (c.numero = :numero or standard.numero = :numero)))
+              and (:extensionId is null or e.id = :extensionId)
+
+              and (:filtreArenes = false or exists (select a from Carte ref join ref.arenes a
+                   where ref.id = coalesce(standard.id,c.id) and a in :arenes))
+              and (:filtreTraits = false
+                   or (:tousTraits = false and exists (select t from Carte ref join ref.traits t
+                       where ref.id = coalesce(standard.id,c.id) and t in :traits))
+                   or (:tousTraits = true and (select count(distinct t) from Carte ref join ref.traits t
+                       where ref.id = coalesce(standard.id,c.id) and t in :traits) = :nombreTraits))
+              and (:version = 'TOUTES'
+                   or (:version = 'STANDARD' and c.hyperspace = false)
+                   or (:version = 'HYPERSPACE' and c.hyperspace = true)
+                   or (:version = 'FOIL' and p.quantiteFoil > 0)
+                   or (:version = 'NONFOIL' and p.quantite > p.quantiteFoil))
+              and (:recherches = false or exists (
+                   select r.id from RechercheCarte r where r.utilisateur.id = p.utilisateur.id
+                     and r.carte.id = coalesce(standard.id,c.id)))
+            group by coalesce(standard.id,c.id),e.code,coalesce(standard.numero,c.numero)
+            order by e.code,coalesce(standard.numero,c.numero),coalesce(standard.id,c.id)
+            """, countQuery = """
+            select count(distinct coalesce(standard.id,c.id)) from Possession p
+            join p.carte c join c.extension e left join c.carteStandard standard
+            where lower(p.utilisateur.email) = lower(:email)
+              and (:q = '' or locate(lower(:q), lower(coalesce(standard.titre,c.titre))) > 0
+                   or locate(lower(:q), lower(coalesce(standard.sousTitre,c.sousTitre,''))) > 0
+                   or (:numero is not null and (c.numero = :numero or standard.numero = :numero)))
+              and (:extensionId is null or e.id = :extensionId)
+
+              and (:filtreArenes = false or exists (select a from Carte ref join ref.arenes a
+                   where ref.id = coalesce(standard.id,c.id) and a in :arenes))
+              and (:filtreTraits = false
+                   or (:tousTraits = false and exists (select t from Carte ref join ref.traits t
+                       where ref.id = coalesce(standard.id,c.id) and t in :traits))
+                   or (:tousTraits = true and (select count(distinct t) from Carte ref join ref.traits t
+                       where ref.id = coalesce(standard.id,c.id) and t in :traits) = :nombreTraits))
+              and (:version = 'TOUTES'
+                   or (:version = 'STANDARD' and c.hyperspace = false)
+                   or (:version = 'HYPERSPACE' and c.hyperspace = true)
+                   or (:version = 'FOIL' and p.quantiteFoil > 0)
+                   or (:version = 'NONFOIL' and p.quantite > p.quantiteFoil))
+              and (:recherches = false or exists (
+                   select r.id from RechercheCarte r where r.utilisateur.id = p.utilisateur.id
+                     and r.carte.id = coalesce(standard.id,c.id)))
+            """)
+    Page<Long> trouverGroupesFiltresIdentite(@Param("email") String email, @Param("q") String q,
+            @Param("numero") Integer numero, @Param("extensionId") Long extensionId,
+            @Param("version") String version, @Param("recherches") boolean recherches,
+            @Param("filtreArenes") boolean filtreArenes, @Param("arenes") List<String> arenes,
+            @Param("filtreTraits") boolean filtreTraits, @Param("traits") List<String> traits,
+            @Param("tousTraits") boolean tousTraits, @Param("nombreTraits") long nombreTraits, Pageable pageable);
 }

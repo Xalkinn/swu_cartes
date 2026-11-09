@@ -38,6 +38,21 @@ public class CatalogueService {
             String mode,
             int page
     ) {
+        return rechercher(recherche, extensionId, coutMin, coutMax, affinites, mode, page, List.of(), List.of());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CarteAffichee> rechercher(String recherche, Long extensionId, Integer coutMin, Integer coutMax,
+                                         List<String> affinites, String mode, int page, List<String> raretes, List<String> types) {
+        return rechercher(recherche,extensionId,coutMin,coutMax,affinites,mode,page,raretes,types,FiltresIdentite.VIDE);
+    }
+    @Transactional(readOnly = true)
+    public Page<CarteAffichee> rechercher(String recherche, Long extensionId, Integer coutMin, Integer coutMax,
+                                         List<String> affinites, String mode, int page, List<String> raretes, List<String> types,
+                                         FiltresIdentite identite) {
+        identite.verifier();
+        List<String> selectionRaretes = FiltresCarte.raretes(raretes);
+        List<String> selectionTypes = FiltresCarte.types(types);
         if (recherche.length() > 100) {
             throw new IllegalArgumentException(
                     "La recherche ne doit pas dépasser 100 caractères."
@@ -81,18 +96,9 @@ public class CatalogueService {
                         + echapperRecherche(recherche.toLowerCase(Locale.ROOT))
                         + "%";
 
-                conditions.add(cb.or(
-                        cb.like(
-                                cb.lower(racine.<String>get("titre")),
-                                motif,
-                                '\\'
-                        ),
-                        cb.like(
-                                cb.lower(racine.<String>get("sousTitre")),
-                                motif,
-                                '\\'
-                        )
-                ));
+                Predicate texte = cb.or(cb.like(cb.lower(racine.get("titre")), motif, '\\'), cb.like(cb.lower(racine.get("sousTitre")), motif, '\\'));
+                if (recherche.matches("[0-9]{1,6}")) texte = cb.or(texte, cb.equal(racine.get("numero"), Integer.parseInt(recherche)));
+                conditions.add(texte);
             }
 
             if (extensionId != null) {
@@ -137,6 +143,9 @@ public class CatalogueService {
                 );
             }
 
+            conditions.add(FiltresCarte.conditionRaretes(racine, cb, selectionRaretes));
+            conditions.add(FiltresCarte.conditionTypes(racine, cb, selectionTypes));
+            conditions.add(identite.condition(racine, requete, cb));
             return cb.and(conditions.toArray(Predicate[]::new));
         };
 
@@ -174,7 +183,7 @@ public class CatalogueService {
                 carte.getImageRecto(),
                 carte.getImageVerso(),
                 carte.getCout(),
-                carte.getAffinites()
+                carte.getAffinites(), carte.getRarete(), carte.getTypeCarte()
         ));
     }
 
@@ -216,7 +225,15 @@ public class CatalogueService {
             String imageRecto,
             String imageVerso,
             Integer cout,
-            Map<String, Integer> affinites
+            Map<String, Integer> affinites,
+            String rarete, String typeCarte
     ) {
+        public CarteAffichee(Long id, String titre, String sousTitre, String numeroAffiche, String codeExtension, String nomExtension,
+                             String imageRecto, String imageVerso, Integer cout, Map<String,Integer> affinites) {
+            this(id, titre, sousTitre, numeroAffiche, codeExtension, nomExtension, imageRecto, imageVerso, cout, affinites, null, null);
+        }
+        public String getRareteLibelle() { return Rarete.libelle(rarete); }
+        public String getRareteCode() { return rarete == null ? "INCONNUE" : rarete; }
+        public String getTypeLibelle() { return TypeCarteFiltre.libelle(typeCarte); }
     }
 }

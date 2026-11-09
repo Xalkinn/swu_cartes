@@ -150,6 +150,23 @@ public class DeckService {
     public Page<ResultatCarte> rechercher(Long utilisateurId, Long id, String q, Long extensionId,
                                           Integer coutMin, Integer coutMax, List<String> affinites,
                                           String mode, Zone zone, int page) {
+        return rechercher(utilisateurId, id, q, extensionId, coutMin, coutMax, affinites, mode, zone, page, List.of(), List.of());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ResultatCarte> rechercher(Long utilisateurId, Long id, String q, Long extensionId,
+                                          Integer coutMin, Integer coutMax, List<String> affinites,
+                                          String mode, Zone zone, int page, List<String> raretes, List<String> types) {
+        return rechercher(utilisateurId,id,q,extensionId,coutMin,coutMax,affinites,mode,zone,page,raretes,types,FiltresIdentite.VIDE);
+    }
+    @Transactional(readOnly = true)
+    public Page<ResultatCarte> rechercher(Long utilisateurId, Long id, String q, Long extensionId,
+                                          Integer coutMin, Integer coutMax, List<String> affinites,
+                                          String mode, Zone zone, int page, List<String> raretes, List<String> types,
+                                          FiltresIdentite identite) {
+        identite.verifier();
+        List<String> selectionRaretes = FiltresCarte.raretes(raretes);
+        List<String> selectionTypes = FiltresCarte.types(types);
         Utilisateur utilisateur = utilisateur(utilisateurId);
         trouver(utilisateurId, id);
         String recherche = q == null ? "" : q.strip();
@@ -191,6 +208,9 @@ public class DeckService {
                 }
                 conditions.add("UNE".equals(mode) ? cb.or(symboles.toArray(Predicate[]::new)) : cb.and(symboles.toArray(Predicate[]::new)));
             }
+            conditions.add(FiltresCarte.conditionRaretes(c, cb, selectionRaretes));
+            conditions.add(FiltresCarte.conditionTypes(c, cb, selectionTypes));
+            conditions.add(identite.condition(c, requete, cb));
             return cb.and(conditions.toArray(Predicate[]::new));
         };
         Sort tri = Sort.by("extension.code", "numero", "id");
@@ -240,9 +260,14 @@ public class DeckService {
     }
     private Fiche fiche(Carte c) {
         return c == null ? null : new Fiche(c.getId(), c.getTitre(), c.getSousTitre(),
-                c.getExtension().getCode() + " · " + c.getNumeroAffiche(), c.getImageRecto(), c.getCout(), c.getTypeCarte());
+                c.getExtension().getCode() + " · " + c.getNumeroAffiche(), c.getImageRecto(), c.getCout(), c.getTypeCarte(), c.getRarete());
     }
-    public record Fiche(Long id, String titre, String sousTitre, String reference, String image, Integer cout, String type) {}
+    public record Fiche(Long id, String titre, String sousTitre, String reference, String image, Integer cout, String type, String rarete) {
+        public Fiche(Long id, String titre, String sousTitre, String reference, String image, Integer cout, String type) { this(id,titre,sousTitre,reference,image,cout,type,null); }
+        public String getRareteLibelle() { return Rarete.libelle(rarete); }
+        public String getRareteCode() { return rarete == null ? "INCONNUE" : rarete; }
+        public String getTypeLibelle() { return TypeCarteFiltre.libelle(type); }
+    }
     public record Resume(Long id, String nom, String description, Fiche leader, Fiche base, int total) {}
     public record Ligne(Fiche carte, int quantite, int possedees, int manquantes) {}
     public record ResultatCarte(Fiche carte, int possedees, int dansDeck) {}

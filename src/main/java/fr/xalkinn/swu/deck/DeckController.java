@@ -1,6 +1,9 @@
 package fr.xalkinn.swu.deck;
 
 import fr.xalkinn.swu.carte.Affinite;
+import fr.xalkinn.swu.carte.Rarete;
+import fr.xalkinn.swu.carte.TypeCarteFiltre;
+import java.util.List;
 import fr.xalkinn.swu.recherche.RechercheService;
 import fr.xalkinn.swu.extension.ExtensionRepository;
 import fr.xalkinn.swu.securite.UtilisateurConnecte;
@@ -50,10 +53,13 @@ public class DeckController {
                 vue.aTrouver().stream().map(ligne -> ligne.carte().id()).toList()));
         model.addAttribute("extensions", extensions.findAll(Sort.by("code")));
         model.addAttribute("affinitesDisponibles", Affinite.values());
+        model.addAttribute("raretesDisponibles", Rarete.values());
+        model.addAttribute("typesDisponibles", List.of(TypeCarteFiltre.UNITE, TypeCarteFiltre.AMELIORATION, TypeCarteFiltre.EVENEMENT));
+        model.addAttribute("filtresActifsDeck", filtres.filtresActifs(id));
         try {
             model.addAttribute("resultat", service.rechercher(principal.getUtilisateurId(), id, filtres.q(),
                     filtres.extensionId(), filtres.coutMin(), filtres.coutMax(), filtres.affinites(),
-                    filtres.mode(), filtres.zone(), filtres.page()));
+                    filtres.mode(), filtres.zone(), filtres.page(), filtres.raretes(), filtres.types(), filtres.identite()));
         } catch (IllegalArgumentException e) {
             model.addAttribute("erreurRechercheDeck", e.getMessage());
             model.addAttribute("resultat", org.springframework.data.domain.Page.empty());

@@ -1,0 +1,192 @@
+/* Arènes et traits : composant partagé par les quatre recherches de cartes. */
+.identite-filtres {
+    display: grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    grid-column: 1/-1;
+    gap: 18px;
+    min-width: 0;
+}
+
+.identite-filtres .identite-facette {
+    grid-column: auto;
+    min-width: 0;
+    margin: 0;
+    padding: 17px;
+    border: 1px solid #354b67;
+    border-radius: 11px;
+    background: #102036;
+}
+
+.identite-facette legend {
+    padding: 0 7px;
+    color: #d3e0f2;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.identite-facette p {
+    margin: 0 0 13px;
+    color: #9bb0cc;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.identite-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.identite-filtres .identite-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    margin: 0;
+    padding: 8px 11px;
+    border: 1px solid #455b78;
+    border-radius: 8px;
+    background: #0b192c;
+    color: #c0d1e7;
+    font-size: 12px;
+    line-height: 1.5;
+    cursor: pointer;
+}
+
+.identite-filtres .identite-options label:has(input:checked) {
+    border-color: #d4b063;
+    color: #ffe0a1;
+    background: #f4ce7810;
+}
+
+.identite-filtres .identite-options input[type=checkbox] {
+    flex: 0 0 16px;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    accent-color: var(--gold, #f8d27c);
+}
+
+.identite-facette .identite-aide {
+    margin: 13px 0 0;
+    font-size: 11px;
+}
+
+.identite-traits summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    color: #e2eaf7;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.identite-traits summary::before {
+    content: '▸';
+    color: var(--gold, #f8d27c);
+}
+
+.identite-traits[open] summary::before {
+    content: '▾';
+}
+
+.identite-traits summary > span:first-child {
+    margin-right: auto;
+}
+
+.identite-nombre {
+    min-width: 24px;
+    padding: 3px 7px;
+    text-align: center;
+    background: #f4ce7815;
+    border-radius: 5px;
+    color: var(--gold, #f8d27c);
+}
+
+.identite-traits-contenu {
+    padding-top: 10px;
+}
+
+.identite-filtres .identite-chercher, .identite-filtres .identite-mode select {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border: 1px solid #455b78;
+    border-radius: 8px;
+    background: #081625;
+    color: #e1eaf8;
+    font: inherit;
+    font-size: 13px;
+}
+
+.identite-liste-traits {
+    max-height: 230px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 3px;
+    scrollbar-color: #4d6481 #0b192c;
+}
+
+.identite-filtres .identite-options label[hidden] {
+    display: none;
+}
+
+.identite-filtres .identite-mode {
+    display: block;
+    margin-top: 14px;
+    color: #becfe5;
+    font-size: 12px;
+}
+
+.identite-filtres .identite-mode select {
+    display: block;
+    margin: 8px 0 0;
+}
+
+.identite-filtres :is(input,select,summary):focus-visible {
+    outline: 2px solid var(--gold, #f8d27c);
+    outline-offset: 3px;
+}
+
+.identite-filtres-actifs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 15px 0;
+}
+
+.identite-filtres-actifs a {
+    max-width: 100%;
+    padding: 8px 11px;
+    border: 1px solid #455b78;
+    border-radius: 8px;
+    background: #192b43;
+    color: #dce7f6;
+    font-size: 12px;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 850px) {
+    .identite-filtres {
+        grid-template-columns:1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .identite-filtres .identite-facette {
+        padding: 14px;
+    }
+
+    .identite-filtres .identite-chercher, .identite-filtres .identite-mode select {
+        font-size: 16px;
+    }
+}

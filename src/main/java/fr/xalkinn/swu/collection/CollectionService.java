@@ -161,14 +161,23 @@ public class CollectionService {
     @Transactional(readOnly = true)
     public Page<CartePossedee> consulter(String email, String recherche, Long extensionId,
                                         String version, boolean recherches, int page) {
+        return consulter(email,recherche,extensionId,version,recherches,page,fr.xalkinn.swu.carte.FiltresIdentite.VIDE);
+    }
+    @Transactional(readOnly = true)
+    public Page<CartePossedee> consulter(String email, String recherche, Long extensionId,
+                                        String version, boolean recherches, int page, fr.xalkinn.swu.carte.FiltresIdentite identite) {
+        identite.verifier();
         String q = recherche == null ? "" : recherche.strip();
         if (q.length() > 100) throw new IllegalArgumentException("La recherche est limitée à 100 caractères.");
         if (!List.of("TOUTES", "STANDARD", "HYPERSPACE", "FOIL", "NONFOIL").contains(version)) {
             throw new IllegalArgumentException("Version possédée invalide.");
         }
         Integer numero = q.matches("[0-9]{1,6}") ? Integer.valueOf(q) : null;
-        Page<Long> groupes = possessionRepository.trouverGroupesFiltres(
+        Page<Long> groupes = possessionRepository.trouverGroupesFiltresIdentite(
                 email, q, numero, extensionId, version, recherches,
+                !identite.arenes().isEmpty(), identite.arenes().isEmpty()?List.of(""):identite.arenes(),
+                !identite.traits().isEmpty(), identite.traits().isEmpty()?List.of(""):identite.traits(),
+                "TOUS".equals(identite.modeTraits()), (long)identite.traits().size(),
                 PageRequest.of(Math.max(0, page), 24)
         );
 
@@ -176,8 +185,11 @@ public class CollectionService {
         if (groupes.getTotalPages() > 0
                 && groupes.getNumber() >= groupes.getTotalPages()) {
 
-            groupes = possessionRepository.trouverGroupesFiltres(
+            groupes = possessionRepository.trouverGroupesFiltresIdentite(
                     email, q, numero, extensionId, version, recherches,
+                !identite.arenes().isEmpty(), identite.arenes().isEmpty()?List.of(""):identite.arenes(),
+                !identite.traits().isEmpty(), identite.traits().isEmpty()?List.of(""):identite.traits(),
+                "TOUS".equals(identite.modeTraits()), (long)identite.traits().size(),
                     PageRequest.of(groupes.getTotalPages() - 1, 24)
             );
         }

@@ -59,6 +59,11 @@ public class CatalogueController {
 
             @RequestParam(name = "affinites", required = false)
             List<String> affinites,
+            @RequestParam(required = false) List<String> raretes,
+            @RequestParam(required = false) List<String> types,
+            @RequestParam(required = false) List<String> arenes,
+            @RequestParam(required = false) List<String> traits,
+            @RequestParam(defaultValue = "TOUS") String modeTraits,
 
             @RequestParam(name = "mode", defaultValue = "TOUTES")
             String mode,
@@ -72,6 +77,7 @@ public class CatalogueController {
             Model model
     ) {
         String recherche = q.strip();
+        FiltresIdentite identite = new FiltresIdentite(arenes,traits,modeTraits);
 
         List<String> selection = affinites == null
                 ? List.of()
@@ -88,6 +94,12 @@ public class CatalogueController {
         List<Extension> extensions = extensionRepository.findAll(Sort.by("code").ascending());
         model.addAttribute("extensions", extensions);
 
+        List<String> selectionRaretes = FiltresCarte.nettoyer(raretes);
+        List<String> selectionTypes = FiltresCarte.nettoyer(types);
+        model.addAttribute("raretesDisponibles", Rarete.values());
+        model.addAttribute("typesDisponibles", TypeCarteFiltre.values());
+        model.addAttribute("selectionRaretes", selectionRaretes);
+        model.addAttribute("selectionTypes", selectionTypes);
         model.addAttribute("affinitesDisponibles", Affinite.values());
         model.addAttribute("selectionAffinites", selection);
         model.addAttribute("recherche", recherche);
@@ -106,7 +118,7 @@ public class CatalogueController {
                     coutMax,
                     selection,
                     mode,
-                    page
+                    page, selectionRaretes, selectionTypes, identite
             );
 
         } catch (IllegalArgumentException exception) {
@@ -121,7 +133,11 @@ public class CatalogueController {
         if (coutMax != null) params.put("coutMax", List.of(coutMax.toString()));
         if (!selection.isEmpty()) params.put("affinites", selection);
         if (!"TOUTES".equals(mode)) params.put("mode", List.of(mode));
+        if (!selectionRaretes.isEmpty()) params.put("raretes", selectionRaretes);
+        if (!selectionTypes.isEmpty()) params.put("types", selectionTypes);
+        identite.parametres(params);
         List<FiltreActif> filtres = new ArrayList<>();
+        identite.filtresActifs("/catalogue",params,filtres);
         if (!recherche.isBlank()) filtres.add(FiltreActif.retirer("Recherche : " + recherche, "/catalogue", params, "q", null));
         if (extensionId != null) filtres.add(FiltreActif.retirer(extensions.stream().filter(e -> e.getId().equals(extensionId)).map(Extension::getCode).findFirst().orElse("Extension"), "/catalogue", params, "extensionId", null));
         if (coutMin != null) filtres.add(FiltreActif.retirer("Coût ≥ " + coutMin, "/catalogue", params, "coutMin", null));
@@ -132,8 +148,13 @@ public class CatalogueController {
             try { libelle = Affinite.valueOf(code).getLibelle(); } catch (IllegalArgumentException e) { libelle = code; }
             filtres.add(FiltreActif.retirer(libelle, "/catalogue", params, "affinites", code));
         }
+        for (String r : selectionRaretes) filtres.add(FiltreActif.retirer(Rarete.libelle(r), "/catalogue", params, "raretes", r));
+        for (String t : selectionTypes) {
+            String label; try { label = TypeCarteFiltre.valueOf(t).getLibelle(); } catch (IllegalArgumentException e) { label = t; }
+            filtres.add(FiltreActif.retirer(label, "/catalogue", params, "types", t));
+        }
         model.addAttribute("filtresActifs", filtres);
-        model.addAttribute("nombreFiltresAvances", (coutMin == null ? 0 : 1) + (coutMax == null ? 0 : 1) + ("SANS".equals(mode) ? 1 : selection.size()));
+        model.addAttribute("nombreFiltresAvances", (coutMin == null ? 0 : 1) + (coutMax == null ? 0 : 1) + ("SANS".equals(mode) ? 1 : selection.size()) + selectionRaretes.size() + selectionTypes.size() + identite.arenes().size() + identite.traits().size());
         model.addAttribute("resultat", resultat);
         model.addAttribute("cartes", resultat.getContent());
         model.addAttribute("recherchesSelection", rechercheService.selection(utilisateurConnecte.getUtilisateurId(), resultat.map(CatalogueService.CarteAffichee::id).getContent()));

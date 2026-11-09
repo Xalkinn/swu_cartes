@@ -1,6 +1,7 @@
 package fr.xalkinn.swu.importation;
 
 import fr.xalkinn.swu.carte.Carte;
+import fr.xalkinn.swu.carte.Rarete;
 import fr.xalkinn.swu.carte.CarteRepository;
 import fr.xalkinn.swu.extension.Extension;
 import fr.xalkinn.swu.extension.ExtensionRepository;
@@ -97,6 +98,8 @@ public class ImportCatalogueService {
                 carte.actualiserFiltres(source.cout(), source.affinites());
                 carte.actualiserHyperspace(source.hyperspace());
                 carte.actualiserType(source.typeCarte());
+                carte.actualiserRarete(source.rarete());
+                carte.actualiserIdentite(source.arenes(), source.traits());
                 cartesImportees.put(source.id(), carte);
             }
 
@@ -207,7 +210,7 @@ public class ImportCatalogueService {
                 Map<?, ?> expansion = objet(objet(attributs.get("expansion")).get("data"));
                 String codeRecu = texte(objet(expansion.get("attributes")).get("code"));
                 boolean carteDeBase = objet(attributs.get("variantOf")).get("data") == null;
-                boolean hyperspace = estHyperspaceNonFoil(attributs);
+                boolean hyperspace = !carteDeBase && estHyperspaceNonFoil(attributs);
 
                 if (!"fr".equals(langue) || !code.equalsIgnoreCase(codeRecu)
                         || (!carteDeBase && !hyperspace)) {
@@ -233,7 +236,7 @@ public class ImportCatalogueService {
                         recupererImage(attributs.get("artBack")),
                         recupererCout(attributs.get("cost")),
                         recupererAffinites(attributs), hyperspace,
-                        recupererIdentifiantStandard(attributs, hyperspace), recupererType(attributs)));
+                        recupererIdentifiantStandard(attributs, hyperspace), recupererType(attributs), recupererRarete(attributs), recupererArenes(attributs), recupererTraits(attributs)));
             }
             page++;
         } while (page <= nombrePages);
@@ -270,6 +273,33 @@ public class ImportCatalogueService {
                     "Une hyperspace ne possède pas de lien valide vers sa carte standard.");
         }
         return identifiant;
+    }
+
+    private static Set<String> nomsRelation(Map<?, ?> attributs, String champ) {
+        Object data = objet(attributs.get(champ)).get("data");
+        if (data == null) return Set.of();
+        if (!(data instanceof List<?> liste)) throw new IllegalStateException("Relation " + champ + " illisible.");
+        Set<String> noms = new HashSet<>();
+        for (Object item : liste) {
+            String nom = fr.xalkinn.swu.carte.FiltresIdentite.normaliserTrait(texte(objet(objet(item).get("attributes")).get("name")));
+            if (nom.isBlank() || nom.length() > 80 || nom.codePoints().anyMatch(Character::isISOControl))
+                throw new IllegalStateException("Libellé " + champ + " invalide.");
+            noms.add(nom);
+        }
+        return Set.copyOf(noms);
+    }
+    private static Set<String> recupererTraits(Map<?, ?> attributs) { return nomsRelation(attributs,"traits"); }
+    private static Set<String> recupererArenes(Map<?, ?> attributs) {
+        Set<String> arenes = new HashSet<>();
+        for (String nom : nomsRelation(attributs,"arenas")) {
+            String code = switch(nom.toLowerCase(Locale.ROOT)) {
+                case "terrestre", "ground" -> "TERRESTRE";
+                case "spatiale", "spatial", "space" -> "SPATIALE";
+                default -> throw new IllegalStateException("Arène inconnue reçue : " + nom);
+            };
+            arenes.add(code);
+        }
+        return Set.copyOf(arenes);
     }
 
     private static String recupererImage(Object valeur) {
@@ -326,6 +356,12 @@ public class ImportCatalogueService {
         return nombre.intValue();
     }
 
+    private static String recupererRarete(Map<?, ?> attributs) {
+        Map<?, ?> data = objet(objet(attributs.get("rarity")).get("data"));
+        Map<?, ?> infos = objet(data.get("attributes"));
+        return Rarete.depuisSource(texte(infos.get("character")), texte(infos.get("englishName")));
+    }
+
     private static String recupererType(Map<?, ?> attributs) {
         Map<?, ?> data = objet(objet(attributs.get("type")).get("data"));
         String type = texte(objet(data.get("attributes")).get("value")).strip();
@@ -338,7 +374,7 @@ public class ImportCatalogueService {
     private record CarteSource(
             String id, String titre, String sousTitre, Integer numero,
             String imageRecto, String imageVerso, Integer cout,
-            Map<String, Integer> affinites, boolean hyperspace, String identifiantStandard, String typeCarte
+            Map<String, Integer> affinites, boolean hyperspace, String identifiantStandard, String typeCarte, String rarete, Set<String> arenes, Set<String> traits
     ) {}
 
     public record BilanImport(String codeExtension, int ajouts, int misesAJour) {}

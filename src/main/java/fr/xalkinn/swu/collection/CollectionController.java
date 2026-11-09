@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import fr.xalkinn.swu.carte.FiltresIdentite;
 import java.util.*;
 import fr.xalkinn.swu.extension.ExtensionRepository;
 import fr.xalkinn.swu.extension.Extension;
@@ -44,22 +45,28 @@ public class CollectionController {
             @RequestParam(required = false) Long extensionId,
             @RequestParam(defaultValue = "TOUTES") String version,
             @RequestParam(defaultValue = "false") boolean recherches,
+            @RequestParam(required = false) List<String> arenes,
+            @RequestParam(required = false) List<String> traits,
+            @RequestParam(defaultValue = "TOUS") String modeTraits,
             HttpServletRequest requete,
             Model model
     ) {
+        FiltresIdentite identite = new FiltresIdentite(arenes,traits,modeTraits);
         List<Extension> extensions = extensionRepository.findAll(Sort.by("code"));
         model.addAttribute("extensions", extensions);
         model.addAttribute("q", q.strip()); model.addAttribute("extensionId", extensionId);
         model.addAttribute("version", version); model.addAttribute("filtreRecherches", recherches);
         Page<CollectionService.CartePossedee> resultat;
-        try { resultat = collectionService.consulter(principal.getName(), q, extensionId, version, recherches, page); }
+        try { resultat = collectionService.consulter(principal.getName(), q, extensionId, version, recherches, page, identite); }
         catch (IllegalArgumentException e) { model.addAttribute("erreurCollection", e.getMessage()); resultat = Page.empty(); }
         Map<String,List<String>> params = new LinkedHashMap<>();
         if (!q.isBlank()) params.put("q", List.of(q.strip()));
         if (extensionId != null) params.put("extensionId", List.of(extensionId.toString()));
         if (!"TOUTES".equals(version)) params.put("version", List.of(version));
         if (recherches) params.put("recherches", List.of("true"));
+        identite.parametres(params);
         List<FiltreActif> filtres = new ArrayList<>();
+        identite.filtresActifs("/collection",params,filtres);
         if (!q.isBlank()) filtres.add(FiltreActif.retirer("Recherche : " + q.strip(), "/collection", params, "q", null));
         if (extensionId != null) filtres.add(FiltreActif.retirer(extensions.stream().filter(e -> e.getId().equals(extensionId)).map(Extension::getCode).findFirst().orElse("Extension"), "/collection", params, "extensionId", null));
         if (!"TOUTES".equals(version)) {

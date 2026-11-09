@@ -1,5 +1,7 @@
 package fr.xalkinn.swu.recherche;
 import fr.xalkinn.swu.extension.ExtensionRepository;
+import fr.xalkinn.swu.carte.FiltresIdentite;
+import fr.xalkinn.swu.web.FiltreActif;
 import fr.xalkinn.swu.securite.UtilisateurConnecte;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +19,22 @@ public class RechercheController {
     public RechercheController(RechercheService service,ExtensionRepository extensions){this.service=service;this.extensions=extensions;}
     @GetMapping("/recherches")
     public String afficher(@AuthenticationPrincipal UtilisateurConnecte principal,@RequestParam(defaultValue="") String q,
-                           @RequestParam(required=false) Long extensionId,@RequestParam(defaultValue="0") int page,Model model){
+                           @RequestParam(required=false) Long extensionId,@RequestParam(defaultValue="0") int page,
+                           @RequestParam(required=false) List<String> arenes,@RequestParam(required=false) List<String> traits,
+                           @RequestParam(defaultValue="TOUS") String modeTraits,Model model){
+        FiltresIdentite identite = new FiltresIdentite(arenes,traits,modeTraits);
         model.addAttribute("q",q.strip());model.addAttribute("extensionId",extensionId);model.addAttribute("extensions",extensions.findAll(Sort.by("code")));
-        try{model.addAttribute("resultat",service.consulter(principal.getUtilisateurId(),q,extensionId,page));}
+        try{model.addAttribute("resultat",service.consulter(principal.getUtilisateurId(),q,extensionId,page,identite));}
         catch(IllegalArgumentException e){model.addAttribute("erreurRecherche",e.getMessage());model.addAttribute("resultat",Page.empty());}
         var retour=org.springframework.web.util.UriComponentsBuilder.fromPath("/recherches").queryParam("q",q.strip()).queryParam("page",Math.max(0,page));
         if(extensionId!=null)retour.queryParam("extensionId",extensionId);
+        Map<String,List<String>> params = new LinkedHashMap<>();
+        if (!q.isBlank()) params.put("q",List.of(q.strip()));
+        if (extensionId!=null) params.put("extensionId",List.of(extensionId.toString()));
+        identite.parametres(params); List<FiltreActif> actifs=new ArrayList<>();
+        identite.filtresActifs("/recherches",params,actifs); model.addAttribute("filtresActifsIdentite",actifs);
+        if (!identite.arenes().isEmpty()) retour.queryParam("arenes",identite.arenes());
+        if (!identite.traits().isEmpty()) retour.queryParam("traits",identite.traits()).queryParam("modeTraits",identite.modeTraits());
         model.addAttribute("retourRecherches",retour.build().encode().toUriString());
         return "recherches";
     }

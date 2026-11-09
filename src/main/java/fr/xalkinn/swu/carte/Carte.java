@@ -49,6 +49,15 @@ public class Carte {
         this.typeCarte = typeCarte;
     }
 
+    @Column(name = "rarete", length = 2)
+    private String rarete;
+
+    public String getRarete() { return rarete; }
+    public void actualiserRarete(String code) {
+        if (code != null && (Rarete.valueOf(code) == Rarete.INCONNUE)) throw new IllegalArgumentException("Code de rareté invalide.");
+        this.rarete = code;
+    }
+
     @Column(name = "cout")
     private Integer cout;
 
@@ -71,6 +80,23 @@ public class Carte {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "extension_id", nullable = false)
     private Extension extension;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "carte_arenes", joinColumns = @JoinColumn(name = "carte_id"))
+    @Column(name = "code_arene", nullable = false, length = 20)
+    private java.util.Set<String> arenes = new java.util.HashSet<>();
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "carte_traits", joinColumns = @JoinColumn(name = "carte_id"))
+    @Column(name = "trait", nullable = false, length = 80)
+    private java.util.Set<String> traits = new java.util.HashSet<>();
+
+    public void actualiserIdentite(java.util.Set<String> arenes, java.util.Set<String> traits) {
+        this.arenes.clear(); this.arenes.addAll(arenes);
+        this.traits.clear(); this.traits.addAll(traits);
+    }
+    public java.util.Set<String> getArenes() { return java.util.Set.copyOf(arenes); }
+    public java.util.Set<String> getTraits() { return java.util.Set.copyOf(traits); }
 
     protected Carte() {
     }

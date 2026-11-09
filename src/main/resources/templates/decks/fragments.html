@@ -1,5 +1,10 @@
 <!DOCTYPE html><html lang="fr" xmlns:th="http://www.thymeleaf.org"><body>
 <th:block th:fragment="filtresCaches">
+    <input type="hidden" name="arenes" th:each="code : ${filtres.arenes}" th:value="${code}">
+    <input type="hidden" name="traits" th:each="trait : ${filtres.traits}" th:value="${trait}">
+    <input type="hidden" name="modeTraits" th:value="${filtres.modeTraits}">
+    <input type="hidden" name="raretes" th:each="code : ${filtres.raretes}" th:value="${code}">
+    <input type="hidden" name="types" th:each="code : ${filtres.types}" th:value="${code}">
     <input type="hidden" name="q" th:value="${filtres.q}">
     <input type="hidden" name="extensionId" th:if="${filtres.extensionId != null}" th:value="${filtres.extensionId}">
     <input type="hidden" name="coutMin" th:if="${filtres.coutMin != null}" th:value="${filtres.coutMin}">
@@ -11,9 +16,9 @@
 </th:block>
 <section th:fragment="emplacement(ligne, emplacement, titre)" class="deck-emplacement">
     <div class="deck-emplacement-entete"><h3 th:text="${titre}"></h3>
-        <a th:href="@{/decks/{id}(id=${vue.id},zone=${emplacement})} + '#recherche'" th:text="${ligne == null ? 'Choisir →' : 'Changer →'}"></a></div>
+        <a th:href="@{${filtres.urlZone(vue.id, emplacement)}}" th:text="${ligne == null ? 'Choisir →' : 'Changer →'}"></a></div>
     <a th:if="${ligne == null}" class="deck-emplacement-vide"
-       th:href="@{/decks/{id}(id=${vue.id},zone=${emplacement})} + '#recherche'"
+       th:href="@{${filtres.urlZone(vue.id, emplacement)}}"
        th:attr="aria-label=${'Choisir le ' + #strings.toLowerCase(titre)}">
         <span aria-hidden="true">+</span><span class="deck-emplacement-invitation" th:text="${'Choisissez votre ' + #strings.toLowerCase(titre)}"></span>
     </a>

@@ -19,6 +19,9 @@
     <script th:src="@{/js/filtres.js(v=1)}" defer></script>
     <link rel="stylesheet" th:href="@{/css/galerie-cartes.css(v=1)}">
     <script th:src="@{/js/galerie-cartes.js(v=1)}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/filtres-cartes.css(v=1)}">
+<link rel="stylesheet" th:href="@{/css/identite-cartes.css(v=1)}">
+    <script th:src="@{/js/identite-cartes.js(v=1)}" defer></script>
 </head>
 
 <body>
@@ -42,7 +45,7 @@
 
     <form th:action="@{/catalogue}" method="get" class="catalogue-recherche-formulaire">
         <div class="catalogue-recherche-rapide">
-            <div><label for="q">Rechercher une carte</label><input type="search" id="q" name="q" th:value="${recherche}" maxlength="100" placeholder="Titre ou sous-titre…"></div>
+            <div><label for="q">Rechercher une carte</label><input type="search" id="q" name="q" th:value="${recherche}" maxlength="100" placeholder="Titre, sous-titre ou numéro…"></div>
             <div><label for="extensionId">Extension</label><select id="extensionId" name="extensionId"><option value="">Toutes les extensions</option><option th:each="extension : ${extensions}" th:value="${extension.id}" th:selected="${extension.id == extensionSelectionnee}" th:text="${extension.code + ' · ' + extension.nom}"></option></select></div>
             <button type="submit">Rechercher →</button>
         </div>
@@ -52,6 +55,8 @@
                 <div class="catalogue-couts"><div><label for="coutMin">Coût minimum</label><input type="number" id="coutMin" name="coutMin" min="0" th:value="${coutMin}" placeholder="Sans limite"></div><div><label for="coutMax">Coût maximum</label><input type="number" id="coutMax" name="coutMax" min="0" th:value="${coutMax}" placeholder="Sans limite"></div></div>
                 <fieldset class="catalogue-affinites-compactes"><legend>Affinités</legend><div class="affinites-options"><label th:each="affinite : ${affinitesDisponibles}"><input type="checkbox" name="affinites" th:value="${affinite.name()}" th:checked="${selectionAffinites.contains(affinite.name())}"><span class="affinite-pastille" th:style="${'background:' + affinite.couleur}"></span><span th:text="${affinite.libelle}"></span></label></div></fieldset>
                 <div class="catalogue-combinaison"><label for="mode">Combinaison des affinités</label><select id="mode" name="mode"><option value="TOUTES" th:selected="${mode == 'TOUTES'}">Toutes les affinités cochées</option><option value="UNE" th:selected="${mode == 'UNE'}">Au moins une affinité cochée</option><option value="SANS" th:selected="${mode == 'SANS'}">Sans affinité</option></select></div>
+                <th:block th:replace="~{fragments/filtres-cartes :: choix(${selectionRaretes}, ${selectionTypes}, true)}"></th:block>
+                <th:block th:replace="~{fragments/filtres-cartes :: identite}"></th:block>
                 <button type="submit" class="catalogue-appliquer">Appliquer les filtres</button>
             </div>
         </details>
@@ -151,6 +156,8 @@
                         th:text="${carte.sousTitre}">
                     sous-titre
                 </p>
+
+                <th:block th:replace="~{fragments/filtres-cartes :: badges(${carte})}"></th:block>
 
                 <p
                         class="catalogue-cout"
@@ -275,6 +282,8 @@
         <a
                 th:if="${resultat.hasPrevious()}"
                 th:href="@{/catalogue(
+                raretes=${selectionRaretes},
+                types=${selectionTypes},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits},
                 q=${recherche},
                 extensionId=${extensionSelectionnee},
                 coutMin=${coutMin},
@@ -296,6 +305,8 @@
         <a
                 th:if="${resultat.hasNext()}"
                 th:href="@{/catalogue(
+                raretes=${selectionRaretes},
+                types=${selectionTypes},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits},
                 q=${recherche},
                 extensionId=${extensionSelectionnee},
                 coutMin=${coutMin},
