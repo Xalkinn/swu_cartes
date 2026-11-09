@@ -47,12 +47,21 @@ public class VitrineService {
     }
     @Transactional(readOnly=true)
     public Vue consulter(Long id,String rubrique,int page){
+        return consulter(id,rubrique,page,null,false);
+    }
+    @Transactional(readOnly=true)
+    public Vue consulter(Long id,String rubrique,int page,Long visiteurId,boolean mesRecherches){
         Vitrine v=publique(id);Joueur joueur=joueur(v);
+        if (visiteurId != null) actif(visiteurId);
+        if (mesRecherches && visiteurId == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Connectez-vous pour retrouver vos recherches.");
         String onglet=rubrique==null?"":rubrique;
         if(onglet.isEmpty())onglet=v.isPartagerCollection()?"collection":v.isPartagerDecks()?"decks":v.isPartagerRecherches()?"recherches":"profil";
         Page<CollectionService.CartePossedee> cartes=Page.empty();Page<DeckService.Resume> listes=Page.empty();Page<RechercheService.CarteRecherchee> souhaits=Page.empty();
         switch(onglet){
-            case "collection" -> {if(!v.isPartagerCollection())throw introuvable();cartes=collection.consulter(v.getUtilisateur().getEmail(),page);}
+            case "collection" -> {if(!v.isPartagerCollection())throw introuvable();cartes=mesRecherches
+                    ? collection.consulter(v.getUtilisateur().getEmail(),"",null,"TOUTES",true,page,
+                        fr.xalkinn.swu.carte.FiltresIdentite.VIDE,visiteurId)
+                    : collection.consulter(v.getUtilisateur().getEmail(),page);}
             case "decks" -> {if(!v.isPartagerDecks())throw introuvable();listes=decks.lister(id,page);}
             case "recherches" -> {if(!v.isPartagerRecherches())throw introuvable();souhaits=recherches.consulter(id,"",null,page);}
             case "profil" -> {}

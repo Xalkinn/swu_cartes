@@ -54,7 +54,7 @@ public class RechercheController {
         try{
             if(retour==null||retour.contains("\\")||retour.contains("\r")||retour.contains("\n"))return "/recherches";
             URI uri=URI.create(retour);
-            if(!uri.isAbsolute()&&uri.getRawAuthority()==null&&(Set.of("/catalogue","/collection","/recherches").contains(uri.getRawPath()) || uri.getRawPath().matches("/decks/[1-9][0-9]*")))return retour;
+            if(!uri.isAbsolute()&&uri.getRawAuthority()==null&&(Set.of("/catalogue","/collection","/recherches").contains(uri.getRawPath()) || uri.getRawPath().matches("/(?:decks|joueurs)/[1-9][0-9]*")))return retour;
         }catch(IllegalArgumentException ignored){}
         return "/recherches";
     }

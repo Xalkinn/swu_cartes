@@ -166,6 +166,14 @@ public class CollectionService {
     @Transactional(readOnly = true)
     public Page<CartePossedee> consulter(String email, String recherche, Long extensionId,
                                         String version, boolean recherches, int page, fr.xalkinn.swu.carte.FiltresIdentite identite) {
+        return consulter(email,recherche,extensionId,version,recherches,page,identite,null);
+    }
+    // Le propriétaire de la collection reste email ; seul le propriétaire de la liste
+    // de recherches varie. Le contrôleur public obtient celui-ci depuis la session.
+    @Transactional(readOnly = true)
+    public Page<CartePossedee> consulter(String email, String recherche, Long extensionId,
+                                        String version, boolean recherches, int page, fr.xalkinn.swu.carte.FiltresIdentite identite,
+                                        Long recherchesUtilisateurId) {
         identite.verifier();
         String q = recherche == null ? "" : recherche.strip();
         if (q.length() > 100) throw new IllegalArgumentException("La recherche est limitée à 100 caractères.");
@@ -173,11 +181,11 @@ public class CollectionService {
             throw new IllegalArgumentException("Version possédée invalide.");
         }
         Integer numero = q.matches("[0-9]{1,6}") ? Integer.valueOf(q) : null;
-        Page<Long> groupes = possessionRepository.trouverGroupesFiltresIdentite(
+        Page<Long> groupes = possessionRepository.trouverGroupesFiltresIdentitePour(
                 email, q, numero, extensionId, version, recherches,
                 !identite.arenes().isEmpty(), identite.arenes().isEmpty()?List.of(""):identite.arenes(),
                 !identite.traits().isEmpty(), identite.traits().isEmpty()?List.of(""):identite.traits(),
-                "TOUS".equals(identite.modeTraits()), (long)identite.traits().size(),
+                "TOUS".equals(identite.modeTraits()), (long)identite.traits().size(), recherchesUtilisateurId,
                 PageRequest.of(Math.max(0, page), 24)
         );
 
@@ -185,11 +193,11 @@ public class CollectionService {
         if (groupes.getTotalPages() > 0
                 && groupes.getNumber() >= groupes.getTotalPages()) {
 
-            groupes = possessionRepository.trouverGroupesFiltresIdentite(
+            groupes = possessionRepository.trouverGroupesFiltresIdentitePour(
                     email, q, numero, extensionId, version, recherches,
                 !identite.arenes().isEmpty(), identite.arenes().isEmpty()?List.of(""):identite.arenes(),
                 !identite.traits().isEmpty(), identite.traits().isEmpty()?List.of(""):identite.traits(),
-                "TOUS".equals(identite.modeTraits()), (long)identite.traits().size(),
+                "TOUS".equals(identite.modeTraits()), (long)identite.traits().size(), recherchesUtilisateurId,
                     PageRequest.of(groupes.getTotalPages() - 1, 24)
             );
         }

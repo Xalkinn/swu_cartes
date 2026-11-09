@@ -1,0 +1,5 @@
+<!DOCTYPE html><html lang="fr" xmlns:th="http://www.thymeleaf.org"><body>
+<th:block th:fragment="coeurCollection(carte)"><th:block th:if="${comparaisonDisponible}">
+    <th:block th:replace="~{fragments/recherches :: coeur(${carte.idCarte},${carte.titre},${recherchesVisiteur.contains(carte.idCarte)},${retourVitrine})}"></th:block>
+</th:block></th:block>
+</body></html>

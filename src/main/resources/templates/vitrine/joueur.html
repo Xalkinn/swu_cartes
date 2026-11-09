@@ -1,8 +1,44 @@
-<!DOCTYPE html><html lang="fr" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title th:text="${vue.joueur.pseudo + ' — Vitrine · Gestion SWU'}"></title><link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/vitrine.css(v=1)}"><link rel="stylesheet" th:href="@{/css/deck-tuile.css(v=1)}"></head><body><header th:replace="~{fragments/header :: header('joueurs')}"></header>
+<!DOCTYPE html><html lang="fr" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title th:text="${vue.joueur.pseudo + ' — Vitrine · Gestion SWU'}"></title><link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/vitrine.css(v=1)}"><link rel="stylesheet" th:href="@{/css/deck-tuile.css(v=1)}"><link rel="stylesheet" th:href="@{/css/recherches.css(v=1)}">
+<link rel="stylesheet" th:href="@{/css/vitrine-recherches.css(v=1)}">
+<script th:src="@{/js/recherches.js(v=4)}" defer></script></head><body><header th:replace="~{fragments/header :: header('joueurs')}"></header>
 <main class="vitrine-page"><a class="vitrine-retour" th:href="@{/joueurs}">← Les joueurs</a><section class="vitrine-profil"><span class="vitrine-avatar" aria-hidden="true" th:text="${#strings.toUpperCase(#strings.substring(vue.joueur.pseudo,0,1))}"></span><div><p class="eyebrow">VITRINE DE JOUEUR</p><h1 th:text="${vue.joueur.pseudo}"></h1><p>Les rubriques partagées par ce joueur.</p></div></section>
 <nav class="vitrine-onglets" aria-label="Rubriques publiques du joueur"><a th:if="${vue.joueur.collection}" th:href="@{/joueurs/{id}(id=${vue.joueur.id},rubrique='collection')}" th:attr="aria-current=${vue.rubrique == 'collection' ? 'page' : null}">Collection</a><a th:if="${vue.joueur.decks}" th:href="@{/joueurs/{id}(id=${vue.joueur.id},rubrique='decks')}" th:attr="aria-current=${vue.rubrique == 'decks' ? 'page' : null}">Decks</a><a th:if="${vue.joueur.recherches}" th:href="@{/joueurs/{id}(id=${vue.joueur.id},rubrique='recherches')}" th:attr="aria-current=${vue.rubrique == 'recherches' ? 'page' : null}">Recherches</a></nav>
 <p th:if="${vue.rubrique == 'profil'}" class="vitrine-vide">Ce joueur n’a pas encore partagé de rubrique.</p>
-<section th:if="${vue.rubrique == 'collection'}"><div class="vitrine-section-entete"><h2>Sa collection</h2><span th:text="${vue.collection.totalElements + ' référence(s)'}"></span></div><p class="vitrine-vide" th:if="${vue.collection.empty}">Cette collection ne contient pas encore de carte.</p><div class="vitrine-cartes"><th:block th:each="carte : ${vue.collection.content}"><th:block th:replace="~{vitrine/fragments :: carte(${carte.titre},${carte.sousTitre},${carte.codeExtension + ' · ' + carte.numeroAffiche},${carte.imageRecto},${carte.quantite})}"></th:block></th:block></div><nav th:replace="~{vitrine/fragments :: pagination(${vue.collection},${vue.joueur.id},'collection')}"></nav></section>
+<section th:if="${vue.rubrique == 'collection'}">
+    <th:block th:replace="~{fragments/recherches :: messages}"></th:block>
+    <div class="vitrine-section-entete"><h2>Sa collection</h2><span th:text="${vue.collection.totalElements + ' référence(s)' + (mesRecherchesVitrine ? ' dans vos recherches' : '')}"></span></div>
+    <div th:if="${comparaisonDisponible}" class="vitrine-correspondances">
+        <p>Les cœurs indiquent <strong>vos recherches</strong> dans cette collection.</p>
+        <form method="get" th:action="@{/joueurs/{id}(id=${vue.joueur.id})}">
+            <input type="hidden" name="rubrique" value="collection">
+            <label><input type="checkbox" name="mesRecherches" value="true" th:checked="${mesRecherchesVitrine}">Les cartes que je recherche</label>
+            <button type="submit">Filtrer</button>
+            <a th:if="${mesRecherchesVitrine}" th:href="@{/joueurs/{id}(id=${vue.joueur.id},rubrique='collection')}">Voir toute la collection</a>
+        </form>
+        <p class="vitrine-correspondances-aide">Repérez les cartes qui vous intéressent pour préparer un échange avec ce joueur.</p>
+    </div>
+    <p class="vitrine-vide" th:if="${vue.collection.empty}" th:text="${mesRecherchesVitrine ? 'Aucune carte de cette collection ne correspond actuellement à vos recherches.' : 'Cette collection ne contient pas encore de carte.'}"></p>
+    <div class="vitrine-cartes" th:attr="data-liste-recherches=${mesRecherchesVitrine ? 'true' : null}">
+        <article th:each="carte : ${vue.collection.content}" class="vitrine-carte vitrine-carte-collection">
+            <th:block th:replace="~{vitrine/recherches :: coeurCollection(${carte})}"></th:block>
+            <div class="vitrine-carte-image"><img th:if="${!#strings.isEmpty(carte.imageRecto)}" th:src="${carte.imageRecto}" th:alt="${carte.titre}" loading="lazy"><span th:if="${#strings.isEmpty(carte.imageRecto)}">Image indisponible</span></div>
+            <div class="vitrine-carte-texte">
+                <p class="vitrine-reference" th:text="${carte.codeExtension + ' · ' + carte.numeroAffiche}"></p>
+                <h3 th:text="${carte.titre}"></h3><p class="vitrine-sous-titre" th:text="${carte.sousTitre}"></p>
+                <strong class="vitrine-quantite" th:text="${carte.quantite + ' exemplaire(s)'}"></strong>
+                <span th:if="${comparaisonDisponible}" class="vitrine-carte-recherche">♥ Dans mes recherches</span>
+                <details class="vitrine-versions"><summary>Versions possédées</summary>
+                    <ul><li th:each="version : ${carte.versions}"><span th:text="${version.libelle + (version.foil ? '' : ' non-foil')}"></span><span th:text="${' · ' + version.numeroAffiche + ' · ×' + version.quantite}"></span></li></ul>
+                </details>
+            </div>
+        </article>
+    </div>
+    <nav class="vitrine-pagination" th:if="${vue.collection.totalPages > 1}" aria-label="Pagination de la collection publique">
+        <a th:if="${vue.collection.hasPrevious()}" th:href="@{/joueurs/{id}(id=${vue.joueur.id},rubrique='collection',mesRecherches=${mesRecherchesVitrine ? true : null},page=${vue.collection.number - 1})}">← Précédent</a>
+        <span th:text="${'Page ' + (vue.collection.number + 1) + ' sur ' + vue.collection.totalPages}"></span>
+        <a th:if="${vue.collection.hasNext()}" th:href="@{/joueurs/{id}(id=${vue.joueur.id},rubrique='collection',mesRecherches=${mesRecherchesVitrine ? true : null},page=${vue.collection.number + 1})}">Suivant →</a>
+    </nav>
+</section>
 <section th:if="${vue.rubrique == 'recherches'}"><div class="vitrine-section-entete"><h2>Ses recherches</h2><span th:text="${vue.recherches.totalElements + ' carte(s)'}"></span></div><p class="vitrine-vide" th:if="${vue.recherches.empty}">Ce joueur n’a pas encore ajouté de recherche.</p><div class="vitrine-cartes"><th:block th:each="carte : ${vue.recherches.content}"><th:block th:replace="~{vitrine/fragments :: carte(${carte.titre},${carte.sousTitre},${carte.reference},${carte.image},null)}"></th:block></th:block></div><nav th:replace="~{vitrine/fragments :: pagination(${vue.recherches},${vue.joueur.id},'recherches')}"></nav></section>
 <section th:if="${vue.rubrique == 'decks'}"><div class="vitrine-section-entete"><h2>Ses decks</h2><span th:text="${vue.decks.totalElements + ' deck(s)'}"></span></div><p class="vitrine-vide" th:if="${vue.decks.empty}">Ce joueur n’a pas encore créé de deck.</p><div class="vitrine-decks">
     <th:block th:each="deck : ${vue.decks.content}">
