@@ -18,6 +18,8 @@
     <script th:src="@{/js/recherches.js(v=4)}" defer></script>
 <link rel="stylesheet" th:href="@{/css/identite-cartes.css(v=1)}">
     <script th:src="@{/js/identite-cartes.js(v=1)}" defer></script>
+<link rel="stylesheet" th:href="@{/css/collection-export.css(v=1)}">
+    <script th:src="@{/js/collection-export.js(v=1)}" defer></script>
 </head>
 
 <body>
@@ -48,6 +50,27 @@
             Ajout rapide →
         </a>
     </div>
+
+    <details class="collection-export">
+        <summary><span aria-hidden="true">↓</span> Exporter ma collection</summary>
+        <form th:action="@{/collection/export}" method="get" class="collection-export-form">
+            <p>Un onglet par extension dans Excel. Une ligne par carte, toutes ses versions regroupées.</p>
+            <div class="collection-export-choix">
+                <div><label for="export-format">Format du fichier</label><select id="export-format" name="format"><option value="xlsx">Excel (.xlsx)</option><option value="csv">CSV (.csv)</option></select></div>
+                <div><label for="export-portee">Cartes à exporter</label><select id="export-portee" name="portee"><option value="TOUT">Toute ma collection</option><option value="FILTRES">La sélection actuelle</option></select></div>
+            </div>
+            <input type="hidden" name="q" th:value="${q}">
+            <input type="hidden" name="extensionId" th:if="${extensionId != null}" th:value="${extensionId}">
+            <input type="hidden" name="version" th:value="${version}">
+            <input type="hidden" name="recherches" th:value="${filtreRecherches}">
+            <input type="hidden" name="arenes" th:each="code : ${identite.arenes}" th:value="${code}">
+            <input type="hidden" name="traits" th:each="trait : ${identite.traits}" th:value="${trait}">
+            <input type="hidden" name="modeTraits" th:value="${identite.modeTraits}">
+            <p class="collection-export-aide">La sélection inclut toutes les pages. Le total comprend les versions foil et hyperspace. Le CSV réunit les extensions dans une colonne dédiée.</p>
+            <button type="submit"><span class="collection-export-spinner" aria-hidden="true" hidden></span><span data-export-libelle>Télécharger le fichier</span></button>
+            <p class="collection-export-etat" role="status" aria-live="polite" hidden></p>
+        </form>
+    </details>
 
     <form th:action="@{/collection}" method="get" class="collection-filtres">
         <div class="collection-filtre-recherche"><label for="collection-q">Rechercher dans ma collection</label><input type="search" id="collection-q" name="q" th:value="${q}" maxlength="100" placeholder="Titre, sous-titre ou numéro…"></div>

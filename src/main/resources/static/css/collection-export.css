@@ -1,0 +1,141 @@
+.collection-export {
+    margin: 24px 0;
+    border: 1px solid #5c6581;
+    border-radius: 14px;
+    background: #0d1d32;
+    overflow: hidden;
+}
+
+.collection-export > summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 17px 22px;
+    color: #f6d280;
+    font-size: 14px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.collection-export > summary::marker {
+    color: #f6d280;
+}
+
+.collection-export-form {
+    padding: 0 22px 22px;
+}
+
+.collection-export-form > p {
+    color: #b6c8df;
+    font-size: 12px;
+    line-height: 1.8;
+    margin: 0 0 18px;
+}
+
+.collection-export-choix {
+    display: grid;
+    grid-template-columns:1fr 1.5fr;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.collection-export-choix > div {
+    min-width: 0;
+}
+
+.collection-export-form label {
+    display: block;
+    color: #c7d5e7;
+    font-size: 12px;
+    margin: 0 0 9px;
+}
+
+.collection-export-form select {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 45px;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid #455d7d;
+    border-radius: 8px;
+    background: #081525;
+    color: #e2ebf7;
+    font: inherit;
+    font-size: 14px;
+}
+
+.collection-export-form > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: auto;
+    min-height: 45px;
+    margin: 0;
+    padding: 12px 21px;
+    border-radius: 9px;
+    font-size: 13px;
+}
+
+.collection-export-form .collection-export-aide {
+    color: #93abc8;
+    font-size: 11px;
+}
+
+.collection-export-form .collection-export-etat {
+    margin: 14px 0 0;
+    color: #c6dfcc;
+}
+
+.collection-export-form .collection-export-erreur {
+    color: #ffb4ac;
+}
+
+.collection-export-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #493b2640;
+    border-top-color: #493b26;
+    border-radius: 50%;
+    animation: export-tourne .8s linear infinite;
+}
+
+.collection-export-spinner[hidden], .collection-export-etat[hidden] {
+    display: none;
+}
+
+.collection-export :is(summary,select,button):focus-visible {
+    outline: 2px solid #f6d280;
+    outline-offset: 4px;
+}
+
+@keyframes export-tourne {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .collection-export-spinner {
+        animation: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .collection-export-choix {
+        grid-template-columns:1fr;
+    }
+
+    .collection-export > summary {
+        padding: 16px 18px;
+    }
+
+    .collection-export-form {
+        padding: 0 18px 18px;
+    }
+
+    .collection-export-form select {
+        font-size: 16px;
+    }
+}
