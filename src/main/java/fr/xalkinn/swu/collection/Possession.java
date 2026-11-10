@@ -2,7 +2,6 @@ package fr.xalkinn.swu.collection;
 
 import fr.xalkinn.swu.carte.Carte;
 import fr.xalkinn.swu.utilisateur.Utilisateur;
-
 import jakarta.persistence.*;
 
 @Entity
@@ -34,20 +33,33 @@ public class Possession {
     @Column(name = "numero_serie", nullable = false, length = 30)
     private java.util.Set<String> numerosSerie = new java.util.HashSet<>();
 
-    public java.util.Set<String> getNumerosSerie(){return java.util.Set.copyOf(numerosSerie);}
-    public static String normaliserSerie(String valeur){
-        String v=valeur==null?"":valeur.strip();
-        if(v.isBlank())return "";
-        if(!v.matches("[0-9]{1,6}/[0-9]{1,6}"))throw new IllegalArgumentException("Numéro de série attendu, par exemple 042/250.");
-        String[] parties=v.split("/");int numero=Integer.parseInt(parties[0]),tirage=Integer.parseInt(parties[1]);
-        if(numero<1||tirage<1||numero>tirage)throw new IllegalArgumentException("Numéro de série hors tirage.");
-        return String.format(java.util.Locale.ROOT,"%0"+Math.max(3,Integer.toString(tirage).length())+"d/%d",numero,tirage);
+    public java.util.Set<String> getNumerosSerie() {
+        return java.util.Set.copyOf(numerosSerie);
     }
-    public void definirSeries(java.util.Collection<String> series){
-        java.util.Set<String> choix=new java.util.HashSet<>();
-        for(String serie:series){String normalisee=normaliserSerie(serie);if(normalisee.isEmpty()||!choix.add(normalisee))throw new IllegalArgumentException("Numéro de série vide ou en double.");}
-        if(choix.size()>quantite||!choix.isEmpty()&&carte.getVariante()!=fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE_SERIALISEE)throw new IllegalArgumentException("Numéros de série incompatibles avec la possession.");
-        numerosSerie.clear();numerosSerie.addAll(choix);
+
+    public static String normaliserSerie(String valeur) {
+        String v = valeur == null ? "" : valeur.strip();
+        if (v.isBlank()) return "";
+        if (!v.matches("[0-9]{1,6}/[0-9]{1,6}"))
+            throw new IllegalArgumentException("Numéro de série attendu, par exemple 042/250.");
+        String[] parties = v.split("/");
+        int numero = Integer.parseInt(parties[0]), tirage = Integer.parseInt(parties[1]);
+        if (numero < 1 || tirage < 1 || numero > tirage)
+            throw new IllegalArgumentException("Numéro de série hors tirage.");
+        return String.format(java.util.Locale.ROOT, "%0" + Math.max(3, Integer.toString(tirage).length()) + "d/%d", numero, tirage);
+    }
+
+    public void definirSeries(java.util.Collection<String> series) {
+        java.util.Set<String> choix = new java.util.HashSet<>();
+        for (String serie : series) {
+            String normalisee = normaliserSerie(serie);
+            if (normalisee.isEmpty() || !choix.add(normalisee))
+                throw new IllegalArgumentException("Numéro de série vide ou en double.");
+        }
+        if (choix.size() > quantite || !choix.isEmpty() && carte.getVariante() != fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE_SERIALISEE)
+            throw new IllegalArgumentException("Numéros de série incompatibles avec la possession.");
+        numerosSerie.clear();
+        numerosSerie.addAll(choix);
     }
 
     protected Possession() {
@@ -86,13 +98,18 @@ public class Possession {
     public void ajuster(int variation, boolean foil) {
         ajuster(variation, foil, "");
     }
+
     public void ajuster(int variation, boolean foil, String numeroSerie) {
-        String serie=normaliserSerie(numeroSerie);
-        if(!serie.isEmpty()&&carte.getVariante()!=fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE_SERIALISEE)throw new IllegalArgumentException("Cette carte n'est pas une Prestige sérialisée.");
-        if(variation==1&&!serie.isEmpty()&&numerosSerie.contains(serie))throw new IllegalArgumentException("Cet exemplaire sérialisé est déjà dans votre collection.");
-        if(variation==-1){
-            if(!serie.isEmpty()&&!numerosSerie.contains(serie))throw new IllegalArgumentException("Cet exemplaire sérialisé n'est pas possédé.");
-            if(serie.isEmpty()&&quantite<=numerosSerie.size()&&!numerosSerie.isEmpty())throw new IllegalArgumentException("Sélectionnez le numéro de série de l'exemplaire à retirer.");
+        String serie = normaliserSerie(numeroSerie);
+        if (!serie.isEmpty() && carte.getVariante() != fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE_SERIALISEE)
+            throw new IllegalArgumentException("Cette carte n'est pas une Prestige sérialisée.");
+        if (variation == 1 && !serie.isEmpty() && numerosSerie.contains(serie))
+            throw new IllegalArgumentException("Cet exemplaire sérialisé est déjà dans votre collection.");
+        if (variation == -1) {
+            if (!serie.isEmpty() && !numerosSerie.contains(serie))
+                throw new IllegalArgumentException("Cet exemplaire sérialisé n'est pas possédé.");
+            if (serie.isEmpty() && quantite <= numerosSerie.size() && !numerosSerie.isEmpty())
+                throw new IllegalArgumentException("Sélectionnez le numéro de série de l'exemplaire à retirer.");
         }
         if (variation != 1 && variation != -1) {
             throw new IllegalArgumentException(
@@ -135,7 +152,10 @@ public class Possession {
         // Si le total atteint zéro, le service supprimera cette possession.
         this.quantite = nouveauTotal;
         this.quantiteFoil = nouveauFoil;
-        if(!serie.isEmpty()){if(variation==1)numerosSerie.add(serie);else numerosSerie.remove(serie);}
+        if (!serie.isEmpty()) {
+            if (variation == 1) numerosSerie.add(serie);
+            else numerosSerie.remove(serie);
+        }
     }
 
     // Remplacement atomique de la répartition, après validation de l'import.

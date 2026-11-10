@@ -3,21 +3,29 @@ package fr.xalkinn.swu.deck;
 import fr.xalkinn.swu.carte.*;
 import fr.xalkinn.swu.collection.Possession;
 import fr.xalkinn.swu.collection.PossessionRepository;
-import fr.xalkinn.swu.utilisateur.*;
-import org.springframework.data.domain.*;
+import fr.xalkinn.swu.utilisateur.Utilisateur;
+import fr.xalkinn.swu.utilisateur.UtilisateurRepository;
+import jakarta.persistence.criteria.MapJoin;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import jakarta.persistence.criteria.*;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class DeckService {
-    public enum Zone { PRINCIPAL, LEADER, BASE }
+    public enum Zone {PRINCIPAL, LEADER, BASE}
+
     private final DeckRepository decks;
     private final DeckCarteRepository lignes;
     private final CarteRepository cartes;
@@ -26,8 +34,11 @@ public class DeckService {
 
     public DeckService(DeckRepository decks, DeckCarteRepository lignes, CarteRepository cartes,
                        UtilisateurRepository utilisateurs, PossessionRepository possessions) {
-        this.decks = decks; this.lignes = lignes; this.cartes = cartes;
-        this.utilisateurs = utilisateurs; this.possessions = possessions;
+        this.decks = decks;
+        this.lignes = lignes;
+        this.cartes = cartes;
+        this.utilisateurs = utilisateurs;
+        this.possessions = possessions;
     }
 
     @Transactional(readOnly = true)
@@ -84,17 +95,21 @@ public class DeckService {
         Carte carte = carteId == null ? null : standard(carteId);
         if (carte != null) {
             String typeAttendu = zone == Zone.LEADER ? "Leader" : "Base";
-            if (!typeAttendu.equals(carte.getTypeCarte())) throw new IllegalArgumentException("Choisissez une carte de type " + typeAttendu + ".");
+            if (!typeAttendu.equals(carte.getTypeCarte()))
+                throw new IllegalArgumentException("Choisissez une carte de type " + typeAttendu + ".");
         }
-        if (zone == Zone.LEADER) deck.choisirLeader(carte); else deck.choisirBase(carte);
+        if (zone == Zone.LEADER) deck.choisirLeader(carte);
+        else deck.choisirBase(carte);
     }
 
     @Transactional
     public void ajouter(Long utilisateurId, Long id, Long carteId, int quantite) {
-        if (quantite < 1 || quantite > 99) throw new IllegalArgumentException("Choisissez une quantité comprise entre 1 et 99.");
+        if (quantite < 1 || quantite > 99)
+            throw new IllegalArgumentException("Choisissez une quantité comprise entre 1 et 99.");
         Deck deck = verrouiller(utilisateurId, id);
         Carte carte = standard(carteId);
-        if (carte.getTypeCarte() == null) throw new IllegalArgumentException("Actualisez cette extension pour renseigner le type des cartes.");
+        if (carte.getTypeCarte() == null)
+            throw new IllegalArgumentException("Actualisez cette extension pour renseigner le type des cartes.");
         if ("Leader".equals(carte.getTypeCarte()) || "Base".equals(carte.getTypeCarte())) {
             throw new IllegalArgumentException("Utilisez l'emplacement leader ou base pour cette carte.");
         }
@@ -112,11 +127,13 @@ public class DeckService {
 
     @Transactional
     public void quantite(Long utilisateurId, Long id, Long carteId, int quantite) {
-        if (quantite < 0 || quantite > 99) throw new IllegalArgumentException("La quantité doit être comprise entre 0 et 99 (0 pour retirer).");
+        if (quantite < 0 || quantite > 99)
+            throw new IllegalArgumentException("La quantité doit être comprise entre 0 et 99 (0 pour retirer).");
         Deck deck = verrouiller(utilisateurId, id);
         DeckCarte ligne = lignes.findByDeckIdAndCarteId(id, carteId)
                 .orElseThrow(() -> new IllegalArgumentException("Cette carte n'est pas dans votre deck."));
-        if (quantite == 0) lignes.delete(ligne); else ligne.modifierQuantite(quantite);
+        if (quantite == 0) lignes.delete(ligne);
+        else ligne.modifierQuantite(quantite);
         deck.toucher();
     }
 
@@ -157,8 +174,9 @@ public class DeckService {
     public Page<ResultatCarte> rechercher(Long utilisateurId, Long id, String q, Long extensionId,
                                           Integer coutMin, Integer coutMax, List<String> affinites,
                                           String mode, Zone zone, int page, List<String> raretes, List<String> types) {
-        return rechercher(utilisateurId,id,q,extensionId,coutMin,coutMax,affinites,mode,zone,page,raretes,types,FiltresIdentite.VIDE);
+        return rechercher(utilisateurId, id, q, extensionId, coutMin, coutMax, affinites, mode, zone, page, raretes, types, FiltresIdentite.VIDE);
     }
+
     @Transactional(readOnly = true)
     public Page<ResultatCarte> rechercher(Long utilisateurId, Long id, String q, Long extensionId,
                                           Integer coutMin, Integer coutMax, List<String> affinites,
@@ -172,10 +190,16 @@ public class DeckService {
         String recherche = q == null ? "" : q.strip();
         if (recherche.length() > 100) throw new IllegalArgumentException("Recherche limitée à 100 caractères.");
         if ((coutMin != null && (coutMin < 0 || coutMin > 9999)) || (coutMax != null && (coutMax < 0 || coutMax > 9999))
-                || (coutMin != null && coutMax != null && coutMin > coutMax)) throw new IllegalArgumentException("Vérifiez les coûts minimum et maximum.");
-        if (affinites.size() > 6 || !List.of("TOUTES", "UNE", "SANS").contains(mode)) throw new IllegalArgumentException("Filtres d'affinités invalides.");
+                || (coutMin != null && coutMax != null && coutMin > coutMax))
+            throw new IllegalArgumentException("Vérifiez les coûts minimum et maximum.");
+        if (affinites.size() > 6 || !List.of("TOUTES", "UNE", "SANS").contains(mode))
+            throw new IllegalArgumentException("Filtres d'affinités invalides.");
         for (String code : affinites) {
-            try { Affinite.valueOf(code); } catch (IllegalArgumentException e) { throw new IllegalArgumentException("Affinité inconnue."); }
+            try {
+                Affinite.valueOf(code);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Affinité inconnue.");
+            }
         }
         Specification<Carte> specification = (c, requete, cb) -> {
             List<Predicate> conditions = new ArrayList<>();
@@ -193,7 +217,8 @@ public class DeckService {
             if (!recherche.isEmpty()) {
                 String motif = "%" + recherche.toLowerCase(Locale.ROOT).replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%";
                 Predicate texte = cb.or(cb.like(cb.lower(c.get("titre")), motif, '\\'), cb.like(cb.lower(c.get("sousTitre")), motif, '\\'));
-                if (recherche.matches("[0-9]{1,6}")) texte = cb.or(texte, cb.equal(c.get("numero"), Integer.parseInt(recherche)));
+                if (recherche.matches("[0-9]{1,6}"))
+                    texte = cb.or(texte, cb.equal(c.get("numero"), Integer.parseInt(recherche)));
                 conditions.add(texte);
             }
             if (extensionId != null) conditions.add(cb.equal(c.get("extension").get("id"), extensionId));
@@ -231,22 +256,28 @@ public class DeckService {
         if (id == null) throw new IllegalArgumentException("Choisissez une carte.");
         Carte carte = cartes.findById(id).orElseThrow(() -> new IllegalArgumentException("Carte introuvable."));
         if (carte.getCarteStandard() != null) carte = carte.getCarteStandard();
-        if(carte.isJeton())throw new IllegalArgumentException("Les jetons ne font pas partie de la liste de cartes d'un deck.");
-        if (!carte.isReference()) throw new IllegalArgumentException("La variante n'est pas reliée à une carte standard. Actualisez l'extension.");
+        if (carte.isJeton())
+            throw new IllegalArgumentException("Les jetons ne font pas partie de la liste de cartes d'un deck.");
+        if (!carte.isReference())
+            throw new IllegalArgumentException("La variante n'est pas reliée à une carte standard. Actualisez l'extension.");
         return carte;
     }
+
     private Utilisateur utilisateur(Long id) {
         Utilisateur u = utilisateurs.findById(id).orElseThrow(() -> new AccessDeniedException("Compte introuvable."));
         if (!u.isActif()) throw new AccessDeniedException("Compte désactivé.");
         return u;
     }
+
     private Deck trouver(Long utilisateurId, Long id) {
         return decks.findByIdAndUtilisateurId(id, utilisateurId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck introuvable."));
     }
+
     private Deck verrouiller(Long utilisateurId, Long id) {
         utilisateur(utilisateurId);
         return decks.verrouiller(id, utilisateurId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck introuvable."));
     }
+
     private Map<Long, Integer> stocks(String email, Collection<Long> ids) {
         if (ids.isEmpty()) return Map.of();
         Map<Long, Integer> resultat = new HashMap<>();
@@ -258,24 +289,47 @@ public class DeckService {
         }
         return resultat;
     }
+
     private Ligne ligne(Carte c, int quantite, Map<Long, Integer> stocks) {
         int stock = stocks.getOrDefault(c.getId(), 0);
         return new Ligne(fiche(c), quantite, stock, Math.max(0, quantite - stock));
     }
+
     private Fiche fiche(Carte c) {
         return c == null ? null : new Fiche(c.getId(), c.getTitre(), c.getSousTitre(),
                 c.getExtension().getCode() + " · " + c.getNumeroAffiche(), c.getImageRecto(), c.getCout(), c.getTypeCarte(), c.getRarete());
     }
-    public record Fiche(Long id, String titre, String sousTitre, String reference, String image, Integer cout, String type, String rarete) {
-        public Fiche(Long id, String titre, String sousTitre, String reference, String image, Integer cout, String type) { this(id,titre,sousTitre,reference,image,cout,type,null); }
-        public String getRareteLibelle() { return Rarete.libelle(rarete); }
-        public String getRareteCode() { return rarete == null ? "INCONNUE" : rarete; }
-        public String getTypeLibelle() { return TypeCarteFiltre.libelle(type); }
+
+    public record Fiche(Long id, String titre, String sousTitre, String reference, String image, Integer cout,
+                        String type, String rarete) {
+        public Fiche(Long id, String titre, String sousTitre, String reference, String image, Integer cout, String type) {
+            this(id, titre, sousTitre, reference, image, cout, type, null);
+        }
+
+        public String getRareteLibelle() {
+            return Rarete.libelle(rarete);
+        }
+
+        public String getRareteCode() {
+            return rarete == null ? "INCONNUE" : rarete;
+        }
+
+        public String getTypeLibelle() {
+            return TypeCarteFiltre.libelle(type);
+        }
     }
-    public record Resume(Long id, String nom, String description, Fiche leader, Fiche base, int total) {}
-    public record Ligne(Fiche carte, int quantite, int possedees, int manquantes) {}
-    public record ResultatCarte(Fiche carte, int possedees, int dansDeck) {}
+
+    public record Resume(Long id, String nom, String description, Fiche leader, Fiche base, int total) {
+    }
+
+    public record Ligne(Fiche carte, int quantite, int possedees, int manquantes) {
+    }
+
+    public record ResultatCarte(Fiche carte, int possedees, int dansDeck) {
+    }
+
     public record Vue(Long id, String nom, String description, Ligne leader, Ligne base, List<Ligne> lignes,
                       int total, int manquantes, int disponibles, int necessaires, int progression,
-                      List<Ligne> aTrouver, boolean typesManquants) {}
+                      List<Ligne> aTrouver, boolean typesManquants) {
+    }
 }

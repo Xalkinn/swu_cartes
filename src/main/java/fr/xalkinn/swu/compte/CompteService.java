@@ -131,15 +131,22 @@ public class CompteService {
         return resultat.isPresent() && !resultat.get().getId().equals(id);
     }
 
-    public record CompteVue(String pseudo, String email, String role, String dateCreation) {}
-    public record ResultatModification(boolean modifie, boolean reconnexionNecessaire) {}
+    public record CompteVue(String pseudo, String email, String role, String dateCreation) {
+    }
+
+    public record ResultatModification(boolean modifie, boolean reconnexionNecessaire) {
+    }
 
     public static class ChampCompteException extends IllegalArgumentException {
         private final String champ;
+
         public ChampCompteException(String champ, String message) {
             super(message);
             this.champ = champ;
         }
-        public String getChamp() { return champ; }
+
+        public String getChamp() {
+            return champ;
+        }
     }
 }

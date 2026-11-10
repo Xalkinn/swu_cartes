@@ -24,21 +24,51 @@ public class CompteForm {
     @Size(max = 72, message = "La confirmation est trop longue.")
     private String confirmationMotDePasse = "";
 
-    public CompteForm() {}
+    public CompteForm() {
+    }
 
     public CompteForm(String pseudo, String email) {
         this.pseudo = pseudo;
         this.email = email;
     }
 
-    public String getPseudo() { return pseudo; }
-    public void setPseudo(String pseudo) { this.pseudo = pseudo == null ? "" : pseudo.strip(); }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email == null ? "" : email.strip(); }
-    public String getMotDePasseActuel() { return motDePasseActuel; }
-    public void setMotDePasseActuel(String valeur) { motDePasseActuel = valeur == null ? "" : valeur; }
-    public String getNouveauMotDePasse() { return nouveauMotDePasse; }
-    public void setNouveauMotDePasse(String valeur) { nouveauMotDePasse = valeur == null ? "" : valeur; }
-    public String getConfirmationMotDePasse() { return confirmationMotDePasse; }
-    public void setConfirmationMotDePasse(String valeur) { confirmationMotDePasse = valeur == null ? "" : valeur; }
+    public String getPseudo() {
+        return pseudo;
+    }
+
+    public void setPseudo(String pseudo) {
+        this.pseudo = pseudo == null ? "" : pseudo.strip();
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email == null ? "" : email.strip();
+    }
+
+    public String getMotDePasseActuel() {
+        return motDePasseActuel;
+    }
+
+    public void setMotDePasseActuel(String valeur) {
+        motDePasseActuel = valeur == null ? "" : valeur;
+    }
+
+    public String getNouveauMotDePasse() {
+        return nouveauMotDePasse;
+    }
+
+    public void setNouveauMotDePasse(String valeur) {
+        nouveauMotDePasse = valeur == null ? "" : valeur;
+    }
+
+    public String getConfirmationMotDePasse() {
+        return confirmationMotDePasse;
+    }
+
+    public void setConfirmationMotDePasse(String valeur) {
+        confirmationMotDePasse = valeur == null ? "" : valeur;
+    }
 }

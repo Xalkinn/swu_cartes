@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <title>Ma collection — Gestion SWU</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet"
+          th:href="@{/css/collection.css(v=3)}">
+
+    <link rel="stylesheet" th:href="@{/css/galerie-cartes.css(v=1)}">
+    <script th:src="@{/js/galerie-cartes.js(v=1)}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/recherches.css(v=1)}">
+    <script th:src="@{/js/recherches.js(v=4)}" defer></script>
+<link rel="stylesheet" th:href="@{/css/identite-cartes.css(v=1)}">
+    <script th:src="@{/js/identite-cartes.js(v=1)}" defer></script>
+<link rel="stylesheet" th:href="@{/css/collection-export.css(v=2)}">
+    <script th:src="@{/js/collection-export.js(v=1)}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/variantes.css(v=1)}">
+    <link rel="stylesheet" th:href="@{/css/filtres-cartes.css(v=1)}">
+    <link rel="stylesheet" th:href="@{/css/collection-filtres.css(v=1)}">
+    <script th:src="@{/js/filtres.js(v=1)}" defer></script>
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header('collection')}">
+</header>
+
+<main class="collection-page" th:attr="data-collection-recherches=${filtreRecherches},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits}">
+    <th:block th:replace="~{fragments/recherches :: messages}"></th:block>
+
+    <p class="eyebrow">VOTRE ESPACE PERSONNEL</p>
+
+    <h1>Ma <span>collection.</span></h1>
+
+    <p class="collection-intro">
+        Toutes les versions d’une même carte sont regroupées.
+        Cliquez sur une carte pour consulter vos exemplaires.
+    </p>
+
+    <div class="collection-liens">
+        <a class="collection-lien" th:href="@{/classeur}">Ouvrir mon classeur →</a>
+        <a class="collection-lien" th:href="@{/recherches}">Mes recherches →</a>
+        <a class="collection-lien" th:href="@{/catalogue}">
+            Parcourir le catalogue →
+        </a>
+
+        <a class="collection-lien"
+           th:href="@{/collection/ajout-rapide}">
+            Ajout rapide →
+        </a>
+    </div>
+
+    <p th:if="${succesImport}" th:text="${succesImport}" class="notice notice-success" role="status"></p>
+    <details class="collection-export">
+        <summary><svg viewBox="0 0 24 24" aria-hidden="true" class="collection-excel-icone"><path d="M13 3h7a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-7M13 3 3 5v14l10 2V3Zm3 4h3m-3 5h3m-3 5h3M6 9l4 6m0-6-4 6"/></svg> Exporter ma collection <span class="collection-export-chevron" aria-hidden="true">⌄</span></summary>
+        <form th:action="@{/collection/export}" method="get" class="collection-export-form">
+            <p>Un onglet par extension dans Excel. Synthèse par carte dans Excel, puis un onglet Détail versions pour les impressions exactes.</p>
+            <div class="collection-export-choix">
+                <div><label for="export-format">Format du fichier</label><select id="export-format" name="format"><option value="xlsx">Excel (.xlsx)</option><option value="csv">CSV (.csv)</option></select></div>
+                <div><label for="export-portee">Cartes à exporter</label><select id="export-portee" name="portee"><option value="TOUT">Toute ma collection</option><option value="FILTRES">La sélection actuelle</option></select></div>
+            </div>
+            <input type="hidden" name="q" th:value="${q}">
+            <input type="hidden" name="extensionId" th:if="${extensionId != null}" th:value="${extensionId}">
+            <input type="hidden" name="version" th:value="${version}">
+            <input type="hidden" name="recherches" th:value="${filtreRecherches}">
+            <input type="hidden" name="arenes" th:each="code : ${identite.arenes}" th:value="${code}">
+            <input type="hidden" name="traits" th:each="trait : ${identite.traits}" th:value="${trait}">
+            <input type="hidden" name="modeTraits" th:value="${identite.modeTraits}">
+            <input type="hidden" name="coutMin" th:if="${coutMin != null}" th:value="${coutMin}">
+            <input type="hidden" name="coutMax" th:if="${coutMax != null}" th:value="${coutMax}">
+            <input type="hidden" name="affinites" th:each="code : ${selectionAffinites}" th:value="${code}">
+            <input type="hidden" name="mode" th:value="${mode}">
+            <input type="hidden" name="raretes" th:each="code : ${selectionRaretes}" th:value="${code}">
+            <input type="hidden" name="types" th:each="code : ${selectionTypes}" th:value="${code}">
+            <input type="hidden" name="variante" th:value="${varianteSelectionnee}">
+            <input type="hidden" name="finition" th:value="${finitionSelectionnee}">
+            <p class="collection-export-aide">La sélection inclut toutes les pages. Le total comprend les versions foil et hyperspace. Le CSV détaille chaque impression et sa finition, avec les numéros de série.</p>
+            <button type="submit"><span class="collection-export-spinner" aria-hidden="true" hidden></span><span data-export-libelle>Télécharger le fichier</span></button>
+            <p class="collection-export-etat" role="status" aria-live="polite" hidden></p>
+        </form>
+    </details>
+
+    <form th:action="@{/collection}" method="get" class="catalogue-recherche-formulaire">
+        <div class="catalogue-recherche-rapide">
+            <div><label for="q">Rechercher dans ma collection</label><input type="search" id="q" name="q" th:value="${q}" maxlength="100" placeholder="Titre, sous-titre ou numéro…"></div>
+            <div><label for="extensionId">Extension</label><select id="extensionId" name="extensionId"><option value="">Toutes les extensions</option><option th:each="extension : ${extensions}" th:value="${extension.id}" th:selected="${extension.id == extensionId}" th:text="${extension.code + ' · ' + extension.nom}"></option></select></div>
+            <button type="submit">Rechercher →</button>
+        </div>
+        <details class="catalogue-filtres-panneau" th:open="${erreurCollection != null}">
+            <summary><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z"/></svg><span>Filtres avancés</span><span class="catalogue-filtres-compte" th:if="${nombreFiltresAvances > 0}" th:text="${nombreFiltresAvances}"></span><svg class="catalogue-filtres-signe" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <div class="catalogue-filtres-interieur">
+                <input type="hidden" name="version" th:if="${version != 'TOUTES'}" th:value="${version}">
+                <div class="catalogue-couts"><div><label for="variante">Variante</label><select id="variante" name="variante"><option value="TOUTES">Toutes les variantes</option><option th:each="v : ${variantesDisponibles}" th:value="${v.name()}" th:selected="${varianteSelectionnee == v.name()}" th:text="${v.libelle}"></option></select></div><div><label for="finition-catalogue">Finition</label><select id="finition-catalogue" name="finition"><option value="TOUTES">Toutes les finitions</option><option value="NON_FOIL" th:selected="${finitionSelectionnee == 'NON_FOIL'}">Non foil</option><option value="FOIL" th:selected="${finitionSelectionnee == 'FOIL'}">Foil</option></select></div></div>
+                <div class="catalogue-couts"><div><label for="coutMin">Coût minimum</label><input type="number" id="coutMin" name="coutMin" min="0" th:value="${coutMin}" placeholder="Sans limite"></div><div><label for="coutMax">Coût maximum</label><input type="number" id="coutMax" name="coutMax" min="0" th:value="${coutMax}" placeholder="Sans limite"></div></div>
+                <fieldset class="catalogue-affinites-compactes"><legend>Affinités</legend><div class="affinites-options"><label th:each="affinite : ${affinitesDisponibles}"><input type="checkbox" name="affinites" th:value="${affinite.name()}" th:checked="${selectionAffinites.contains(affinite.name())}"><span class="affinite-pastille" th:style="${'background:' + affinite.couleur}"></span><span th:text="${affinite.libelle}"></span></label></div></fieldset>
+                <div class="catalogue-combinaison"><label for="mode">Combinaison des affinités</label><select id="mode" name="mode"><option value="TOUTES" th:selected="${mode == 'TOUTES'}">Toutes les affinités cochées</option><option value="UNE" th:selected="${mode == 'UNE'}">Au moins une affinité cochée</option><option value="SANS" th:selected="${mode == 'SANS'}">Sans affinité</option></select></div>
+                <th:block th:replace="~{fragments/filtres-cartes :: choix(${selectionRaretes}, ${selectionTypes}, true)}"></th:block>
+                <th:block th:replace="~{fragments/filtres-cartes :: identite}"></th:block>
+                <label class="collection-filtre-coeur collection-coeur-avance"><input type="checkbox" name="recherches" value="true" th:checked="${filtreRecherches}">Mes recherches uniquement</label>
+                <p class="collection-filtres-aide">Variante et finition : au moins un exemplaire possédé doit correspondre. Le total et les versions restent complets.</p>
+                <button type="submit" class="catalogue-appliquer">Appliquer les filtres</button>
+            </div>
+        </details>
+    </form>
+    <div class="collection-filtres-actifs" th:if="${!filtresActifs.empty}" aria-label="Filtres actifs"><a th:each="filtre : ${filtresActifs}" th:href="@{${filtre.url}}" th:attr="aria-label=${'Retirer le filtre ' + filtre.libelle}"><span th:text="${filtre.libelle}"></span><span aria-hidden="true">×</span></a><a th:href="@{/collection}">Tout effacer</a></div>
+
+    <p th:if="${erreurCollection}"
+       th:text="${erreurCollection}"
+       class="notice"
+       role="alert">
+    </p>
+
+    <p class="collection-intro"
+       th:text="${resultat.totalElements
+           + ' référence(s) dans cette sélection'}">
+    </p>
+
+    <p th:if="${resultat.totalElements == 0}"
+       class="collection-vide">
+        Aucune carte dans cette sélection.
+        Modifiez les filtres ou ajoutez des cartes depuis le catalogue.
+    </p>
+
+    <section class="collection-grille"
+             aria-label="Mes cartes">
+
+        <article th:each="carte : ${resultat.content}"
+                 class="collection-carte">
+            <th:block th:replace="~{fragments/recherches :: coeur(${carte.idCarte}, ${carte.titre}, ${recherchesSelection.contains(carte.idCarte)}, ${retour})}"></th:block>
+
+
+            <button type="button"
+                    class="collection-ouvrir"
+                    th:attr="
+                        data-dialog-id=${'versions-' + carte.idCarte},
+                        aria-controls=${'versions-' + carte.idCarte},
+                        aria-label=${'Voir les versions possédées de '
+                            + carte.titre}"
+                    aria-haspopup="dialog">
+
+                <img th:if="${!#strings.isEmpty(carte.imageRecto)}"
+                     th:src="${carte.imageRecto}"
+                     th:alt="${carte.titre}"
+                     loading="lazy">
+
+                <span th:if="${#strings.isEmpty(carte.imageRecto)}"
+                      class="collection-image-absente">
+                    Image indisponible
+                </span>
+
+                <span class="collection-informations">
+
+                    <span class="collection-reference"
+                          th:text="${carte.codeExtension
+                              + ' · ' + carte.numeroAffiche}">
+                    </span>
+
+                    <span class="collection-titre"
+                          th:text="${carte.titre}">
+                    </span>
+
+                    <span class="collection-sous-titre"
+                          th:if="${!#strings.isEmpty(carte.sousTitre)}"
+                          th:text="${carte.sousTitre}">
+                    </span>
+
+                    <span class="collection-total" aria-label="Quantité totale possédée">
+                        <strong th:text="${carte.quantite}">3</strong>
+                        exemplaire(s)
+                    </span>
+
+                    <span class="collection-detail-foil"
+                          th:text="${'Dont ' + carte.quantiteFoil
+                              + ' foil(s)'}">
+                    </span>
+
+                    <span class="collection-voir">
+                        Voir mes versions →
+                    </span>
+
+                </span>
+            </button>
+
+            <th:block th:replace="~{fragments/galerie-cartes :: collection(${carte})}"></th:block>
+        </article>
+    </section>
+
+    <nav th:if="${resultat.totalPages > 1}"
+         class="collection-pagination"
+         aria-label="Pagination de ma collection">
+
+        <a th:if="${resultat.hasPrevious()}"
+           th:href="@{/collection(page=${resultat.number - 1},q=${q},extensionId=${extensionId},version=${version},recherches=${filtreRecherches},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits},coutMin=${coutMin},coutMax=${coutMax},affinites=${selectionAffinites},mode=${mode},raretes=${selectionRaretes},types=${selectionTypes},variante=${varianteSelectionnee},finition=${finitionSelectionnee})}">
+            ← Précédent
+        </a>
+
+        <span th:text="${'Page ' + (resultat.number + 1)
+            + ' sur ' + resultat.totalPages}">
+        </span>
+
+        <a th:if="${resultat.hasNext()}"
+           th:href="@{/collection(page=${resultat.number + 1},q=${q},extensionId=${extensionId},version=${version},recherches=${filtreRecherches},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits},coutMin=${coutMin},coutMax=${coutMax},affinites=${selectionAffinites},mode=${mode},raretes=${selectionRaretes},types=${selectionTypes},variante=${varianteSelectionnee},finition=${finitionSelectionnee})}">
+            Suivant →
+        </a>
+    </nav>
+
+    <th:block th:replace="~{fragments/galerie-cartes :: zoom}"></th:block>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

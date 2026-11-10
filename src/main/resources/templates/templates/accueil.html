@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Votre tableau de bord — Gestion SWU</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/accueil.css(v=visuel2)}">
+    <script th:src="@{/js/accueil.js(v=dashboard1)}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header('accueil')}"></header>
+
+<!-- Pictogrammes communs à cette page, sans bibliothèque externe. -->
+<svg class="accueil-symboles" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="acc-etoile" viewBox="0 0 24 24"><path d="m12 2 2.8 7.2L22 12l-7.2 2.8L12 22l-2.8-7.2L2 12l7.2-2.8Z"/></symbol>
+    <symbol id="acc-coupe" viewBox="0 0 24 24"><path d="M7 3h10v5a5 5 0 0 1-10 0V3ZM7 5H3v3a4 4 0 0 0 5 4m9-7h4v3a4 4 0 0 1-5 4M12 13v5m-4 3h8m-6-3h4v3h-4Z"/></symbol>
+    <symbol id="acc-cartes" viewBox="0 0 24 24"><rect x="8" y="5" width="12" height="16" rx="2"/><path d="M5 18H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2M11 10h6m-6 4h6"/></symbol>
+    <symbol id="acc-flamme" viewBox="0 0 24 24"><path d="M13 2c1 6-4 5-3 9 1 2 3 1 4-2 4 3 6 5 5 8a7 7 0 0 1-14-1c0-5 5-7 8-14Z"/></symbol>
+    <symbol id="acc-decor-plus" viewBox="0 0 100 100"><path d="M50 18v64M18 50h64"/></symbol>
+    <symbol id="acc-decor-cartes" viewBox="0 0 100 100"><rect x="18" y="18" width="47" height="65" rx="6" transform="rotate(-18 41.5 50.5)"/><rect x="31" y="14" width="47" height="65" rx="6" transform="rotate(10 54.5 46.5)"/><rect x="30" y="23" width="47" height="65" rx="6"/><path d="M40 39h27M40 70h19M40 77h12"/></symbol>
+    <symbol id="acc-decor-boite" viewBox="0 0 100 100"><path d="m17 30 33-15 33 15v47L50 93 17 77V30Zm0 0 33 16 33-16M50 46v47M17 42l33 16 33-16M34 23l33 16"/><path d="m61 66 12-6v12l-12 6V66Z"/></symbol>
+    <symbol id="acc-plus" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 12h8m-4-4v8"/></symbol>
+    <symbol id="acc-collection" viewBox="0 0 24 24"><path d="m3 7 9-5 9 5-9 5-9-5Zm0 5 9 5 9-5M3 17l9 5 9-5"/></symbol>
+    <symbol id="acc-deck" viewBox="0 0 24 24"><path d="m4 8 8-4 8 4v12H4V8Zm0 0 8 4 8-4M12 12v8M8 2h8"/></symbol>
+    <symbol id="acc-fleche" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+    <symbol id="acc-scan" viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m8 0h5v-5M2 12h20M8 8h8v8H8Z"/></symbol>
+</svg>
+
+<main class="accueil-dashboard" th:attr="data-actualites-url=@{/api/accueil/actualites}">
+
+    <div class="accueil-bienvenue">
+        <div>
+            <p class="accueil-eyebrow"><span></span> VOTRE GALAXIE, VOS CARTES</p>
+            <h1>Prêt pour la <em>prochaine partie ?</em></h1>
+        </div>
+        <a class="accueil-catalogue" th:href="@{/catalogue}">
+            Explorer le catalogue <svg aria-hidden="true"><use href="#acc-fleche"/></svg>
+        </a>
+    </div>
+
+    <section class="accueil-premiere-ligne" aria-label="À la une et communauté">
+        <aside class="accueil-communaute" aria-labelledby="communaute-titre">
+            <div class="accueil-rubrique"><h2 id="communaute-titre">CÔTÉ COMMUNAUTÉ</h2></div>
+
+            <a th:href="@{/tournois}" class="accueil-communaute-carte accueil-tournois">
+                <svg class="accueil-icone" aria-hidden="true"><use href="#acc-coupe"/></svg>
+                <span class="accueil-communaute-titre">Tournois</span>
+                <span class="accueil-communaute-description">Votre prochaine rencontre.</span>
+                <svg class="accueil-petite-fleche" aria-hidden="true"><use href="#acc-fleche"/></svg>
+            </a>
+
+            <a th:href="@{/communaute/decks}" class="accueil-communaute-carte accueil-commu-decks">
+                <svg class="accueil-icone" aria-hidden="true"><use href="#acc-cartes"/></svg>
+                <span class="accueil-communaute-titre">Decks de la commu</span>
+                <span class="accueil-communaute-description">Les idées se partagent.</span>
+                <svg class="accueil-petite-fleche" aria-hidden="true"><use href="#acc-fleche"/></svg>
+            </a>
+
+            <a th:href="@{/decks-du-moment}" class="accueil-communaute-carte accueil-meta">
+                <svg class="accueil-icone" aria-hidden="true"><use href="#acc-flamme"/></svg>
+                <span class="accueil-communaute-titre">Decks du moment</span>
+                <span class="accueil-communaute-description">De quoi changer la partie.</span>
+                <svg class="accueil-petite-fleche" aria-hidden="true"><use href="#acc-fleche"/></svg>
+            </a>
+        </aside>
+
+        <div class="accueil-actualites">
+            <div class="accueil-rubrique">
+                <h2 id="actualites-titre">À LA UNE</h2>
+                <span class="accueil-source">STAR WARS UNLIMITED · OFFICIEL</span>
+            </div>
+
+            <section class="accueil-carrousel" aria-roledescription="carrousel"
+                     aria-labelledby="actualites-titre" tabindex="0" data-carrousel>
+                <div class="accueil-diapos" data-diapos>
+                    <article class="accueil-diapo accueil-diapo-attente">
+                        <div class="accueil-orbite" aria-hidden="true"></div>
+                        <div class="accueil-diapo-contenu">
+                            <span class="accueil-hero-badge">LES NOUVELLES DE LA GALAXIE</span>
+                            <h2>Une galaxie<br>en mouvement.</h2>
+                            <p data-attente-texte>Chargement des dernières actualités officielles…</p>
+                            <a class="accueil-hero-lien" href="https://starwarsunlimited.com/fr/articles"
+                               target="_blank" rel="noopener noreferrer">
+                                Voir les actualités <svg aria-hidden="true"><use href="#acc-fleche"/></svg>
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <div class="accueil-commandes">
+                <p class="accueil-news-etat" data-news-etat aria-live="polite">Connexion à la source officielle</p>
+                <div class="accueil-points" data-points aria-label="Choisir une actualité"></div>
+                <div class="accueil-navigation" data-navigation hidden>
+                    <button type="button" data-precedent aria-label="Actualité précédente">‹</button>
+                    <button type="button" data-pause aria-label="Mettre le défilement en pause" aria-pressed="false">Ⅱ</button>
+                    <button type="button" data-suivant aria-label="Actualité suivante">›</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="accueil-espace" aria-labelledby="espace-titre">
+        <div class="accueil-espace-entete">
+            <div>
+                <h2 id="espace-titre">Votre espace</h2>
+            </div>
+            <span class="accueil-espace-note" th:if="${!connecte}">Connectez-vous pour retrouver votre collection</span>
+        </div>
+
+        <div class="accueil-raccourcis">
+            <a class="accueil-raccourci accueil-raccourci-ajout"
+               th:href="${connecte} ? @{/collection/ajout-rapide} : @{/login}">
+                <svg class="accueil-raccourci-decor" aria-hidden="true" focusable="false"><use href="#acc-decor-plus"/></svg>
+                <h3>Ajouter des cartes</h3>
+                <span class="accueil-raccourci-fleche" aria-hidden="true"><svg><use href="#acc-fleche"/></svg></span>
+            </a>
+            <a class="accueil-raccourci accueil-raccourci-collection"
+               th:href="${connecte} ? @{/collection} : @{/login}">
+                <svg class="accueil-raccourci-decor" aria-hidden="true" focusable="false"><use href="#acc-decor-cartes"/></svg>
+                <h3>Ma collection</h3>
+                <span class="accueil-raccourci-fleche" aria-hidden="true"><svg><use href="#acc-fleche"/></svg></span>
+            </a>
+            <a class="accueil-raccourci accueil-raccourci-decks"
+               th:href="${connecte} ? @{/decks} : @{/login}">
+                <svg class="accueil-raccourci-decor" aria-hidden="true" focusable="false"><use href="#acc-decor-boite"/></svg>
+                <h3>Mes decks</h3>
+                <span class="accueil-raccourci-fleche" aria-hidden="true"><svg><use href="#acc-fleche"/></svg></span>
+            </a>
+        </div>
+    </section>
+
+    <div class="accueil-bas-page">
+        <p><svg aria-hidden="true"><use href="#acc-etoile"/></svg> Chaque carte a sa place dans votre galaxie.</p>
+        <a th:href="@{/catalogue}">
+            <svg aria-hidden="true"><use href="#acc-cartes"/></svg> Trouver une carte
+        </a>
+    </div>
+
+    <dialog class="accueil-dialog" id="accueil-bientot" aria-labelledby="accueil-dialog-titre">
+        <button type="button" class="accueil-dialog-fermer" data-fermer-bientot aria-label="Fermer" autofocus>✕</button>
+        <span class="accueil-dialog-icone"><svg aria-hidden="true"><use href="#acc-etoile"/></svg></span>
+        <p class="accueil-eyebrow">LA SUITE DE L’AVENTURE</p>
+        <h2 id="accueil-dialog-titre">Bientôt dans votre espace.</h2>
+        <p data-bientot-description>Cette rubrique arrive prochainement.</p>
+        <button type="button" class="accueil-dialog-retour" data-fermer-bientot>Revenir à l’accueil</button>
+    </dialog>
+
+    <noscript><p class="accueil-sans-js">Activez JavaScript pour le carrousel. Les actualités restent accessibles sur <a href="https://starwarsunlimited.com/fr/articles">le site officiel</a>.</p></noscript>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

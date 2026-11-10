@@ -3,9 +3,7 @@ package fr.xalkinn.swu;
 import fr.xalkinn.swu.utilisateur.InscriptionForm;
 import fr.xalkinn.swu.utilisateur.Utilisateur;
 import fr.xalkinn.swu.utilisateur.UtilisateurRepository;
-
 import jakarta.validation.Valid;
-
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${deck.nom + ' — Decks du moment'}"></title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/recherches.css}">
+    <link rel="stylesheet" th:href="@{/css/galerie-cartes.css}">
+    <link rel="stylesheet" th:href="@{/css/meta.css(v=2)}">
+    <script th:src="@{/js/recherches.js(v=5)}" defer></script>
+    <script th:src="@{/js/galerie-cartes.js}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header('meta')}"></header>
+<main class="meta-page">
+    <a class="meta-retour" th:href="@{/decks-du-moment}">← Decks du moment</a>
+    <p class="eyebrow" th:text="${'TOP ' + deck.rang + ' · PREMIER'}"></p>
+    <h1 class="meta-titre-deck" th:text="${deck.nom}"></h1>
+    <p class="meta-intro"><span th:text="${deck.tournoi}"></span> · <span th:text="${deck.date}"></span><br>Joué par <strong th:text="${deck.joueur}"></strong></p>
+    <div class="meta-resume"><span><strong th:text="${deck.total}"></strong> cartes principales</span><span><strong th:text="${deck.totalReserve}"></strong> en réserve</span><span th:text="${vue.meta}"></span></div>
+    <p th:if="${deck.nonTraduites > 0}" class="meta-notice" th:text="${deck.nonTraduites + ' carte(s) affichée(s) dans la langue source, faute de correspondance certaine dans le catalogue français.'}"></p>
+    <th:block th:replace="~{fragments/recherches :: messages}"></th:block>
+    <section class="meta-commandement" aria-label="Leader et base">
+        <article th:each="carte : ${ {deck.leader, deck.base} }" class="meta-carte meta-carte-commandement">
+            <p class="eyebrow" th:text="${carte.section}"></p>
+            <th:block th:replace="~{fragments/galerie-cartes :: image(${carte.image}, ${carte.titre}, ${carte.reference})}"></th:block>
+            <h2 th:text="${carte.titre}"></h2>
+            <p th:if="${carte.sousTitre}" th:text="${carte.sousTitre}"></p>
+            <th:block th:if="${connecte and carte.id != null}"><form th:replace="~{fragments/recherches :: coeur(${carte.id}, ${carte.titre}, ${selectionRecherches.contains(carte.id)}, ${retourMeta})}"></form></th:block>
+        </article>
+    </section>
+    <section th:each="section : ${ {'principale', 'reserve'} }" class="meta-section">
+        <div class="meta-section-titre"><h2 th:text="${section == 'principale' ? 'La liste principale' : 'La réserve'}"></h2><span th:text="${(section == 'principale' ? deck.total : deck.totalReserve) + ' cartes'}"></span></div>
+        <p th:if="${section == 'reserve' and deck.reserve.isEmpty()}">Cette liste ne comporte pas de réserve.</p>
+        <div class="meta-cartes">
+            <article th:each="carte : ${section == 'principale' ? deck.principale : deck.reserve}" class="meta-carte">
+                <span class="meta-quantite" th:text="${'×' + carte.quantite}"></span>
+                <th:block th:replace="~{fragments/galerie-cartes :: image(${carte.image}, ${carte.titre}, ${carte.reference})}"></th:block>
+                <div class="meta-carte-bas"><div><h3 th:text="${carte.titre}"></h3><p th:if="${carte.sousTitre}" th:text="${carte.sousTitre}"></p><small th:text="${carte.reference}"></small></div>
+                    <th:block th:if="${connecte and carte.id != null}"><form th:replace="~{fragments/recherches :: coeur(${carte.id}, ${carte.titre}, ${selectionRecherches.contains(carte.id)}, ${retourMeta})}"></form></th:block>
+                </div>
+            </article>
+        </div>
+    </section>
+    <p class="meta-credit">Liste et résultat : <a href="https://www.swumetastats.com/decklists" target="_blank" rel="noopener noreferrer">SWU Meta Stats</a> · <span th:text="${'Actualisé le ' + vue.actualisation()}"></span></p>
+</main>
+<th:block th:replace="~{fragments/galerie-cartes :: zoom}"></th:block>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body></html>

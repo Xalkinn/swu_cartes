@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Decks du moment — Gestion SWU</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/deck-tuile.css}">
+    <link rel="stylesheet" th:href="@{/css/meta.css(v=2)}">
+    <script th:src="@{/js/meta.js}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header('meta')}"></header>
+<main class="meta-page" th:attr="data-meta-attente=${vue.etat.chargement},data-meta-etat=@{/api/meta/etat},data-meta-version=${vue.etat.reussite == null ? '' : vue.etat.reussite.toString()}">
+    <p class="eyebrow">INSPIRATION · PREMIER</p>
+    <h1>Les decks <span>du moment.</span></h1>
+    <p class="meta-intro">Des listes de tournoi récentes, à explorer carte par carte.</p>
+    <section class="meta-bandeau">
+        <div><span class="meta-source">SÉLECTION AUTOMATIQUE · TOP 8</span>
+            <h2 th:text="${#strings.isEmpty(vue.meta) ? 'Les tables se préparent.' : vue.meta}"></h2>
+            <p>Les listes complètes disponibles dans le flux récent de SWU Meta Stats, classées par date puis par résultat.</p>
+            <p th:if="${!#strings.isEmpty(vue.depuis)}" th:text="${'Tournois depuis le ' + vue.depuis + ' · Format Premier'}"></p>
+        </div>
+        <div class="meta-synchro">
+            <p th:if="${!#strings.isEmpty(vue.actualisation())}" th:text="${'Actualisé le ' + vue.actualisation()}"></p>
+            <p>Actualisation quotidienne à 6 h.</p>
+            <form th:if="${administrateur}" th:action="@{/admin/meta/actualiser}" method="post"><button class="meta-bouton" type="submit" th:disabled="${vue.etat.chargement}">Actualiser la sélection ↻</button></form>
+        </div>
+    </section>
+    <p th:if="${messageMeta}" th:text="${messageMeta}" class="meta-notice" role="status"></p>
+    <p th:if="${vue.etat.erreur}" th:text="${vue.etat.erreur}" class="meta-notice" role="status"></p>
+    <p th:if="${vue.etat.chargement}" class="meta-chargement" role="status"><span aria-hidden="true"></span> Récupération des dernières listes…</p>
+    <section th:if="${vue.decks.isEmpty()}" class="meta-vide">
+        <h2>La première sélection arrive.</h2>
+        <p th:if="${vue.etat.chargement}">Les decks apparaîtront automatiquement dès la fin du chargement.</p>
+        <p th:unless="${vue.etat.chargement}">Aucune liste disponible pour le moment. Une prochaine actualisation réessaiera automatiquement.</p>
+    </section>
+    <section th:unless="${vue.decks.isEmpty()}" class="meta-decks" aria-label="Listes compétitives récentes">
+        <article th:each="deck : ${vue.decks}" class="meta-deck">
+            <div class="meta-resultat"><strong th:text="${'TOP ' + deck.rang}"></strong><span th:text="${deck.date}"></span></div>
+            <a th:replace="~{fragments/deck :: carte(${deck}, @{/decks-du-moment/{id}(id=${deck.id})})}"></a>
+            <div class="meta-provenance"><p th:text="${deck.tournoi}"></p><span th:text="${'Joué par ' + deck.joueur}"></span></div>
+        </article>
+    </section>
+    <p class="meta-credit">Source : <a href="https://www.swumetastats.com/decklists" target="_blank" rel="noopener noreferrer">SWU Meta Stats</a>. Sélection de résultats récents disponibles, et non classement exhaustif des archétypes.</p>
+    <div class="meta-suite"><a th:href="@{/communaute/decks}">Les decks de la commu →</a><a th:if="${connecte}" th:href="@{/decks}">Mes decks →</a></div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body></html>

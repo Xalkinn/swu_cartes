@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -51,7 +52,7 @@ public class AdministrationUtilisateursService {
                 utilisateur.getId(), utilisateur.getPseudo(), utilisateur.getEmail(), utilisateur.getRole(),
                 utilisateur.isActif(), utilisateur.getDateCreation() == null ? null : DATE.format(utilisateur.getDateCreation()),
                 utilisateur.getId().equals(acteurId), adminsActifs == 1 && utilisateur.isActif()
-                    && "ADMIN".equals(utilisateur.getRole())));
+                && "ADMIN".equals(utilisateur.getRole())));
         return new ListeUtilisateurs(resultat, repository.count(), repository.countByActif(true), adminsActifs);
     }
 
@@ -96,7 +97,12 @@ public class AdministrationUtilisateursService {
     }
 
     public record UtilisateurAdmin(Long id, String pseudo, String email, String role, boolean actif,
-                                   String dateCreation, boolean moi, boolean dernierAdministrateurActif) {}
-    public record ListeUtilisateurs(Page<UtilisateurAdmin> utilisateurs, long total, long actifs, long adminsActifs) {}
-    public record ModificationAcces(String pseudo, boolean modifie, boolean moi, String role, boolean actif) {}
+                                   String dateCreation, boolean moi, boolean dernierAdministrateurActif) {
+    }
+
+    public record ListeUtilisateurs(Page<UtilisateurAdmin> utilisateurs, long total, long actifs, long adminsActifs) {
+    }
+
+    public record ModificationAcces(String pseudo, boolean modifie, boolean moi, String role, boolean actif) {
+    }
 }

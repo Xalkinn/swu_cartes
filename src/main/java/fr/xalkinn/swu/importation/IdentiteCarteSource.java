@@ -1,17 +1,15 @@
 package fr.xalkinn.swu.importation;
 
 import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
-/** Empreinte exacte des règles d'une carte, indépendante de son traitement et numéro. */
+/**
+ * Empreinte exacte des règles d'une carte, indépendante de son traitement et numéro.
+ */
 final class IdentiteCarteSource {
-    private IdentiteCarteSource() { }
+    private IdentiteCarteSource() {
+    }
 
     // Rappels explicatifs rencontrés et vérifiés dans les fiches TWI officielles.
     // Ne jamais supprimer les parenthèses arbitraires : elles peuvent contenir une règle.

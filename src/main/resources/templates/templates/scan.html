@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Scanner une carte — Gestion SWU</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/scan.css}">
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js" defer></script>
+
+    <script th:src="@{/js/scan.js(v=3)}" defer></script>
+    <script th:src="@{/js/camera.js}" defer></script>
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header('scan')}"></header>
+
+<main class="scan-page">
+
+    <p class="eyebrow">AJOUT À MA COLLECTION</p>
+    <h1>Scanner <span>une carte.</span></h1>
+
+    <p class="scan-intro">
+        Placez la carte entière dans le cadre doré.
+        Gardez-la bien droite, nette et sans reflet, avec les inscriptions du bas visibles.
+    </p>
+
+    <p th:if="${succesScan}"
+       th:text="${succesScan}"
+       class="notice notice-success"
+       role="status">
+        Ajout effectué
+    </p>
+
+    <p th:if="${erreurScan}"
+       th:text="${erreurScan}"
+       class="notice"
+       role="alert">
+        Erreur
+    </p>
+
+    <div class="scan-etapes">
+
+        <section class="panel" aria-labelledby="titre-photo">
+            <p class="eyebrow">ÉTAPE 1</p>
+            <h2 id="titre-photo">Photographier la carte</h2>
+
+            <button type="button" id="ouvrirCamera">
+                Ouvrir la caméra / webcam
+            </button>
+
+            <div id="panneauCamera" class="camera-panneau" hidden>
+
+                <label for="orientationCarte">Orientation de la carte</label>
+
+                <select id="orientationCarte">
+                    <option value="portrait">Verticale</option>
+                    <option value="paysage">Horizontale</option>
+                </select>
+
+                <div class="camera-viseur">
+                    <video id="cameraVideo"
+                           autoplay
+                           muted
+                           playsinline
+                           aria-label="Aperçu de la caméra"></video>
+
+                    <div id="cameraCadre"
+                         class="camera-cadre"
+                         aria-hidden="true"></div>
+                </div>
+
+                <p class="scan-aide">
+                    Positionnez la carte entière dans le cadre, avec une petite marge.
+                    Attendez la mise au point avant de photographier.
+                </p>
+
+                <div class="camera-actions">
+                    <button type="button" id="photographier" disabled>
+                        Photographier
+                    </button>
+
+                    <button type="button"
+                            id="fermerCamera"
+                            class="camera-fermer">
+                        Fermer
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Conservé pour communiquer avec le lecteur existant. -->
+            <input type="file"
+                   id="photoCamera"
+                   accept="image/*"
+                   hidden>
+
+            <label for="photoFichier">Ou choisir une image existante</label>
+
+            <input type="file"
+                   id="photoFichier"
+                   accept="image/*"
+                   class="scan-file">
+
+            <img id="photoApercu"
+                 class="scan-photo"
+                 alt="Photo sélectionnée"
+                 hidden>
+
+            <button type="button"
+                    id="lirePhoto"
+                    disabled>
+                Lire l’extension et le numéro →
+            </button>
+
+            <p id="statutLecture"
+               class="scan-aide"
+               role="status"
+               aria-live="polite">
+                Ouvrez la caméra ou choisissez une image.
+            </p>
+
+            <details class="scan-details">
+                <summary>Voir le texte lu sur la photo</summary>
+
+                <textarea id="texteLu"
+                          rows="5"
+                          readonly
+                          aria-label="Texte lu sur la photo"></textarea>
+            </details>
+        </section>
+
+        <section class="panel" aria-labelledby="titre-reference">
+            <p class="eyebrow">ÉTAPE 2</p>
+            <h2 id="titre-reference">Vérifier la référence</h2>
+
+            <p class="scan-aide">
+                Vous pouvez corriger ces valeurs ou les saisir
+                directement si la photo est mal reconnue.
+            </p>
+
+            <form th:action="@{/scan/rechercher}" method="post">
+
+                <label for="extensionCode">Extension</label>
+
+                <select id="extensionCode"
+                        name="extensionCode"
+                        required>
+
+                    <option value="">Sélectionner une extension</option>
+
+                    <option th:each="extension : ${extensions}"
+                            th:value="${extension.code}"
+                            th:selected="${extension.code == codeSelectionne}"
+                            th:text="${extension.code + ' — ' + extension.nom}">
+                        Extension
+                    </option>
+                </select>
+
+                <label for="numero">Numéro de la carte</label>
+
+                <input
+                        type="text"
+                        id="numero"
+                        name="numero"
+                        inputmode="text"
+                        pattern="[Tt]?[0-9]{1,6}"
+                        maxlength="7"
+                        placeholder="Ex. : 005 ou T01 pour un jeton"
+                        th:value="${numeroSelectionne}"
+                        required
+                >
+
+                <button type="submit" id="rechercherCarte">
+                    Rechercher dans le catalogue →
+                </button>
+            </form>
+
+            <p class="scan-aide">
+                L’extension doit avoir été importée dans le catalogue.
+                Cette première version recherche les cartes de base.
+            </p>
+        </section>
+
+    </div>
+
+    <section th:if="${rechercheEffectuee}"
+             class="scan-confirmation"
+             aria-labelledby="titre-confirmation">
+
+        <p class="eyebrow">ÉTAPE 3</p>
+        <h2 id="titre-confirmation">Confirmer la carte</h2>
+
+        <p th:if="${#lists.isEmpty(candidats)}" class="scan-aide">
+            Aucune carte trouvée. Vérifiez l’extension et le numéro,
+            ou demandez à l’administrateur d’importer cette extension.
+        </p>
+
+        <p th:if="${#lists.size(candidats) > 1}" class="scan-aide">
+            Plusieurs fiches partagent cette référence.
+            Choisissez celle qui correspond à votre carte.
+        </p>
+
+        <div class="scan-resultats">
+
+            <article th:each="carte : ${candidats}"
+                     class="panel scan-resultat">
+
+                <img th:if="${!#strings.isEmpty(carte.imageRecto)}"
+                     th:src="${carte.imageRecto}"
+                     th:alt="${carte.titre}">
+
+                <p class="eyebrow" th:text="${carte.reference}">
+                    Référence
+                </p>
+
+                <h2 th:text="${carte.titre}">Titre</h2>
+
+                <p class="scan-sous-titre"
+                   th:text="${carte.sousTitre}">
+                    sous-titre
+                </p>
+
+                <form th:action="@{/scan/ajouter}" method="post">
+                    <input type="hidden"
+                           name="carteId"
+                           th:value="${carte.id}">
+
+                    <button type="submit">
+                        Confirmer et ajouter 1 exemplaire
+                    </button>
+                </form>
+
+            </article>
+
+        </div>
+    </section>
+
+    <noscript>
+        <p class="notice">
+            Activez JavaScript pour lire les photos.
+            La saisie manuelle de la référence reste disponible.
+        </p>
+    </noscript>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

@@ -96,7 +96,8 @@ public class ActualitesService {
                         .queryParam("fields[4]", "locale")
                         .build())
                 .retrieve()
-                .body(new ParameterizedTypeReference<Map<String, Object>>() {});
+                .body(new ParameterizedTypeReference<Map<String, Object>>() {
+                });
 
         if (reponse == null || !(reponse.get("data") instanceof List<?> donnees)) {
             throw new IllegalStateException("Réponse d'actualités inattendue.");
@@ -169,9 +170,11 @@ public class ActualitesService {
         executor.shutdownNow();
     }
 
-    public record Actualite(String titre, String description, String url, String image, String date) {}
+    public record Actualite(String titre, String description, String url, String image, String date) {
+    }
 
     public record EtatActualites(
             List<Actualite> articles, boolean chargement, boolean indisponible, Instant actualiseLe
-    ) {}
+    ) {
+    }
 }

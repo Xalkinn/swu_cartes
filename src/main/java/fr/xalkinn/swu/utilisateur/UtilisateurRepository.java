@@ -5,15 +5,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 import java.util.Optional;
 
 public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> {
     Optional<Utilisateur> findByEmailIgnoreCase(String email);
+
     Optional<Utilisateur> findByPseudoIgnoreCase(String pseudo);
+
     boolean existsByEmailIgnoreCase(String email);
+
     boolean existsByPseudoIgnoreCase(String pseudo);
 
     long countByActif(boolean actif);
+
     long countByRoleAndActif(String role, boolean actif);
 
     @Query("""

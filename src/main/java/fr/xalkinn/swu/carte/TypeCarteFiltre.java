@@ -11,10 +11,24 @@ public enum TypeCarteFiltre {
     BASE("Base", List.of("Base"));
     private final String libelle;
     private final List<String> valeurs;
-    TypeCarteFiltre(String libelle, List<String> valeurs) { this.libelle = libelle; this.valeurs = valeurs; }
-    public String getCode() { return name(); }
-    public String getLibelle() { return libelle; }
-    public List<String> getValeurs() { return valeurs; }
+
+    TypeCarteFiltre(String libelle, List<String> valeurs) {
+        this.libelle = libelle;
+        this.valeurs = valeurs;
+    }
+
+    public String getCode() {
+        return name();
+    }
+
+    public String getLibelle() {
+        return libelle;
+    }
+
+    public List<String> getValeurs() {
+        return valeurs;
+    }
+
     public static String libelle(String valeur) {
         if (valeur == null || valeur.isBlank()) return "Type non renseigné";
         for (TypeCarteFiltre type : values()) if (type.valeurs.contains(valeur)) return type.libelle;

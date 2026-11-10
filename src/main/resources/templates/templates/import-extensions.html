@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Importer le catalogue — Gestion SWU</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/import-extensions.css(v=3)}">
+    <script th:src="@{/js/import-attente.js(v=2)}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header('admin')}"></header>
+
+<main class="import-page">
+    <p class="import-eyebrow">ADMINISTRATION</p>
+    <h1>Enrichir <span>le catalogue.</span></h1>
+    <p class="import-intro">
+        Importez toutes les impressions françaises publiées : standard, foil, hyperspace, Showcase, Prestige et promotions liées.
+        Les fiches existantes sont mises à jour sans modifier vos quantités. Les éditions promotionnelles liées sont créées si nécessaire.
+    </p>
+
+    <p th:if="${erreurImport != null}" th:text="${erreurImport}"
+       class="import-notice import-notice-erreur" role="alert"></p>
+
+    <section th:if="${bilanImport != null}"
+             class="import-notice import-notice-succes" role="status">
+        <h2 th:text="${'Import terminé : ' + bilanImport.codeExtension}"></h2>
+        <p th:text="${bilanImport.ajouts + ' ajout(s) et '
+            + bilanImport.misesAJour + ' mise(s) à jour.'}"></p>
+    </section>
+
+    <section class="import-panneau">
+        <h2>Choisir un import</h2>
+        <p class="import-aide">
+            L’import global traite toutes les extensions enregistrées dans votre application,
+            les unes après les autres. Une extension en échec n’empêche pas les suivantes.
+        </p>
+
+        <form th:action="@{/admin/import/extensions}" method="post" data-import-form>
+            <label for="extensionId">Extension</label>
+            <select id="extensionId" name="extensionId" required
+                    th:disabled="${#lists.isEmpty(extensions)}">
+                <option value="" th:selected="${extensionSelectionnee == null}">
+                    Sélectionnez une extension
+                </option>
+                <option th:each="extension : ${extensions}"
+                        th:value="${extension.id}"
+                        th:selected="${extension.id == extensionSelectionnee}"
+                        th:text="${extension.code + ' — ' + extension.nom}"></option>
+            </select>
+
+            <div class="import-boutons">
+                <button type="submit" th:disabled="${#lists.isEmpty(extensions)}">
+                    Importer cette extension →
+                </button>
+                <button type="submit" class="import-bouton-global"
+                        th:formaction="@{/admin/import/extensions/toutes}"
+                        th:disabled="${#lists.isEmpty(extensions)}"
+                        data-import-toutes formnovalidate>
+                    Importer toutes les extensions →
+                </button>
+            </div>
+
+            <p class="import-aide" th:text="${#lists.size(extensions)
+                + ' extension(s) enregistrée(s).'}"></p>
+        </form>
+
+        <p th:if="${#lists.isEmpty(extensions)}" class="import-aide">
+            Ajoutez d’abord vos extensions depuis l’administration des extensions.
+        </p>
+
+        <div class="import-attente" data-import-attente role="status"
+             aria-live="polite" hidden>
+            <div class="import-attente-entete">
+                <span class="import-spinner" aria-hidden="true"></span>
+                <div>
+                    <strong data-import-titre>Import en cours…</strong>
+                    <p>Les cartes et leurs variantes sont en cours de traitement.</p>
+                </div>
+            </div>
+            <progress class="import-progression" aria-label="Import en cours"></progress>
+            <p class="import-aide">
+                Gardez cette page ouverte. L’import global peut prendre plusieurs minutes.
+            </p>
+        </div>
+    </section>
+
+    <section th:if="${bilanToutes != null}" class="import-panneau import-bilan-global">
+        <h2>Résultat de l’import global</h2>
+        <p class="import-aide" th:text="${bilanToutes.reussites
+            + ' extension(s) importée(s) avec succès sur ' + bilanToutes.total + '.'}"></p>
+
+        <ul class="import-bilan-liste">
+            <li th:each="detail : ${bilanToutes.details}">
+                <strong th:text="${detail.codeExtension}"></strong>
+                <span th:if="${detail.erreur == null}" class="import-global-succes"
+                      th:text="${'✓ ' + detail.ajouts + ' ajout(s), '
+                          + detail.misesAJour + ' mise(s) à jour'}"></span>
+                <span th:if="${detail.nonReliees > 0}" class="import-global-erreur" th:text="${detail.nonReliees + ' référence(s) à vérifier dans la source'}"></span>
+                <span th:if="${detail.erreur != null}" class="import-global-erreur"
+                      th:text="${'✕ ' + detail.erreur}"></span>
+            </li>
+        </ul>
+    </section>
+
+    <a class="import-retour" th:href="@{/templates/templates/admin}">← Retour à l’administration</a>
+    <p class="notice" th:if="${bilanImport != null and bilanImport.nonReliees > 0}" th:text="${bilanImport.nonReliees + ' impression(s) sans lien de référence fiable dans la source. Elles sont conservées avec leur traitement et signalées dans le catalogue ; aucun rattachement approximatif n’est créé.'}"></p>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

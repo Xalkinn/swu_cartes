@@ -1,10 +1,8 @@
 package fr.xalkinn.swu.importation;
 
 import fr.xalkinn.swu.extension.ExtensionRepository;
-
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

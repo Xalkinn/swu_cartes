@@ -1,7 +1,6 @@
 package fr.xalkinn.swu.extension;
 
 import jakarta.validation.Valid;
-
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;

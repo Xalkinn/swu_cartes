@@ -1,8 +1,8 @@
 package fr.xalkinn.swu.carte;
 
 import fr.xalkinn.swu.extension.Extension;
-
 import jakarta.persistence.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +40,9 @@ public class Carte {
     @Column(name = "type_carte", length = 40)
     private String typeCarte;
 
-    public String getTypeCarte() { return typeCarte; }
+    public String getTypeCarte() {
+        return typeCarte;
+    }
 
     public void actualiserType(String typeCarte) {
         if (typeCarte == null || typeCarte.isBlank() || typeCarte.length() > 40) {
@@ -52,9 +54,13 @@ public class Carte {
     @Column(name = "rarete", length = 2)
     private String rarete;
 
-    public String getRarete() { return rarete; }
+    public String getRarete() {
+        return rarete;
+    }
+
     public void actualiserRarete(String code) {
-        if (code != null && (Rarete.valueOf(code) == Rarete.INCONNUE)) throw new IllegalArgumentException("Code de rareté invalide.");
+        if (code != null && (Rarete.valueOf(code) == Rarete.INCONNUE))
+            throw new IllegalArgumentException("Code de rareté invalide.");
         this.rarete = code;
     }
 
@@ -81,23 +87,54 @@ public class Carte {
     @Column(name = "rattachement_attendu", nullable = false)
     private boolean rattachementAttendu;
 
-    public VarianteCarte getVariante(){ return variante; }
-    public FinitionCarte getFinition(){ return finition; }
-    public String getCodeVarianteSource(){ return codeVarianteSource; }
-    public boolean isRattachementAttendu(){return rattachementAttendu;}
-    public boolean isReference(){return variante==VarianteCarte.STANDARD && finition!=FinitionCarte.FOIL && carteStandard==null && !rattachementAttendu;}
-    public boolean isFoilAutorise(){return finition.autorise(true);}
-    public boolean isNonFoilAutorise(){return finition.autorise(false);}
-    public String getLibelleVariante(){return libelleVariante==null?variante.getLibelle():libelleVariante;}
-    public String libelleVersion(boolean foil){
-        String libelle=getLibelleVariante();
-        if(foil && variante!=VarianteCarte.SHOWCASE && variante!=VarianteCarte.PRESTIGE_SERIALISEE && !libelle.toLowerCase(java.util.Locale.ROOT).contains("foil"))libelle+=" foil";
+    public VarianteCarte getVariante() {
+        return variante;
+    }
+
+    public FinitionCarte getFinition() {
+        return finition;
+    }
+
+    public String getCodeVarianteSource() {
+        return codeVarianteSource;
+    }
+
+    public boolean isRattachementAttendu() {
+        return rattachementAttendu;
+    }
+
+    public boolean isReference() {
+        return variante == VarianteCarte.STANDARD && finition != FinitionCarte.FOIL && carteStandard == null && !rattachementAttendu;
+    }
+
+    public boolean isFoilAutorise() {
+        return finition.autorise(true);
+    }
+
+    public boolean isNonFoilAutorise() {
+        return finition.autorise(false);
+    }
+
+    public String getLibelleVariante() {
+        return libelleVariante == null ? variante.getLibelle() : libelleVariante;
+    }
+
+    public String libelleVersion(boolean foil) {
+        String libelle = getLibelleVariante();
+        if (foil && variante != VarianteCarte.SHOWCASE && variante != VarianteCarte.PRESTIGE_SERIALISEE && !libelle.toLowerCase(java.util.Locale.ROOT).contains("foil"))
+            libelle += " foil";
         return libelle;
     }
-    public void actualiserVariante(VarianteCarte variante,FinitionCarte finition,String code,String libelle,boolean rattachementAttendu){
-        if(variante==null||finition==null||code!=null&&code.length()>24||libelle!=null&&libelle.length()>120)throw new IllegalArgumentException("Variante invalide.");
-        this.variante=variante;this.finition=finition;this.hyperspace=variante==VarianteCarte.HYPERSPACE;
-        this.codeVarianteSource=code;this.libelleVariante=libelle;this.rattachementAttendu=rattachementAttendu;
+
+    public void actualiserVariante(VarianteCarte variante, FinitionCarte finition, String code, String libelle, boolean rattachementAttendu) {
+        if (variante == null || finition == null || code != null && code.length() > 24 || libelle != null && libelle.length() > 120)
+            throw new IllegalArgumentException("Variante invalide.");
+        this.variante = variante;
+        this.finition = finition;
+        this.hyperspace = variante == VarianteCarte.HYPERSPACE;
+        this.codeVarianteSource = code;
+        this.libelleVariante = libelle;
+        this.rattachementAttendu = rattachementAttendu;
     }
 
     @ElementCollection(fetch = FetchType.LAZY)
@@ -128,11 +165,19 @@ public class Carte {
     private java.util.Set<String> traits = new java.util.HashSet<>();
 
     public void actualiserIdentite(java.util.Set<String> arenes, java.util.Set<String> traits) {
-        this.arenes.clear(); this.arenes.addAll(arenes);
-        this.traits.clear(); this.traits.addAll(traits);
+        this.arenes.clear();
+        this.arenes.addAll(arenes);
+        this.traits.clear();
+        this.traits.addAll(traits);
     }
-    public java.util.Set<String> getArenes() { return java.util.Set.copyOf(arenes); }
-    public java.util.Set<String> getTraits() { return java.util.Set.copyOf(traits); }
+
+    public java.util.Set<String> getArenes() {
+        return java.util.Set.copyOf(arenes);
+    }
+
+    public java.util.Set<String> getTraits() {
+        return java.util.Set.copyOf(traits);
+    }
 
     protected Carte() {
     }
@@ -182,14 +227,18 @@ public class Carte {
     }
 
     // Conserve un nombre en BDD, mais permet l'affichage « 005 ».
-    public boolean isJeton(){return ReferenceCarte.estJeton(typeCarte);}
+    public boolean isJeton() {
+        return ReferenceCarte.estJeton(typeCarte);
+    }
+
     public String getNumeroAffiche() {
-        return ReferenceCarte.afficher(numero,isJeton());
+        return ReferenceCarte.afficher(numero, isJeton());
     }
 
     public Extension getExtension() {
         return extension;
     }
+
     public void actualiserImages(String imageRecto, String imageVerso) {
         this.imageRecto = imageRecto;
         this.imageVerso = imageVerso;

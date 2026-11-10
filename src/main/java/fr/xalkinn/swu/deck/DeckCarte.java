@@ -6,7 +6,8 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "deck_cartes", uniqueConstraints = @UniqueConstraint(columnNames = {"deck_id", "carte_id"}))
 public class DeckCarte {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "deck_id", nullable = false)
@@ -16,14 +17,27 @@ public class DeckCarte {
     private Carte carte;
     @Column(nullable = false)
     private int quantite;
-    protected DeckCarte() {}
-    public DeckCarte(Deck deck, Carte carte, int quantite) {
-        this.deck = deck; this.carte = carte; modifierQuantite(quantite);
+
+    protected DeckCarte() {
     }
+
+    public DeckCarte(Deck deck, Carte carte, int quantite) {
+        this.deck = deck;
+        this.carte = carte;
+        modifierQuantite(quantite);
+    }
+
     public void modifierQuantite(int quantite) {
-        if (quantite < 1 || quantite > 99) throw new IllegalArgumentException("Choisissez une quantité comprise entre 1 et 99.");
+        if (quantite < 1 || quantite > 99)
+            throw new IllegalArgumentException("Choisissez une quantité comprise entre 1 et 99.");
         this.quantite = quantite;
     }
-    public Carte getCarte() { return carte; }
-    public int getQuantite() { return quantite; }
+
+    public Carte getCarte() {
+        return carte;
+    }
+
+    public int getQuantite() {
+        return quantite;
+    }
 }

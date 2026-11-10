@@ -3,9 +3,8 @@ package fr.xalkinn.swu.deck;
 import fr.xalkinn.swu.carte.Affinite;
 import fr.xalkinn.swu.carte.Rarete;
 import fr.xalkinn.swu.carte.TypeCarteFiltre;
-import java.util.List;
-import fr.xalkinn.swu.recherche.RechercheService;
 import fr.xalkinn.swu.extension.ExtensionRepository;
+import fr.xalkinn.swu.recherche.RechercheService;
 import fr.xalkinn.swu.securite.UtilisateurConnecte;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,21 +13,28 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/decks")
 public class DeckController {
     private final DeckService service;
     private final ExtensionRepository extensions;
     private final RechercheService recherches;
+
     public DeckController(DeckService service, ExtensionRepository extensions, RechercheService recherches) {
-        this.service = service; this.extensions = extensions; this.recherches = recherches;
+        this.service = service;
+        this.extensions = extensions;
+        this.recherches = recherches;
     }
+
     @GetMapping
     public String lister(@AuthenticationPrincipal UtilisateurConnecte principal,
                          @RequestParam(defaultValue = "0") int page, Model model) {
         model.addAttribute("resultat", service.lister(principal.getUtilisateurId(), page));
         return "decks/index";
     }
+
     @PostMapping
     public String creer(@AuthenticationPrincipal UtilisateurConnecte principal, @RequestParam String nom,
                         @RequestParam(defaultValue = "") String description, RedirectAttributes redirect) {
@@ -43,6 +49,7 @@ public class DeckController {
             return "redirect:/decks";
         }
     }
+
     @GetMapping("/{id}")
     public String afficher(@AuthenticationPrincipal UtilisateurConnecte principal, @PathVariable Long id,
                            @ModelAttribute("filtres") RechercheDeck filtres, Model model) {
@@ -66,6 +73,7 @@ public class DeckController {
         }
         return "decks/editeur";
     }
+
     @PostMapping("/{id}/informations")
     public String renommer(@AuthenticationPrincipal UtilisateurConnecte principal, @PathVariable Long id,
                            @RequestParam String nom, @RequestParam(defaultValue = "") String description,
@@ -73,6 +81,7 @@ public class DeckController {
         return action(() -> service.renommer(principal.getUtilisateurId(), id, nom, description),
                 "/decks/" + id, "Les informations du deck ont été enregistrées.", redirect);
     }
+
     @PostMapping("/{id}/publication")
     public String publication(@AuthenticationPrincipal UtilisateurConnecte principal, @PathVariable Long id,
                               @RequestParam boolean publier, @ModelAttribute("filtres") RechercheDeck filtres,
@@ -81,13 +90,15 @@ public class DeckController {
                 filtres.url(id, filtres.page()).replace("#recherche", "#publication"),
                 publier ? "Votre deck est publié dans la communauté." : "Votre deck a été retiré de la communauté.", redirect);
     }
+
     @PostMapping("/{id}/supprimer")
     public String supprimer(@AuthenticationPrincipal UtilisateurConnecte principal, @PathVariable Long id,
-                           RedirectAttributes redirect) {
+                            RedirectAttributes redirect) {
         service.supprimer(principal.getUtilisateurId(), id);
         redirect.addFlashAttribute("succesDeck", "Le deck a été supprimé. Votre collection est conservée.");
         return "redirect:/decks";
     }
+
     @PostMapping("/{id}/choisir")
     public String choisir(@AuthenticationPrincipal UtilisateurConnecte principal, @PathVariable Long id,
                           @RequestParam(required = false) Long carteId, @RequestParam DeckService.Zone emplacement,
@@ -95,6 +106,7 @@ public class DeckController {
         return action(() -> service.choisir(principal.getUtilisateurId(), id, carteId, emplacement),
                 filtres.url(id, filtres.page()), "La sélection du deck a été enregistrée.", redirect);
     }
+
     @PostMapping("/{id}/ajouter")
     public String ajouter(@AuthenticationPrincipal UtilisateurConnecte principal, @PathVariable Long id,
                           @RequestParam Long carteId, @RequestParam(defaultValue = "1") int quantite,
@@ -102,6 +114,7 @@ public class DeckController {
         return action(() -> service.ajouter(principal.getUtilisateurId(), id, carteId, quantite),
                 filtres.url(id, filtres.page()), "Carte ajoutée au deck.", redirect);
     }
+
     @PostMapping("/{id}/quantite")
     public String quantite(@AuthenticationPrincipal UtilisateurConnecte principal, @PathVariable Long id,
                            @RequestParam Long carteId, @RequestParam int quantite,
@@ -109,9 +122,14 @@ public class DeckController {
         return action(() -> service.quantite(principal.getUtilisateurId(), id, carteId, quantite),
                 filtres.url(id, filtres.page()).replace("#recherche", "#composition"), "La composition a été mise à jour.", redirect);
     }
+
     private String action(Runnable action, String retour, String succes, RedirectAttributes redirect) {
-        try { action.run(); redirect.addFlashAttribute("succesDeck", succes); }
-        catch (IllegalArgumentException e) { redirect.addFlashAttribute("erreurDeck", e.getMessage()); }
+        try {
+            action.run();
+            redirect.addFlashAttribute("succesDeck", succes);
+        } catch (IllegalArgumentException e) {
+            redirect.addFlashAttribute("erreurDeck", e.getMessage());
+        }
         return "redirect:" + retour;
     }
 }

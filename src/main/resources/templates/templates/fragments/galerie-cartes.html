@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"><body>
+
+<!-- Image activable, réutilisée pour le recto, le verso et chaque finition possédée. -->
+<th:block th:fragment="image(url, titre, reference)">
+    <button th:if="${!#strings.isEmpty(url)}" class="carte-galerie-image" type="button" aria-haspopup="dialog" aria-controls="carte-zoom"
+            th:attr="data-carte-zoom=${url},data-carte-titre=${titre},data-carte-reference=${reference},aria-label=${'Agrandir ' + titre}">
+        <img th:src="${url}" th:alt="${titre}" loading="lazy" decoding="async">
+        <span class="carte-galerie-agrandir">Agrandir ↗</span>
+    </button>
+    <div th:if="${#strings.isEmpty(url)}" class="carte-galerie-sans-image"><span aria-hidden="true">✦</span><p>Image indisponible</p></div>
+</th:block>
+
+<dialog th:fragment="catalogue(carte, quantite)" class="carte-dialog carte-dialog-catalogue"
+        th:id="${'catalogue-carte-' + carte.id}" th:attr="aria-labelledby=${'catalogue-dialog-titre-' + carte.id}">
+    <div class="carte-dialog-entete">
+        <div><p class="carte-dialog-eyebrow" th:text="${carte.codeExtension + ' · ' + carte.numeroAffiche}"></p>
+            <h2 th:id="${'catalogue-dialog-titre-' + carte.id}" th:text="${carte.titre}"></h2>
+            <p th:if="${!#strings.isEmpty(carte.sousTitre)}" th:text="${carte.sousTitre}" class="carte-dialog-sous-titre"></p>
+        </div>
+        <button type="button" class="carte-dialog-fermer" data-fermer-dialog aria-label="Fermer la fiche de carte" autofocus>✕</button>
+    </div>
+    <div class="carte-dialog-corps">
+        <p th:if="${erreurCollection}" th:text="${erreurCollection}" class="carte-dialog-erreur" role="alert"></p>
+        <div class="carte-detail-grille">
+            <article class="carte-galerie-carte carte-detail-recto">
+                    <div class="carte-galerie-visuel"><th:block th:replace="~{fragments/galerie-cartes :: image(${carte.imageRecto}, ${carte.titre}, ${carte.codeExtension + ' · ' + carte.numeroAffiche})}"></th:block></div>
+                    <p class="carte-face-legende">Recto · Cliquez pour agrandir</p>
+                </article>
+            <section class="carte-detail-infos" aria-label="Informations et ajout à ma collection">
+                <p class="carte-galerie-reference" th:text="${carte.nomExtension}"></p>
+                <p class="carte-detail-cout" th:text="${carte.cout == null ? 'Coût non renseigné' : 'Coût en ressources : ' + carte.cout}"></p>
+                <th:block th:replace="~{fragments/filtres-cartes :: badges(${carte})}"></th:block>
+                <div class="carte-detail-affinites">
+                    <th:block th:each="affinite : ${affinitesDisponibles}">
+                        <span th:if="${carte.affinites.containsKey(affinite.name())}" class="carte-detail-affinite">
+                            <i th:style="${'background:' + affinite.couleur}" aria-hidden="true"></i><span th:text="${affinite.libelle}"></span>
+                            <strong th:if="${carte.affinites.get(affinite.name()) > 1}" th:text="${'×' + carte.affinites.get(affinite.name())}"></strong>
+                        </span>
+                    </th:block>
+                    <span th:if="${carte.affinites.empty}" class="carte-detail-affinite">Sans affinité</span>
+                </div>
+                <div class="carte-detail-stock"><span>Dans votre collection, pour cette référence</span><strong th:text="${quantite}"></strong><span>exemplaire(s), foil inclus</span></div>
+                <p class="carte-galerie-reference" th:text="${carte.versionLibelle}"></p>
+                <p th:if="${carte.nonReliee}" class="carte-dialog-erreur">Cette impression n'est pas encore rattachée à sa carte de référence dans la source.</p>
+                <h3>Ajouter à ma collection</h3>
+                <div class="carte-detail-ajouts">
+                    <form th:each="foil : ${ {false, true} }" th:if="${foil ? carte.foilAutorise : carte.nonFoilAutorise}" th:action="@{/collection/ajuster}" method="post">
+                        <input type="hidden" name="carteId" th:value="${carte.id}"><input type="hidden" name="variation" value="1">
+                        <input type="hidden" name="foil" th:value="${foil}"><input type="hidden" name="retour" th:value="${retourCatalogue}">
+                        <label th:if="${carte.variante.name() == 'PRESTIGE_SERIALISEE'}">Numéro de série (facultatif)<input type="text" name="serie" placeholder="042/250" maxlength="30"></label>
+                        <button class="carte-ajouter" type="submit" th:disabled="${quantite >= 9999}"
+                                th:attr="aria-label=${'Ajouter un exemplaire ' + (foil ? 'foil' : 'non foil') + ' de ' + carte.titre}">
+                            <span aria-hidden="true">+</span><span th:text="${foil ? '1 exemplaire foil' : '1 exemplaire non foil'}"></span>
+                        </button>
+                    </form>
+                </div>
+                <div class="carte-detail-recherche">
+                    <th:block th:replace="~{fragments/recherches :: coeur(${carte.id}, ${carte.titre}, ${recherchesSelection.contains(carte.id)}, ${retourCatalogue})}"></th:block>
+                    <p>Marquer cette carte<br><strong>dans mes recherches</strong></p>
+                </div>
+                <p class="carte-detail-aide">Après l’ajout, cette fenêtre reste ouverte pour ajouter un autre exemplaire.</p>
+            </section>
+                <article th:if="${!#strings.isEmpty(carte.imageVerso)}" class="carte-galerie-carte carte-detail-verso">
+                    <div class="carte-galerie-visuel"><th:block th:replace="~{fragments/galerie-cartes :: image(${carte.imageVerso}, ${carte.titre + ' — verso'}, ${carte.codeExtension + ' · ' + carte.numeroAffiche})}"></th:block></div>
+                    <p class="carte-face-legende">Verso · Cliquez pour agrandir</p>
+                </article>
+
+        </div>
+    </div>
+    <div class="carte-dialog-pied"><span>Le cœur est partagé avec le catalogue et vos recherches.</span><button type="button" data-fermer-dialog>Retour au catalogue</button></div>
+</dialog>
+
+<dialog th:fragment="collection(carte)" class="carte-dialog versions-dialog" th:id="${'versions-' + carte.idCarte}"
+        th:attr="aria-labelledby=${'titre-versions-' + carte.idCarte}">
+    <div class="carte-dialog-entete">
+        <div><p class="carte-dialog-eyebrow" th:text="${carte.codeExtension + ' · ' + carte.numeroAffiche}"></p>
+            <h2 th:id="${'titre-versions-' + carte.idCarte}" th:text="${carte.titre}"></h2>
+            <p th:if="${!#strings.isEmpty(carte.sousTitre)}" th:text="${carte.sousTitre}" class="carte-dialog-sous-titre"></p>
+        </div>
+        <button type="button" class="carte-dialog-fermer" data-fermer-dialog aria-label="Fermer les versions possédées" autofocus>✕</button>
+    </div>
+    <div class="carte-dialog-corps">
+        <p th:if="${erreurCollection}" th:text="${erreurCollection}" class="carte-dialog-erreur" role="alert"></p>
+        <div class="carte-collection-resume"><p><strong th:text="${carte.quantite}"></strong> exemplaire(s) au total <span th:text="${'· dont ' + carte.quantiteFoil + ' foil(s)'}"></span></p>
+            <p>Vos finitions possédées. Cliquez sur une image pour l’agrandir.</p></div>
+        <div class="carte-galerie versions-liste">
+            <article th:each="version : ${carte.versions}" class="carte-galerie-carte version-ligne" th:classappend="${version.foil} ? 'carte-version-foil' : ''">
+                <div class="carte-galerie-visuel">
+                    <th:block th:replace="~{fragments/galerie-cartes :: image(${version.imageRecto}, ${carte.titre + ' — ' + version.libelle}, ${(version.codeExtension == '' ? carte.codeExtension : version.codeExtension) + ' · ' + version.numeroAffiche})}"></th:block>
+                    <span class="carte-galerie-quantite" th:text="${'× ' + version.quantite}"></span>
+                </div>
+                <div class="carte-galerie-infos">
+                    <p class="carte-galerie-reference" th:text="${(version.codeExtension == '' ? carte.codeExtension : version.codeExtension) + ' · ' + version.numeroAffiche}"></p>
+                    <h3 th:text="${version.libelle}"></h3><p class="carte-version-nom" th:text="${carte.titre}"></p>
+                    <p class="carte-version-stock"><strong th:text="${version.quantite}"></strong> exemplaire(s) possédé(s)</p>
+                    <p th:if="${!version.numerosSerie.empty}" class="carte-galerie-reference" th:text="${'Séries : ' + #strings.listJoin(version.numerosSerie, ', ')}"></p>
+                    <form th:action="@{/collection/ajuster}" method="post" class="version-actions">
+                        <label th:if="${!version.numerosSerie.empty}">Exemplaire à retirer<select name="serie"><option value="">Sans numéro renseigné</option><option th:each="serie : ${version.numerosSerie}" th:value="${serie}" th:text="${serie}"></option></select></label>
+                        <input type="hidden" name="carteId" th:value="${version.idCarte}"><input type="hidden" name="foil" th:value="${version.foil}">
+                        <input type="hidden" name="retour" th:value="${retour}">
+                        <button type="submit" name="variation" value="-1" th:attr="aria-label=${'Retirer un exemplaire ' + version.libelle + ' de ' + carte.titre}">−1</button>
+                        <button type="submit" name="variation" value="1" th:disabled="${version.totalSurCarte >= 9999}" th:attr="aria-label=${'Ajouter un exemplaire ' + version.libelle + ' de ' + carte.titre}">+1</button>
+                    </form>
+                </div>
+            </article>
+        </div>
+        <p class="carte-detail-aide">Pour ajouter une finition absente de cette galerie, utilisez l’ajout rapide.</p>
+    </div>
+    <div class="carte-dialog-pied"><div class="carte-pied-recherche"><th:block th:replace="~{fragments/recherches :: coeur(${carte.idCarte}, ${carte.titre}, ${recherchesSelection.contains(carte.idCarte)}, ${retour})}"></th:block><span>Marquer cette carte dans mes recherches</span></div><button type="button" data-fermer-dialog>Retour à ma collection</button></div>
+</dialog>
+
+<dialog th:fragment="zoom" id="carte-zoom" class="carte-dialog carte-dialog-zoom" aria-labelledby="carte-zoom-titre">
+    <div class="carte-dialog-entete"><div><h2 id="carte-zoom-titre" data-carte-zoom-titre>Carte en grand</h2><p data-carte-zoom-reference></p></div>
+        <button type="button" class="carte-dialog-fermer" data-fermer-dialog aria-label="Fermer l’agrandissement" autofocus>✕</button></div>
+    <div class="carte-zoom-corps"><img data-carte-zoom-image alt=""></div>
+</dialog>
+</body></html>

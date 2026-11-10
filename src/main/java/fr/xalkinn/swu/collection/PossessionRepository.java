@@ -140,8 +140,9 @@ public interface PossessionRepository
                      and r.carte.id = coalesce(standard.id,c.id)))
             """)
     Page<Long> trouverGroupesFiltres(@Param("email") String email, @Param("q") String q,
-            @Param("numero") Integer numero, @Param("extensionId") Long extensionId,
-            @Param("version") String version, @Param("recherches") boolean recherches, Pageable pageable);
+                                     @Param("numero") Integer numero, @Param("extensionId") Long extensionId,
+                                     @Param("version") String version, @Param("recherches") boolean recherches, Pageable pageable);
+
     // Filtre les groupes avant la pagination. Les quantités de toutes leurs versions
     // sont ensuite chargées par trouverPossessionsDesGroupes, sans perdre d'exemplaires.
     @Query(value = """
@@ -155,7 +156,7 @@ public interface PossessionRepository
                    or (lower(:q) like 't%' and coalesce(standard.typeCarte,c.typeCarte,'') in ('Token','Token Unit','Token Upgrade'))
                    or (lower(:q) not like 't%' and coalesce(standard.typeCarte,c.typeCarte,'') not in ('Token','Token Unit','Token Upgrade')))
               and (:extensionId is null or coalesce(se.id,e.id) = :extensionId)
-
+            
               and (:filtreArenes = false or exists (select a from Carte ref join ref.arenes a
                    where ref.id = coalesce(standard.id,c.id) and a in :arenes))
               and (:filtreTraits = false
@@ -189,7 +190,7 @@ public interface PossessionRepository
                    or (lower(:q) like 't%' and coalesce(standard.typeCarte,c.typeCarte,'') in ('Token','Token Unit','Token Upgrade'))
                    or (lower(:q) not like 't%' and coalesce(standard.typeCarte,c.typeCarte,'') not in ('Token','Token Unit','Token Upgrade')))
               and (:extensionId is null or coalesce(se.id,e.id) = :extensionId)
-
+            
               and (:filtreArenes = false or exists (select a from Carte ref join ref.arenes a
                    where ref.id = coalesce(standard.id,c.id) and a in :arenes))
               and (:filtreTraits = false
@@ -212,15 +213,16 @@ public interface PossessionRepository
                      and r.carte.id = coalesce(standard.id,c.id)))
             """)
     Page<Long> trouverGroupesFiltresIdentitePour(@Param("email") String email, @Param("q") String q,
-            @Param("numero") Integer numero, @Param("extensionId") Long extensionId,
-            @Param("version") String version, @Param("recherches") boolean recherches,
-            @Param("filtreArenes") boolean filtreArenes, @Param("arenes") List<String> arenes,
-            @Param("filtreTraits") boolean filtreTraits, @Param("traits") List<String> traits,
-            @Param("tousTraits") boolean tousTraits, @Param("nombreTraits") long nombreTraits, @Param("recherchesUtilisateurId") Long recherchesUtilisateurId, Pageable pageable);
+                                                 @Param("numero") Integer numero, @Param("extensionId") Long extensionId,
+                                                 @Param("version") String version, @Param("recherches") boolean recherches,
+                                                 @Param("filtreArenes") boolean filtreArenes, @Param("arenes") List<String> arenes,
+                                                 @Param("filtreTraits") boolean filtreTraits, @Param("traits") List<String> traits,
+                                                 @Param("tousTraits") boolean tousTraits, @Param("nombreTraits") long nombreTraits, @Param("recherchesUtilisateurId") Long recherchesUtilisateurId, Pageable pageable);
+
     default Page<Long> trouverGroupesFiltresIdentite(String email, String q, Integer numero, Long extensionId,
-            String version, boolean recherches, boolean filtreArenes, List<String> arenes,
-            boolean filtreTraits, List<String> traits, boolean tousTraits, long nombreTraits, Pageable pageable) {
-        return trouverGroupesFiltresIdentitePour(email,q,numero,extensionId,version,recherches,filtreArenes,arenes,
-                filtreTraits,traits,tousTraits,nombreTraits,null,pageable);
+                                                     String version, boolean recherches, boolean filtreArenes, List<String> arenes,
+                                                     boolean filtreTraits, List<String> traits, boolean tousTraits, long nombreTraits, Pageable pageable) {
+        return trouverGroupesFiltresIdentitePour(email, q, numero, extensionId, version, recherches, filtreArenes, arenes,
+                filtreTraits, traits, tousTraits, nombreTraits, null, pageable);
     }
 }

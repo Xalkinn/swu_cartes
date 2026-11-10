@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Catalogue — Gestion SWU</title>
+
+    <!-- Styles communs -->
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+
+    <!-- Styles du catalogue -->
+    <link rel="stylesheet" th:href="@{/css/catalogue.css(v=5)}">
+
+    <!-- Boutons de gestion de la collection -->
+    <link rel="stylesheet" th:href="@{/css/collection.css(v=1)}">
+    <link rel="stylesheet" th:href="@{/css/recherches.css(v=3)}">
+    <script th:src="@{/js/recherches.js(v=4)}" defer></script>
+    <script th:src="@{/js/filtres.js(v=1)}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/galerie-cartes.css(v=1)}">
+    <script th:src="@{/js/galerie-cartes.js(v=1)}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/filtres-cartes.css(v=1)}">
+<link rel="stylesheet" th:href="@{/css/identite-cartes.css(v=1)}">
+    <script th:src="@{/js/identite-cartes.js(v=1)}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/variantes.css(v=1)}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header('catalogue')}"></header>
+
+<main class="catalogue-page">
+    <th:block th:replace="~{fragments/recherches :: messages}"></th:block>
+
+    <p class="eyebrow">STAR WARS UNLIMITED</p>
+
+    <h1>Le <span>catalogue.</span></h1>
+    <p class="recherches-acces"><a class="recherches-acces-bouton" th:href="@{/recherches}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.6 5.6 0 0 0-7.9 0L12 5.5l-.9-.9a5.6 5.6 0 0 0-7.9 7.9L12 21l8.8-8.5a5.6 5.6 0 0 0 0-7.9Z"/></svg>
+        Voir mes recherches <span class="recherches-acces-fleche" aria-hidden="true">→</span>
+    </a><span>Un cœur rempli indique une carte recherchée.</span></p>
+
+    <!-- =====================================
+         RECHERCHE ET FILTRES
+         ===================================== -->
+
+    <form th:action="@{/catalogue}" method="get" class="catalogue-recherche-formulaire">
+        <div class="catalogue-recherche-rapide">
+            <div><label for="q">Rechercher une carte</label><input type="search" id="q" name="q" th:value="${recherche}" maxlength="100" placeholder="Titre, sous-titre ou numéro…"></div>
+            <div><label for="extensionId">Extension</label><select id="extensionId" name="extensionId"><option value="">Toutes les extensions</option><option th:each="extension : ${extensions}" th:value="${extension.id}" th:selected="${extension.id == extensionSelectionnee}" th:text="${extension.code + ' · ' + extension.nom}"></option></select></div>
+            <button type="submit">Rechercher →</button>
+        </div>
+        <details class="catalogue-filtres-panneau" th:open="${erreur != null}">
+            <summary><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z"/></svg><span>Filtres avancés</span><span class="catalogue-filtres-compte" th:if="${nombreFiltresAvances > 0}" th:text="${nombreFiltresAvances}"></span><svg class="catalogue-filtres-signe" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <div class="catalogue-filtres-interieur">
+                <div class="catalogue-couts"><div><label for="variante">Variante</label><select id="variante" name="variante"><option value="TOUTES">Toutes les variantes</option><option th:each="v : ${variantesDisponibles}" th:value="${v.name()}" th:selected="${varianteSelectionnee == v.name()}" th:text="${v.libelle}"></option></select></div><div><label for="finition-catalogue">Finition</label><select id="finition-catalogue" name="finition"><option value="TOUTES">Toutes les finitions</option><option value="NON_FOIL" th:selected="${finitionSelectionnee == 'NON_FOIL'}">Non foil</option><option value="FOIL" th:selected="${finitionSelectionnee == 'FOIL'}">Foil</option></select></div></div>
+                <div class="catalogue-couts"><div><label for="coutMin">Coût minimum</label><input type="number" id="coutMin" name="coutMin" min="0" th:value="${coutMin}" placeholder="Sans limite"></div><div><label for="coutMax">Coût maximum</label><input type="number" id="coutMax" name="coutMax" min="0" th:value="${coutMax}" placeholder="Sans limite"></div></div>
+                <fieldset class="catalogue-affinites-compactes"><legend>Affinités</legend><div class="affinites-options"><label th:each="affinite : ${affinitesDisponibles}"><input type="checkbox" name="affinites" th:value="${affinite.name()}" th:checked="${selectionAffinites.contains(affinite.name())}"><span class="affinite-pastille" th:style="${'background:' + affinite.couleur}"></span><span th:text="${affinite.libelle}"></span></label></div></fieldset>
+                <div class="catalogue-combinaison"><label for="mode">Combinaison des affinités</label><select id="mode" name="mode"><option value="TOUTES" th:selected="${mode == 'TOUTES'}">Toutes les affinités cochées</option><option value="UNE" th:selected="${mode == 'UNE'}">Au moins une affinité cochée</option><option value="SANS" th:selected="${mode == 'SANS'}">Sans affinité</option></select></div>
+                <th:block th:replace="~{fragments/filtres-cartes :: choix(${selectionRaretes}, ${selectionTypes}, true)}"></th:block>
+                <th:block th:replace="~{fragments/filtres-cartes :: identite}"></th:block>
+                <button type="submit" class="catalogue-appliquer">Appliquer les filtres</button>
+            </div>
+        </details>
+    </form>
+    <div class="catalogue-filtres-actifs" th:if="${!filtresActifs.empty}" aria-label="Filtres actifs">
+        <span>Votre sélection</span><a class="catalogue-filtre-actif" th:each="filtre : ${filtresActifs}" th:href="@{${filtre.url}}" th:attr="aria-label=${'Retirer le filtre ' + filtre.libelle}"><span th:text="${filtre.libelle}"></span><span aria-hidden="true">×</span></a><a class="catalogue-effacer" th:href="@{/catalogue}">Tout effacer</a>
+    </div>
+
+    <!-- =====================================
+         MESSAGES ET COMPTEUR
+         ===================================== -->
+
+    <p
+            th:if="${erreur}"
+            th:text="${erreur}"
+            class="notice"
+            role="alert">
+        Erreur de recherche
+    </p>
+
+    <p
+            th:if="${erreurCollection}"
+            th:text="${erreurCollection}"
+            class="notice"
+            role="alert">
+        Erreur de modification de la collection
+    </p>
+
+    <p
+            class="catalogue-compteur"
+            th:text="${resultat.totalElements + ' carte(s) trouvée(s)'}">
+        Nombre de résultats
+    </p>
+
+    <p
+            th:if="${#lists.isEmpty(cartes) and erreur == null}"
+            class="catalogue-vide">
+        Aucune carte ne correspond à ces critères.
+    </p>
+
+    <!-- =====================================
+         GRILLE DES CARTES
+         ===================================== -->
+
+    <section
+            class="catalogue-grille"
+            aria-label="Résultats de recherche">
+
+        <article
+                th:each="carte : ${cartes}"
+                class="catalogue-carte" th:attr="data-catalogue-dialog=${'catalogue-carte-' + carte.id}">
+            <th:block th:replace="~{fragments/recherches :: coeur(${carte.id}, ${carte.titre}, ${recherchesSelection.contains(carte.id)}, ${retourCatalogue})}"></th:block>
+
+
+            <!-- Images -->
+
+            <div class="catalogue-images">
+
+                <button type="button" class="catalogue-apercu" aria-haspopup="dialog"
+                        th:attr="data-dialog-id=${'catalogue-carte-' + carte.id},aria-controls=${'catalogue-carte-' + carte.id},aria-label=${'Voir ' + carte.titre + ' en détail'}">
+                    <img th:if="${!#strings.isEmpty(carte.imageRecto)}" th:src="${carte.imageRecto}" th:alt="${carte.titre}" loading="lazy">
+                    <span th:if="${#strings.isEmpty(carte.imageRecto)}" class="catalogue-sans-image">Image indisponible</span>
+                    <span class="catalogue-apercu-indice">Voir la carte ↗</span>
+                </button>
+
+                <details
+                        th:if="${!#strings.isEmpty(carte.imageVerso)}">
+
+                    <summary>Voir l’autre face</summary>
+
+                    <img
+                            th:src="${carte.imageVerso}"
+                            th:alt="${'Face 2 — ' + carte.titre}"
+                            loading="lazy"
+                    >
+
+                </details>
+
+            </div>
+
+            <!-- Informations -->
+
+            <div class="catalogue-informations">
+
+                <p
+                        class="catalogue-reference"
+                        th:text="${carte.codeExtension + ' · ' + carte.numeroAffiche}">
+                    SOR · 005
+                </p>
+
+                <p class="variante-badge" th:text="${carte.versionLibelle}"></p>
+                <p class="variante-a-verifier" th:if="${carte.nonReliee}">Référence non reliée</p>
+                <h2><button type="button" class="catalogue-titre-ouvrir" th:text="${carte.titre}" aria-haspopup="dialog"
+                            th:attr="data-dialog-id=${'catalogue-carte-' + carte.id},aria-controls=${'catalogue-carte-' + carte.id}"></button></h2>
+
+                <p
+                        th:if="${!#strings.isEmpty(carte.sousTitre)}"
+                        class="catalogue-sous-titre"
+                        th:text="${carte.sousTitre}">
+                    sous-titre
+                </p>
+
+                <th:block th:replace="~{fragments/filtres-cartes :: badges(${carte})}"></th:block>
+
+                <p
+                        class="catalogue-cout"
+                        th:text="${carte.cout != null
+                        ? 'Coût : ' + carte.cout
+                        : 'Coût : non renseigné'}">
+                    Coût
+                </p>
+
+                <!-- Affinités et nombre de symboles -->
+
+                <div class="catalogue-affinites">
+
+                    <th:block
+                            th:each="affinite : ${affinitesDisponibles}">
+
+                        <span
+                                th:if="${carte.affinites.containsKey(affinite.name())}"
+                                class="affinite-badge">
+
+                            <span
+                                    class="pastille-affinite"
+                                    th:style="${'background-color:' + affinite.couleur}"
+                                    aria-hidden="true">
+                            </span>
+
+                            <span th:text="${affinite.libelle}">
+                                Affinité
+                            </span>
+
+                            <strong
+                                    th:if="${carte.affinites.get(affinite.name()) > 1}"
+                                    th:text="${'×' + carte.affinites.get(affinite.name())}">
+                                ×2
+                            </strong>
+
+                        </span>
+
+                    </th:block>
+
+                    <span
+                            th:if="${carte.affinites.isEmpty()}"
+                            class="affinite-badge">
+                        Sans affinité
+                    </span>
+
+                </div>
+
+                <p
+                        class="catalogue-extension"
+                        th:text="${carte.nomExtension}">
+                    Extension
+                </p>
+
+                <!-- Collection personnelle -->
+
+                <div
+                        class="possession"
+                        th:with="quantite=${quantites.getOrDefault(carte.id, 0)}">
+
+                    <p class="possession-compteur">
+                        Dans ma collection :
+                        <strong th:text="${quantite}">0</strong>
+                    </p>
+
+                    <!-- Thymeleaf ajoute le jeton CSRF au formulaire POST. -->
+                    <form
+                            th:action="@{/collection/ajuster}"
+                            method="post"
+                            class="possession-actions">
+
+                        <input
+                                type="hidden"
+                                name="carteId"
+                                th:value="${carte.id}"
+                        >
+
+                        <input
+                                type="hidden"
+                                name="retour"
+                                th:value="${retourCatalogue}"
+                        >
+
+                        <button
+                                type="submit"
+                                name="variation"
+                                value="-1"
+                                th:disabled="${quantite == 0}"
+                                th:attr="aria-label=${'Retirer un exemplaire de ' + carte.titre}">
+                            −1
+                        </button>
+
+                        <button
+                                type="submit"
+                                name="variation"
+                                value="1"
+                                th:disabled="${quantite >= 9999}"
+                                th:attr="aria-label=${'Ajouter un exemplaire de ' + carte.titre}">
+                            +1
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+            <th:block th:replace="~{fragments/galerie-cartes :: catalogue(${carte}, ${quantites.getOrDefault(carte.id, 0)})}"></th:block>
+        </article>
+
+    </section>
+
+    <!-- =====================================
+         PAGINATION AVEC CONSERVATION DES FILTRES
+         ===================================== -->
+
+    <nav
+            th:if="${resultat.totalPages > 1}"
+            class="catalogue-pagination"
+            aria-label="Pagination du catalogue">
+
+        <a
+                th:if="${resultat.hasPrevious()}"
+                th:href="@{/catalogue(
+                raretes=${selectionRaretes},
+                types=${selectionTypes},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits},variante=${varianteSelectionnee},finition=${finitionSelectionnee},
+                q=${recherche},
+                extensionId=${extensionSelectionnee},
+                coutMin=${coutMin},
+                coutMax=${coutMax},
+                affinites=${selectionAffinites},
+                mode=${mode},
+                page=${resultat.number - 1}
+            )}">
+            ← Précédent
+        </a>
+
+        <span
+                aria-live="polite"
+                th:text="${'Page ' + (resultat.number + 1)
+                + ' sur ' + resultat.totalPages}">
+            Page
+        </span>
+
+        <a
+                th:if="${resultat.hasNext()}"
+                th:href="@{/catalogue(
+                raretes=${selectionRaretes},
+                types=${selectionTypes},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits},variante=${varianteSelectionnee},finition=${finitionSelectionnee},
+                q=${recherche},
+                extensionId=${extensionSelectionnee},
+                coutMin=${coutMin},
+                coutMax=${coutMax},
+                affinites=${selectionAffinites},
+                mode=${mode},
+                page=${resultat.number + 1}
+            )}">
+            Suivant →
+        </a>
+
+    </nav>
+
+    <th:block th:replace="~{fragments/galerie-cartes :: zoom}"></th:block>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

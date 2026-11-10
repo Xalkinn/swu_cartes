@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
 
 // Pas de @Component : ce filtre est installé une seule fois, dans la chaîne SecurityConfig.
@@ -63,7 +64,7 @@ public class VerificationAccesFilter extends OncePerRequestFilter {
         String autorite = "ROLE_" + utilisateur.getRole();
         boolean changement = authentication.getAuthorities().size() != 1
                 || authentication.getAuthorities().stream()
-                    .noneMatch(droit -> autorite.equals(droit.getAuthority()));
+                .noneMatch(droit -> autorite.equals(droit.getAuthority()));
 
         if (changement) {
             UtilisateurConnecte nouveauPrincipal = new UtilisateurConnecte(

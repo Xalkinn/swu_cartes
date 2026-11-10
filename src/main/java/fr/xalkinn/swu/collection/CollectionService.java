@@ -4,21 +4,15 @@ import fr.xalkinn.swu.carte.Carte;
 import fr.xalkinn.swu.carte.CarteRepository;
 import fr.xalkinn.swu.utilisateur.Utilisateur;
 import fr.xalkinn.swu.utilisateur.UtilisateurRepository;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,11 +47,11 @@ public class CollectionService {
             int variation,
             boolean foil
     ) {
-        ajuster(email,carteId,variation,foil,"");
+        ajuster(email, carteId, variation, foil, "");
     }
 
     @Transactional
-    public void ajuster(String email,Long carteId,int variation,boolean foil,String serie) {
+    public void ajuster(String email, Long carteId, int variation, boolean foil, String serie) {
         if (variation != 1 && variation != -1) {
             throw new IllegalArgumentException(
                     "Seuls les ajustements +1 et -1 sont autorisés."
@@ -81,18 +75,22 @@ public class CollectionService {
                         "Carte introuvable."
                 ));
 
-        if(carte.getFinition()==fr.xalkinn.swu.carte.FinitionCarte.FOIL)foil=true;
-        if(variation==1&&!carte.getFinition().autorise(foil)){
-            boolean historique=foil&&(carte.getVariante()==fr.xalkinn.swu.carte.VarianteCarte.STANDARD||carte.getVariante()==fr.xalkinn.swu.carte.VarianteCarte.HYPERSPACE)&&possessionRepository.findByUtilisateurIdAndCarteId(utilisateur.getId(),carteId).map(p->p.getQuantiteFoil()>0).orElse(false);
-            if(!historique)throw new IllegalArgumentException("Choisissez l'impression correspondant à cette finition dans le catalogue.");
-            Long reference=carte.getCarteStandard()==null?carte.getId():carte.getCarteStandard().getId();
-            fr.xalkinn.swu.carte.VarianteCarte famille=carte.getVariante();
-            List<Carte> choix=carteRepository.trouverImpressions(List.of(reference)).stream().filter(c->c.getVariante()==famille&&c.getFinition()==fr.xalkinn.swu.carte.FinitionCarte.FOIL).toList();
-            if(choix.size()!=1)throw new IllegalArgumentException("La finition historique ne possède pas de correspondance foil unique. Utilisez le catalogue.");
-            carte=choix.get(0);carteId=carte.getId();
+        if (carte.getFinition() == fr.xalkinn.swu.carte.FinitionCarte.FOIL) foil = true;
+        if (variation == 1 && !carte.getFinition().autorise(foil)) {
+            boolean historique = foil && (carte.getVariante() == fr.xalkinn.swu.carte.VarianteCarte.STANDARD || carte.getVariante() == fr.xalkinn.swu.carte.VarianteCarte.HYPERSPACE) && possessionRepository.findByUtilisateurIdAndCarteId(utilisateur.getId(), carteId).map(p -> p.getQuantiteFoil() > 0).orElse(false);
+            if (!historique)
+                throw new IllegalArgumentException("Choisissez l'impression correspondant à cette finition dans le catalogue.");
+            Long reference = carte.getCarteStandard() == null ? carte.getId() : carte.getCarteStandard().getId();
+            fr.xalkinn.swu.carte.VarianteCarte famille = carte.getVariante();
+            List<Carte> choix = carteRepository.trouverImpressions(List.of(reference)).stream().filter(c -> c.getVariante() == famille && c.getFinition() == fr.xalkinn.swu.carte.FinitionCarte.FOIL).toList();
+            if (choix.size() != 1)
+                throw new IllegalArgumentException("La finition historique ne possède pas de correspondance foil unique. Utilisez le catalogue.");
+            carte = choix.get(0);
+            carteId = carte.getId();
         }
-        String numeroSerie=Possession.normaliserSerie(serie);
-        if(!numeroSerie.isEmpty()&&carte.getVariante()!=fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE_SERIALISEE)throw new IllegalArgumentException("Cette impression n'est pas sérialisée.");
+        String numeroSerie = Possession.normaliserSerie(serie);
+        if (!numeroSerie.isEmpty() && carte.getVariante() != fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE_SERIALISEE)
+            throw new IllegalArgumentException("Cette impression n'est pas sérialisée.");
 
         Possession possession = possessionRepository
                 .findByUtilisateurIdAndCarteId(
@@ -103,15 +101,15 @@ public class CollectionService {
 
         if (possession == null) {
             if (variation == 1) {
-                Possession nouvelle=new Possession(utilisateur,carte,foil);
-                if(!numeroSerie.isBlank())nouvelle.definirSeries(List.of(numeroSerie));
+                Possession nouvelle = new Possession(utilisateur, carte, foil);
+                if (!numeroSerie.isBlank()) nouvelle.definirSeries(List.of(numeroSerie));
                 possessionRepository.save(nouvelle);
             }
 
             return;
         }
 
-        possession.ajuster(variation, foil,numeroSerie);
+        possession.ajuster(variation, foil, numeroSerie);
 
         if (possession.getQuantite() == 0) {
             possessionRepository.delete(possession);
@@ -177,27 +175,29 @@ public class CollectionService {
 
     @Transactional(readOnly = true)
     public Page<CartePossedee> consulter(String email, String recherche, Long extensionId,
-                                        String version, boolean recherches, int page) {
-        return consulter(email,recherche,extensionId,version,recherches,page,fr.xalkinn.swu.carte.FiltresIdentite.VIDE);
+                                         String version, boolean recherches, int page) {
+        return consulter(email, recherche, extensionId, version, recherches, page, fr.xalkinn.swu.carte.FiltresIdentite.VIDE);
     }
+
     @Transactional(readOnly = true)
     public Page<CartePossedee> consulter(String email, String recherche, Long extensionId,
-                                        String version, boolean recherches, int page, fr.xalkinn.swu.carte.FiltresIdentite identite) {
-        return consulter(email,recherche,extensionId,version,recherches,page,identite,null);
+                                         String version, boolean recherches, int page, fr.xalkinn.swu.carte.FiltresIdentite identite) {
+        return consulter(email, recherche, extensionId, version, recherches, page, identite, null);
     }
+
     // Le propriétaire de la collection reste email ; seul le propriétaire de la liste
     // de recherches varie. Le contrôleur public obtient celui-ci depuis la session.
     @Transactional(readOnly = true)
     public Page<CartePossedee> consulter(String email, String recherche, Long extensionId,
-                                        String version, boolean recherches, int page, fr.xalkinn.swu.carte.FiltresIdentite identite,
-                                        Long recherchesUtilisateurId) {
+                                         String version, boolean recherches, int page, fr.xalkinn.swu.carte.FiltresIdentite identite,
+                                         Long recherchesUtilisateurId) {
         return consulter(email, recherche, extensionId, version, recherches, page, identite, recherchesUtilisateurId, FiltresCollection.VIDE);
     }
 
     @Transactional(readOnly = true)
     public Page<CartePossedee> consulter(String email, String recherche, Long extensionId,
-            String version, boolean recherches, int page, fr.xalkinn.swu.carte.FiltresIdentite identite,
-            Long recherchesUtilisateurId, FiltresCollection filtres) {
+                                         String version, boolean recherches, int page, fr.xalkinn.swu.carte.FiltresIdentite identite,
+                                         Long recherchesUtilisateurId, FiltresCollection filtres) {
         identite.verifier();
         filtres.verifier();
         String q = recherche == null ? "" : recherche.strip();
@@ -361,6 +361,8 @@ public class CollectionService {
             String codeExtension,
             List<String> numerosSerie
     ) {
-        public VersionPossedee(Long idCarte,String libelle,String numeroAffiche,String imageRecto,boolean foil,int quantite,int totalSurCarte){this(idCarte,libelle,numeroAffiche,imageRecto,foil,quantite,totalSurCarte,"",List.of());}
+        public VersionPossedee(Long idCarte, String libelle, String numeroAffiche, String imageRecto, boolean foil, int quantite, int totalSurCarte) {
+            this(idCarte, libelle, numeroAffiche, imageRecto, foil, quantite, totalSurCarte, "", List.of());
+        }
     }
 }

@@ -1,6 +1,7 @@
 package fr.xalkinn.swu.utilisateur;
 
 import jakarta.persistence.*;
+
 import java.time.Instant;
 
 @Entity
@@ -29,7 +30,8 @@ public class Utilisateur {
     @Column(name = "date_creation", nullable = false, insertable = false, updatable = false)
     private Instant dateCreation;
 
-    protected Utilisateur() {}
+    protected Utilisateur() {
+    }
 
     public Utilisateur(String pseudo, String email, String motDePasseHash) {
         this.pseudo = pseudo;
@@ -57,11 +59,31 @@ public class Utilisateur {
         this.actif = actif;
     }
 
-    public Long getId() { return id; }
-    public String getPseudo() { return pseudo; }
-    public String getEmail() { return email; }
-    public String getMotDePasseHash() { return motDePasseHash; }
-    public String getRole() { return role; }
-    public boolean isActif() { return actif; }
-    public Instant getDateCreation() { return dateCreation; }
+    public Long getId() {
+        return id;
+    }
+
+    public String getPseudo() {
+        return pseudo;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getMotDePasseHash() {
+        return motDePasseHash;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public boolean isActif() {
+        return actif;
+    }
+
+    public Instant getDateCreation() {
+        return dateCreation;
+    }
 }

@@ -1,9 +1,9 @@
 package fr.xalkinn.swu.securite;
 
 import fr.xalkinn.swu.utilisateur.UtilisateurRepository;
-import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -52,8 +52,8 @@ public class SecurityConfig {
                         utilisateurRepository, securityContextRepository), AuthorizationFilter.class)
                 .authorizeHttpRequests(acces -> acces
                         .requestMatchers("/", "/inscription", "/error", "/css/**", "/js/**",
-                                "/images/**", "/api/accueil/actualites").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/joueurs", "/joueurs/**", "/communaute/decks", "/communaute/decks/**").permitAll()
+                                "/images/**", "/api/accueil/actualites", "/decks-du-moment").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/decks-du-moment/**", "/api/meta/etat", "/joueurs", "/joueurs/**", "/communaute/decks", "/communaute/decks/**").permitAll()
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(connexion -> connexion

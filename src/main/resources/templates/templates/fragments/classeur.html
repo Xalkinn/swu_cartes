@@ -1,0 +1,8 @@
+<!DOCTYPE html><html lang="fr" xmlns:th="http://www.thymeleaf.org"><body>
+<th:block th:fragment="coeur(carte)"><th:block th:if="${classeur.peutRechercher}"><th:block th:replace="~{fragments/recherches :: coeur(${carte.id}, ${carte.titre}, ${classeur.recherches.contains(carte.id)}, ${retourClasseur})}"></th:block></th:block></th:block>
+<nav th:fragment="pagination" class="classeur-pagination" th:if="${!classeur.resultat.empty}" aria-label="Pages du classeur">
+    <a th:if="${classeur.resultat.hasPrevious()}" th:href="@{${cheminClasseur}(extensionId=${classeur.extension.id},etat=${classeur.etat},q=${classeur.q},page=${classeur.resultat.number - 1})}">← Précédent</a><span th:unless="${classeur.resultat.hasPrevious()}" class="classeur-pagination-inactive" aria-hidden="true">← Précédent</span>
+    <span class="classeur-page-numero" th:text="${'Page ' + (classeur.resultat.number + 1) + ' / ' + classeur.resultat.totalPages}"></span>
+    <a th:if="${classeur.resultat.hasNext()}" th:href="@{${cheminClasseur}(extensionId=${classeur.extension.id},etat=${classeur.etat},q=${classeur.q},page=${classeur.resultat.number + 1})}">Suivant →</a><span th:unless="${classeur.resultat.hasNext()}" class="classeur-pagination-inactive" aria-hidden="true">Suivant →</span>
+</nav>
+</body></html>

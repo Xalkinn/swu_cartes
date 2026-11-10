@@ -4,7 +4,6 @@ import fr.xalkinn.swu.carte.Carte;
 import fr.xalkinn.swu.carte.CarteRepository;
 import fr.xalkinn.swu.extension.Extension;
 import fr.xalkinn.swu.extension.ExtensionRepository;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,10 +34,11 @@ public class AjoutRapideService {
             Finition finition,
             Long carteId
     ) {
-        return ajouter(email,extensionId,numeroSaisi,finition,carteId,"");
+        return ajouter(email, extensionId, numeroSaisi, finition, carteId, "");
     }
+
     @Transactional
-    public ResultatAjout ajouter(String email,Long extensionId,String numeroSaisi,Finition finition,Long carteId,String serie){
+    public ResultatAjout ajouter(String email, Long extensionId, String numeroSaisi, Finition finition, Long carteId, String serie) {
         if (finition == null) {
             throw new IllegalArgumentException(
                     "Choisissez une finition."
@@ -49,8 +49,8 @@ public class AjoutRapideService {
                 ? ""
                 : numeroSaisi.strip();
 
-        int numero=fr.xalkinn.swu.carte.ReferenceCarte.numero(saisie);
-        boolean jeton=fr.xalkinn.swu.carte.ReferenceCarte.jeton(saisie);
+        int numero = fr.xalkinn.swu.carte.ReferenceCarte.numero(saisie);
+        boolean jeton = fr.xalkinn.swu.carte.ReferenceCarte.jeton(saisie);
 
         Extension extension = extensionRepository.findById(extensionId)
                 .orElseThrow(() -> new IllegalArgumentException(
@@ -66,7 +66,7 @@ public class AjoutRapideService {
                 )
                 .stream()
                 .filter(carte ->
-                        carte.isJeton()==jeton && carte.getVariante()==finition.getFamille() && carte.getFinition().autorise(finition.isFoil())
+                        carte.isJeton() == jeton && carte.getVariante() == finition.getFamille() && carte.getFinition().autorise(finition.isFoil())
                 )
                 .toList();
 
@@ -108,7 +108,7 @@ public class AjoutRapideService {
                 email,
                 carte.getId(),
                 1,
-                finition.isFoil(),serie
+                finition.isFoil(), serie
         );
 
         List<Long> ids = List.of(carte.getId());
@@ -140,18 +140,18 @@ public class AjoutRapideService {
 
     public enum Finition {
 
-        CLASSIQUE("Standard",fr.xalkinn.swu.carte.VarianteCarte.STANDARD,false),
-        FOIL("Standard foil",fr.xalkinn.swu.carte.VarianteCarte.STANDARD,true),
-        HYPERSPACE("Hyperspace",fr.xalkinn.swu.carte.VarianteCarte.HYPERSPACE,false),
-        HYPERSPACE_FOIL("Hyperspace foil",fr.xalkinn.swu.carte.VarianteCarte.HYPERSPACE,true),
-        SHOWCASE("Showcase",fr.xalkinn.swu.carte.VarianteCarte.SHOWCASE,true),
-        PRESTIGE("Prestige",fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE,false),
-        PRESTIGE_FOIL("Prestige foil",fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE,true),
-        PRESTIGE_SERIALISEE("Prestige sérialisée",fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE_SERIALISEE,true),
-        PROMO("Promotionnelle non foil",fr.xalkinn.swu.carte.VarianteCarte.PROMO,false),
-        PROMO_FOIL("Promotionnelle foil",fr.xalkinn.swu.carte.VarianteCarte.PROMO,true),
-        AUTRE("Autre traitement non foil",fr.xalkinn.swu.carte.VarianteCarte.AUTRE,false),
-        AUTRE_FOIL("Autre traitement foil",fr.xalkinn.swu.carte.VarianteCarte.AUTRE,true);
+        CLASSIQUE("Standard", fr.xalkinn.swu.carte.VarianteCarte.STANDARD, false),
+        FOIL("Standard foil", fr.xalkinn.swu.carte.VarianteCarte.STANDARD, true),
+        HYPERSPACE("Hyperspace", fr.xalkinn.swu.carte.VarianteCarte.HYPERSPACE, false),
+        HYPERSPACE_FOIL("Hyperspace foil", fr.xalkinn.swu.carte.VarianteCarte.HYPERSPACE, true),
+        SHOWCASE("Showcase", fr.xalkinn.swu.carte.VarianteCarte.SHOWCASE, true),
+        PRESTIGE("Prestige", fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE, false),
+        PRESTIGE_FOIL("Prestige foil", fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE, true),
+        PRESTIGE_SERIALISEE("Prestige sérialisée", fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE_SERIALISEE, true),
+        PROMO("Promotionnelle non foil", fr.xalkinn.swu.carte.VarianteCarte.PROMO, false),
+        PROMO_FOIL("Promotionnelle foil", fr.xalkinn.swu.carte.VarianteCarte.PROMO, true),
+        AUTRE("Autre traitement non foil", fr.xalkinn.swu.carte.VarianteCarte.AUTRE, false),
+        AUTRE_FOIL("Autre traitement foil", fr.xalkinn.swu.carte.VarianteCarte.AUTRE, true);
 
         private final String libelle;
         private final fr.xalkinn.swu.carte.VarianteCarte famille;
@@ -168,10 +168,13 @@ public class AjoutRapideService {
         }
 
         public boolean isHyperspace() {
-            return famille==fr.xalkinn.swu.carte.VarianteCarte.HYPERSPACE;
+            return famille == fr.xalkinn.swu.carte.VarianteCarte.HYPERSPACE;
         }
 
-        public fr.xalkinn.swu.carte.VarianteCarte getFamille(){return famille;}
+        public fr.xalkinn.swu.carte.VarianteCarte getFamille() {
+            return famille;
+        }
+
         public boolean isFoil() {
             return foil;
         }

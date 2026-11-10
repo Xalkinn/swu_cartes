@@ -4,7 +4,6 @@ import fr.xalkinn.swu.carte.CarteRepository;
 import fr.xalkinn.swu.carte.ReferenceCarte;
 import fr.xalkinn.swu.collection.CollectionService;
 import fr.xalkinn.swu.extension.ExtensionRepository;
-
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

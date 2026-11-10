@@ -1,27 +1,25 @@
 package fr.xalkinn.swu.carte;
 
-import fr.xalkinn.swu.extension.ExtensionRepository;
 import fr.xalkinn.swu.collection.CollectionService;
-
+import fr.xalkinn.swu.extension.Extension;
+import fr.xalkinn.swu.extension.ExtensionRepository;
+import fr.xalkinn.swu.recherche.RechercheService;
+import fr.xalkinn.swu.securite.UtilisateurConnecte;
+import fr.xalkinn.swu.web.FiltreActif;
 import jakarta.servlet.http.HttpServletRequest;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
-import fr.xalkinn.swu.recherche.RechercheService;
-import fr.xalkinn.swu.securite.UtilisateurConnecte;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import fr.xalkinn.swu.web.FiltreActif;
-import fr.xalkinn.swu.extension.Extension;
 
 @Controller
 public class CatalogueController {
@@ -79,8 +77,10 @@ public class CatalogueController {
             Model model
     ) {
         String recherche = q.strip();
-        model.addAttribute("variantesDisponibles",VarianteCarte.values());model.addAttribute("varianteSelectionnee",variante);model.addAttribute("finitionSelectionnee",finition);
-        FiltresIdentite identite = new FiltresIdentite(arenes,traits,modeTraits);
+        model.addAttribute("variantesDisponibles", VarianteCarte.values());
+        model.addAttribute("varianteSelectionnee", variante);
+        model.addAttribute("finitionSelectionnee", finition);
+        FiltresIdentite identite = new FiltresIdentite(arenes, traits, modeTraits);
 
         List<String> selection = affinites == null
                 ? List.of()
@@ -121,7 +121,7 @@ public class CatalogueController {
                     coutMax,
                     selection,
                     mode,
-                    page, selectionRaretes, selectionTypes, identite,variante,finition
+                    page, selectionRaretes, selectionTypes, identite, variante, finition
             );
 
         } catch (IllegalArgumentException exception) {
@@ -129,7 +129,7 @@ public class CatalogueController {
             resultat = Page.empty();
         }
 
-        Map<String,List<String>> params = new LinkedHashMap<>();
+        Map<String, List<String>> params = new LinkedHashMap<>();
         if (!recherche.isBlank()) params.put("q", List.of(recherche));
         if (extensionId != null) params.put("extensionId", List.of(extensionId.toString()));
         if (coutMin != null) params.put("coutMin", List.of(coutMin.toString()));
@@ -138,30 +138,53 @@ public class CatalogueController {
         if (!"TOUTES".equals(mode)) params.put("mode", List.of(mode));
         if (!selectionRaretes.isEmpty()) params.put("raretes", selectionRaretes);
         if (!selectionTypes.isEmpty()) params.put("types", selectionTypes);
-        if(!"TOUTES".equals(variante))params.put("variante",List.of(variante));
-        if(!"TOUTES".equals(finition))params.put("finition",List.of(finition));
+        if (!"TOUTES".equals(variante)) params.put("variante", List.of(variante));
+        if (!"TOUTES".equals(finition)) params.put("finition", List.of(finition));
         identite.parametres(params);
         List<FiltreActif> filtres = new ArrayList<>();
-        identite.filtresActifs("/catalogue",params,filtres);
-        if (!recherche.isBlank()) filtres.add(FiltreActif.retirer("Recherche : " + recherche, "/catalogue", params, "q", null));
-        if (extensionId != null) filtres.add(FiltreActif.retirer(extensions.stream().filter(e -> e.getId().equals(extensionId)).map(Extension::getCode).findFirst().orElse("Extension"), "/catalogue", params, "extensionId", null));
-        if (coutMin != null) filtres.add(FiltreActif.retirer("Coût ≥ " + coutMin, "/catalogue", params, "coutMin", null));
-        if (coutMax != null) filtres.add(FiltreActif.retirer("Coût ≤ " + coutMax, "/catalogue", params, "coutMax", null));
+        identite.filtresActifs("/catalogue", params, filtres);
+        if (!recherche.isBlank())
+            filtres.add(FiltreActif.retirer("Recherche : " + recherche, "/catalogue", params, "q", null));
+        if (extensionId != null)
+            filtres.add(FiltreActif.retirer(extensions.stream().filter(e -> e.getId().equals(extensionId)).map(Extension::getCode).findFirst().orElse("Extension"), "/catalogue", params, "extensionId", null));
+        if (coutMin != null)
+            filtres.add(FiltreActif.retirer("Coût ≥ " + coutMin, "/catalogue", params, "coutMin", null));
+        if (coutMax != null)
+            filtres.add(FiltreActif.retirer("Coût ≤ " + coutMax, "/catalogue", params, "coutMax", null));
         if ("SANS".equals(mode)) filtres.add(FiltreActif.retirer("Sans affinité", "/catalogue", params, "mode", null));
         else for (String code : selection) {
             String libelle;
-            try { libelle = Affinite.valueOf(code).getLibelle(); } catch (IllegalArgumentException e) { libelle = code; }
+            try {
+                libelle = Affinite.valueOf(code).getLibelle();
+            } catch (IllegalArgumentException e) {
+                libelle = code;
+            }
             filtres.add(FiltreActif.retirer(libelle, "/catalogue", params, "affinites", code));
         }
-        for (String r : selectionRaretes) filtres.add(FiltreActif.retirer(Rarete.libelle(r), "/catalogue", params, "raretes", r));
+        for (String r : selectionRaretes)
+            filtres.add(FiltreActif.retirer(Rarete.libelle(r), "/catalogue", params, "raretes", r));
         for (String t : selectionTypes) {
-            String label; try { label = TypeCarteFiltre.valueOf(t).getLibelle(); } catch (IllegalArgumentException e) { label = t; }
+            String label;
+            try {
+                label = TypeCarteFiltre.valueOf(t).getLibelle();
+            } catch (IllegalArgumentException e) {
+                label = t;
+            }
             filtres.add(FiltreActif.retirer(label, "/catalogue", params, "types", t));
         }
-        if(!"TOUTES".equals(variante)){String libelle;try{libelle=VarianteCarte.valueOf(variante).getLibelle();}catch(IllegalArgumentException e){libelle=variante;}filtres.add(FiltreActif.retirer(libelle,"/catalogue",params,"variante",null));}
-        if(!"TOUTES".equals(finition))filtres.add(FiltreActif.retirer(finition.equals("FOIL")?"Foil":"Non foil","/catalogue",params,"finition",null));
+        if (!"TOUTES".equals(variante)) {
+            String libelle;
+            try {
+                libelle = VarianteCarte.valueOf(variante).getLibelle();
+            } catch (IllegalArgumentException e) {
+                libelle = variante;
+            }
+            filtres.add(FiltreActif.retirer(libelle, "/catalogue", params, "variante", null));
+        }
+        if (!"TOUTES".equals(finition))
+            filtres.add(FiltreActif.retirer(finition.equals("FOIL") ? "Foil" : "Non foil", "/catalogue", params, "finition", null));
         model.addAttribute("filtresActifs", filtres);
-        model.addAttribute("nombreFiltresAvances", (coutMin == null ? 0 : 1) + (coutMax == null ? 0 : 1) + ("SANS".equals(mode) ? 1 : selection.size()) + selectionRaretes.size() + selectionTypes.size() + identite.arenes().size() + identite.traits().size() + ("TOUTES".equals(variante)?0:1) + ("TOUTES".equals(finition)?0:1));
+        model.addAttribute("nombreFiltresAvances", (coutMin == null ? 0 : 1) + (coutMax == null ? 0 : 1) + ("SANS".equals(mode) ? 1 : selection.size()) + selectionRaretes.size() + selectionTypes.size() + identite.arenes().size() + identite.traits().size() + ("TOUTES".equals(variante) ? 0 : 1) + ("TOUTES".equals(finition) ? 0 : 1));
         model.addAttribute("resultat", resultat);
         model.addAttribute("cartes", resultat.getContent());
         model.addAttribute("recherchesSelection", rechercheService.selection(utilisateurConnecte.getUtilisateurId(), resultat.map(CatalogueService.CarteAffichee::id).getContent()));

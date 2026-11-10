@@ -43,14 +43,12 @@
         <aside class="accueil-communaute" aria-labelledby="communaute-titre">
             <div class="accueil-rubrique"><h2 id="communaute-titre">CÔTÉ COMMUNAUTÉ</h2></div>
 
-            <button type="button" class="accueil-communaute-carte accueil-tournois"
-                    data-bientot="tournois" aria-haspopup="dialog">
+            <a th:href="@{/tournois}" class="accueil-communaute-carte accueil-tournois">
                 <svg class="accueil-icone" aria-hidden="true"><use href="#acc-coupe"/></svg>
-                <span class="accueil-bientot-badge">BIENTÔT</span>
                 <span class="accueil-communaute-titre">Tournois</span>
                 <span class="accueil-communaute-description">Votre prochaine rencontre.</span>
                 <svg class="accueil-petite-fleche" aria-hidden="true"><use href="#acc-fleche"/></svg>
-            </button>
+            </a>
 
             <a th:href="@{/communaute/decks}" class="accueil-communaute-carte accueil-commu-decks">
                 <svg class="accueil-icone" aria-hidden="true"><use href="#acc-cartes"/></svg>
@@ -59,14 +57,12 @@
                 <svg class="accueil-petite-fleche" aria-hidden="true"><use href="#acc-fleche"/></svg>
             </a>
 
-            <button type="button" class="accueil-communaute-carte accueil-meta"
-                    data-bientot="moment" aria-haspopup="dialog">
+            <a th:href="@{/decks-du-moment}" class="accueil-communaute-carte accueil-meta">
                 <svg class="accueil-icone" aria-hidden="true"><use href="#acc-flamme"/></svg>
-                <span class="accueil-bientot-badge">BIENTÔT</span>
                 <span class="accueil-communaute-titre">Decks du moment</span>
                 <span class="accueil-communaute-description">De quoi changer la partie.</span>
                 <svg class="accueil-petite-fleche" aria-hidden="true"><use href="#acc-fleche"/></svg>
-            </button>
+            </a>
         </aside>
 
         <div class="accueil-actualites">
