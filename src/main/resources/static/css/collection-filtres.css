@@ -1,0 +1,485 @@
+.catalogue-recherche-formulaire {
+    margin: 25px 0 0;
+    padding: 0;
+}
+
+.catalogue-recherche-rapide {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.4fr) minmax(190px, 1fr) auto;
+    gap: 16px;
+    align-items: end;
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 14px 14px 0 0;
+    background: #0c192c;
+}
+
+.catalogue-recherche-rapide > div, .catalogue-filtres-interieur > div {
+    min-width: 0;
+}
+
+.catalogue-recherche-formulaire label {
+    display: block;
+    margin: 0 0 9px;
+    color: #b9c9df;
+    font-size: 12px;
+}
+
+.catalogue-recherche-formulaire input:not([type="checkbox"]), .catalogue-recherche-formulaire select {
+    width: 100%;
+    min-width: 0;
+    min-height: 45px;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid #364c68;
+    border-radius: 8px;
+    color: var(--text);
+    background: #091524;
+    font: inherit;
+    font-size: 14px;
+}
+
+.catalogue-recherche-formulaire button {
+    width: auto;
+    min-height: 45px;
+    margin: 0;
+    padding: 12px 21px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.catalogue-filtres-panneau {
+    overflow: hidden;
+    margin: 0 0 20px;
+    border: 1px solid var(--border);
+    border-top: 0;
+    border-radius: 0 0 14px 14px;
+    background: #0b1627;
+}
+
+.catalogue-filtres-panneau > summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 13px 22px;
+    color: #b6c9e2;
+    font-size: 13px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.catalogue-filtres-panneau > summary::-webkit-details-marker {
+    display: none;
+}
+
+.catalogue-filtres-panneau > summary > svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+}
+
+.catalogue-filtres-compte {
+    min-width: 23px;
+    padding: 3px 7px;
+    border-radius: 5px;
+    background: #f4ce781a;
+    color: var(--gold);
+    text-align: center;
+    font-size: 11px;
+}
+
+.catalogue-filtres-signe {
+    margin-left: auto;
+    font-size: 19px;
+    transition: transform .15s;
+}
+
+.catalogue-filtres-panneau[open] .catalogue-filtres-signe {
+    transform: rotate(180deg);
+}
+
+.catalogue-filtres-interieur {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 21px 25px;
+    padding: 22px;
+    border-top: 1px solid var(--border);
+}
+
+.catalogue-couts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 13px;
+}
+
+.catalogue-affinites-compactes {
+    grid-column: 1/-1;
+    grid-row: 2;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.catalogue-affinites-compactes legend {
+    margin-bottom: 12px;
+    padding: 0;
+    color: #b9c9df;
+    font-size: 12px;
+}
+
+.catalogue-affinites-compactes .affinites-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.catalogue-affinites-compactes label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    margin: 0;
+    padding: 9px 11px;
+    border: 1px solid #344a67;
+    border-radius: 8px;
+    background: #102038;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.catalogue-recherche-formulaire input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    accent-color: var(--gold);
+}
+
+.catalogue-affinites-compactes .affinite-pastille {
+    width: 9px;
+    height: 9px;
+    border: 1px solid #8799af;
+    border-radius: 50%;
+}
+
+.catalogue-recherche-formulaire .catalogue-appliquer {
+    grid-column: 1/-1;
+    justify-self: start;
+}
+
+.catalogue-filtres-actifs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin: 20px 0 26px;
+}
+
+.catalogue-filtres-actifs > span {
+    color: #91a8c4;
+    font-size: 11px;
+}
+
+.collection-page .catalogue-filtre-actif {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    max-width: 100%;
+    padding: 8px 11px;
+    border: 1px solid #49617e;
+    border-radius: 8px;
+    background: #172840;
+    color: #dce7f5;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.catalogue-filtre-actif > span:first-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.collection-page .catalogue-effacer {
+    margin-left: 8px;
+    color: var(--gold);
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.catalogue-filtres-panneau > summary:focus-visible, .catalogue-filtre-actif:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+}
+
+@media (max-width: 800px) {
+    .catalogue-recherche-rapide {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .catalogue-recherche-rapide > button {
+        grid-column: 1/-1;
+        justify-self: start;
+    }
+
+    .catalogue-filtres-interieur {
+        grid-template-columns: 1fr;
+    }
+
+    .catalogue-affinites-compactes {
+        grid-row: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .catalogue-recherche-rapide {
+        grid-template-columns: 1fr;
+        padding: 17px;
+    }
+
+    .catalogue-recherche-rapide > button {
+        width: 100%;
+    }
+
+    .catalogue-filtres-interieur {
+        padding: 17px;
+    }
+
+    .catalogue-recherche-formulaire input:not([type="checkbox"]), .catalogue-recherche-formulaire select {
+        font-size: 16px;
+    }
+}
+
+/* Filtres communs au catalogue et à l’atelier de deck. */
+.recherche-filtres-supplementaires {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    grid-column: 1/-1;
+    gap: 22px;
+    min-width: 0;
+}
+
+.catalogue-filtres-interieur .recherche-filtres-supplementaires {
+    grid-row: 3;
+}
+
+.deck-page .deck-filtres .recherche-facettes, .collection-page .recherche-facettes {
+    min-width: 0;
+    grid-column: auto;
+    margin: 0;
+    padding: 18px;
+    border: 1px solid #354b67;
+    border-radius: 11px;
+    background: #102036;
+}
+
+.recherche-facettes legend {
+    padding: 0 7px;
+    color: #d3e0f2;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.recherche-facettes > p {
+    margin: 0 0 13px;
+    color: #8ea6c4;
+    font-size: 11px;
+    line-height: 1.8;
+}
+
+.recherche-facettes-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.collection-page .recherche-facettes-options label, .deck-page .recherche-facettes-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    margin: 0;
+    padding: 8px 10px;
+    border: 1px solid #455b78;
+    border-radius: 8px;
+    background: #0b192c;
+    color: #bcd0e8;
+    font-size: 11px;
+    line-height: 1.5;
+    cursor: pointer;
+}
+
+.recherche-facettes-options label:has(input:checked) {
+    border-color: #c8ab67;
+    background: #f4ce7810;
+    color: #f7e0ac;
+}
+
+.collection-page .recherche-facettes-options input[type="checkbox"], .deck-page .recherche-facettes-options input[type="checkbox"] {
+    flex: 0 0 16px;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    accent-color: var(--gold);
+}
+
+.recherche-rarete-lettre {
+    display: inline-grid;
+    place-items: center;
+    width: 21px;
+    height: 21px;
+    border: 1px solid currentColor;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.recherche-facettes .recherche-facettes-aide {
+    margin: 13px 0 0;
+    font-size: 10px;
+}
+
+.recherche-facettes-aide a {
+    display: inline-block;
+    color: var(--gold);
+    text-decoration: none;
+}
+
+.recherche-identite-carte {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 13px 0;
+}
+
+.recherche-rarete-badge, .recherche-type-badge {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    padding: 5px 8px;
+    border: 1px solid #526681;
+    border-radius: 6px;
+    background: #101d2e;
+    color: #a9bfdc;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.rarete-C {
+    color: #cda783;
+    border-color: #83624a;
+    background: #4b342629;
+}
+
+.rarete-U {
+    color: #c4d5e7;
+    border-color: #788a9e;
+    background: #b7c9df0c;
+}
+
+.rarete-R {
+    color: #8bc9fb;
+    border-color: #4a8bbd;
+    background: #34688f19;
+}
+
+.rarete-L {
+    color: #ffe09b;
+    border-color: #b7984e;
+    background: #b99b4e12;
+}
+
+.rarete-S {
+    color: #e0b8f7;
+    border-color: #9c6cba;
+    background: #80529d19;
+}
+
+.rarete-INCONNUE {
+    color: #8da1ba;
+    border-color: #506178;
+}
+
+.recherche-criteres-actifs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 0 23px 20px;
+}
+
+.deck-page .recherche-criteres-actifs a {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #455e7e;
+    border-radius: 8px;
+    background: #192b43;
+    color: #d8e5f7;
+    font-size: 11px;
+    text-decoration: none;
+}
+
+.recherche-criteres-actifs a > span:first-child {
+    overflow-wrap: anywhere;
+}
+
+.deck-page .recherche-criteres-actifs .recherche-tout-effacer {
+    border-color: transparent;
+    background: transparent;
+    color: var(--gold);
+}
+
+.recherche-facettes :is(input,a):focus-visible, .recherche-criteres-actifs a:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 4px;
+}
+
+@media (max-width: 850px) {
+    .recherche-filtres-supplementaires {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+}
+
+@media (max-width: 600px) {
+    .deck-page .deck-filtres .recherche-facettes, .collection-page .recherche-facettes {
+        padding: 14px;
+    }
+
+    .recherche-criteres-actifs {
+        padding: 0 15px 20px;
+    }
+}
+
+.collection-page .collection-coeur-avance {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.collection-page .collection-filtres-aide {
+    grid-column: 1/-1;
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.collection-page .catalogue-combinaison {
+    align-self: start;
+}
+
+.collection-page .identite-filtres {
+    align-items: start;
+}

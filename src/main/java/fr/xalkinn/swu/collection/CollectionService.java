@@ -11,7 +11,6 @@ import jakarta.persistence.PersistenceContext;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -192,33 +191,23 @@ public class CollectionService {
     public Page<CartePossedee> consulter(String email, String recherche, Long extensionId,
                                         String version, boolean recherches, int page, fr.xalkinn.swu.carte.FiltresIdentite identite,
                                         Long recherchesUtilisateurId) {
+        return consulter(email, recherche, extensionId, version, recherches, page, identite, recherchesUtilisateurId, FiltresCollection.VIDE);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CartePossedee> consulter(String email, String recherche, Long extensionId,
+            String version, boolean recherches, int page, fr.xalkinn.swu.carte.FiltresIdentite identite,
+            Long recherchesUtilisateurId, FiltresCollection filtres) {
         identite.verifier();
+        filtres.verifier();
         String q = recherche == null ? "" : recherche.strip();
         if (q.length() > 100) throw new IllegalArgumentException("La recherche est limitée à 100 caractères.");
         if (!List.of("TOUTES", "STANDARD", "HYPERSPACE", "FOIL", "NONFOIL", "SHOWCASE", "PRESTIGE", "PRESTIGE_SERIALISEE", "PROMO", "AUTRE").contains(version)) {
             throw new IllegalArgumentException("Version possédée invalide.");
         }
         Integer numero = q.matches("(?i)T?[0-9]{1,6}") ? fr.xalkinn.swu.carte.ReferenceCarte.numero(q) : null;
-        Page<Long> groupes = possessionRepository.trouverGroupesFiltresIdentitePour(
-                email, q, numero, extensionId, version, recherches,
-                !identite.arenes().isEmpty(), identite.arenes().isEmpty()?List.of(""):identite.arenes(),
-                !identite.traits().isEmpty(), identite.traits().isEmpty()?List.of(""):identite.traits(),
-                "TOUS".equals(identite.modeTraits()), (long)identite.traits().size(), recherchesUtilisateurId,
-                PageRequest.of(Math.max(0, page), 24)
-        );
-
-        // Après une suppression, la page demandée peut ne plus exister.
-        if (groupes.getTotalPages() > 0
-                && groupes.getNumber() >= groupes.getTotalPages()) {
-
-            groupes = possessionRepository.trouverGroupesFiltresIdentitePour(
-                    email, q, numero, extensionId, version, recherches,
-                !identite.arenes().isEmpty(), identite.arenes().isEmpty()?List.of(""):identite.arenes(),
-                !identite.traits().isEmpty(), identite.traits().isEmpty()?List.of(""):identite.traits(),
-                "TOUS".equals(identite.modeTraits()), (long)identite.traits().size(), recherchesUtilisateurId,
-                    PageRequest.of(groupes.getTotalPages() - 1, 24)
-            );
-        }
+        Page<Long> groupes = RechercheGroupesCollection.rechercher(entityManager, email, q, numero,
+                extensionId, version, recherches, identite, recherchesUtilisateurId, filtres, page);
 
         if (groupes.isEmpty()) {
             return new PageImpl<>(

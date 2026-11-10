@@ -21,6 +21,9 @@
 <link rel="stylesheet" th:href="@{/css/collection-export.css(v=2)}">
     <script th:src="@{/js/collection-export.js(v=1)}" defer></script>
     <link rel="stylesheet" th:href="@{/css/variantes.css(v=1)}">
+    <link rel="stylesheet" th:href="@{/css/filtres-cartes.css(v=1)}">
+    <link rel="stylesheet" th:href="@{/css/collection-filtres.css(v=1)}">
+    <script th:src="@{/js/filtres.js(v=1)}" defer></script>
 </head>
 
 <body>
@@ -68,21 +71,43 @@
             <input type="hidden" name="arenes" th:each="code : ${identite.arenes}" th:value="${code}">
             <input type="hidden" name="traits" th:each="trait : ${identite.traits}" th:value="${trait}">
             <input type="hidden" name="modeTraits" th:value="${identite.modeTraits}">
+            <input type="hidden" name="coutMin" th:if="${coutMin != null}" th:value="${coutMin}">
+            <input type="hidden" name="coutMax" th:if="${coutMax != null}" th:value="${coutMax}">
+            <input type="hidden" name="affinites" th:each="code : ${selectionAffinites}" th:value="${code}">
+            <input type="hidden" name="mode" th:value="${mode}">
+            <input type="hidden" name="raretes" th:each="code : ${selectionRaretes}" th:value="${code}">
+            <input type="hidden" name="types" th:each="code : ${selectionTypes}" th:value="${code}">
+            <input type="hidden" name="variante" th:value="${varianteSelectionnee}">
+            <input type="hidden" name="finition" th:value="${finitionSelectionnee}">
             <p class="collection-export-aide">La sélection inclut toutes les pages. Le total comprend les versions foil et hyperspace. Le CSV détaille chaque impression et sa finition, avec les numéros de série.</p>
             <button type="submit"><span class="collection-export-spinner" aria-hidden="true" hidden></span><span data-export-libelle>Télécharger le fichier</span></button>
             <p class="collection-export-etat" role="status" aria-live="polite" hidden></p>
         </form>
     </details>
 
-    <form th:action="@{/collection}" method="get" class="collection-filtres">
-        <div class="collection-filtre-recherche"><label for="collection-q">Rechercher dans ma collection</label><input type="search" id="collection-q" name="q" th:value="${q}" maxlength="100" placeholder="Titre, sous-titre ou numéro…"></div>
-        <div><label for="collection-extension">Extension</label><select id="collection-extension" name="extensionId"><option value="">Toutes les extensions</option><option th:each="extension : ${extensions}" th:value="${extension.id}" th:selected="${extension.id == extensionId}" th:text="${extension.code + ' · ' + extension.nom}"></option></select></div>
-        <div><label for="collection-version">Version possédée</label><select id="collection-version" name="version"><option value="TOUTES" th:selected="${version == 'TOUTES'}">Toutes les versions</option><option value="STANDARD" th:selected="${version == 'STANDARD'}">Avec standard</option><option value="HYPERSPACE" th:selected="${version == 'HYPERSPACE'}">Avec hyperspace</option><option value="SHOWCASE" th:selected="${version == 'SHOWCASE'}">Avec Showcase</option><option value="PRESTIGE" th:selected="${version == 'PRESTIGE'}">Avec Prestige</option><option value="PRESTIGE_SERIALISEE" th:selected="${version == 'PRESTIGE_SERIALISEE'}">Avec Prestige sérialisée</option><option value="PROMO" th:selected="${version == 'PROMO'}">Avec promotionnelle</option><option value="AUTRE" th:selected="${version == 'AUTRE'}">Avec autre traitement</option><option value="FOIL" th:selected="${version == 'FOIL'}">Avec foil</option><option value="NONFOIL" th:selected="${version == 'NONFOIL'}">Avec non-foil</option></select></div>
-        <label class="collection-filtre-coeur"><input type="checkbox" name="recherches" value="true" th:checked="${filtreRecherches}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.6 5.6 0 0 0-7.9 0L12 5.5l-.9-.9a5.6 5.6 0 0 0-7.9 7.9L12 21l8.8-8.5a5.6 5.6 0 0 0 0-7.9Z"/></svg>Mes recherches uniquement</label>
-        <th:block th:replace="~{fragments/filtres-cartes :: identite}"></th:block>
-        <div class="collection-filtres-actions"><button type="submit">Filtrer ma collection →</button><a th:href="@{/collection}">Réinitialiser</a></div>
+    <form th:action="@{/collection}" method="get" class="catalogue-recherche-formulaire">
+        <div class="catalogue-recherche-rapide">
+            <div><label for="q">Rechercher dans ma collection</label><input type="search" id="q" name="q" th:value="${q}" maxlength="100" placeholder="Titre, sous-titre ou numéro…"></div>
+            <div><label for="extensionId">Extension</label><select id="extensionId" name="extensionId"><option value="">Toutes les extensions</option><option th:each="extension : ${extensions}" th:value="${extension.id}" th:selected="${extension.id == extensionId}" th:text="${extension.code + ' · ' + extension.nom}"></option></select></div>
+            <button type="submit">Rechercher →</button>
+        </div>
+        <details class="catalogue-filtres-panneau" th:open="${erreurCollection != null}">
+            <summary><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z"/></svg><span>Filtres avancés</span><span class="catalogue-filtres-compte" th:if="${nombreFiltresAvances > 0}" th:text="${nombreFiltresAvances}"></span><svg class="catalogue-filtres-signe" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <div class="catalogue-filtres-interieur">
+                <input type="hidden" name="version" th:if="${version != 'TOUTES'}" th:value="${version}">
+                <div class="catalogue-couts"><div><label for="variante">Variante</label><select id="variante" name="variante"><option value="TOUTES">Toutes les variantes</option><option th:each="v : ${variantesDisponibles}" th:value="${v.name()}" th:selected="${varianteSelectionnee == v.name()}" th:text="${v.libelle}"></option></select></div><div><label for="finition-catalogue">Finition</label><select id="finition-catalogue" name="finition"><option value="TOUTES">Toutes les finitions</option><option value="NON_FOIL" th:selected="${finitionSelectionnee == 'NON_FOIL'}">Non foil</option><option value="FOIL" th:selected="${finitionSelectionnee == 'FOIL'}">Foil</option></select></div></div>
+                <div class="catalogue-couts"><div><label for="coutMin">Coût minimum</label><input type="number" id="coutMin" name="coutMin" min="0" th:value="${coutMin}" placeholder="Sans limite"></div><div><label for="coutMax">Coût maximum</label><input type="number" id="coutMax" name="coutMax" min="0" th:value="${coutMax}" placeholder="Sans limite"></div></div>
+                <fieldset class="catalogue-affinites-compactes"><legend>Affinités</legend><div class="affinites-options"><label th:each="affinite : ${affinitesDisponibles}"><input type="checkbox" name="affinites" th:value="${affinite.name()}" th:checked="${selectionAffinites.contains(affinite.name())}"><span class="affinite-pastille" th:style="${'background:' + affinite.couleur}"></span><span th:text="${affinite.libelle}"></span></label></div></fieldset>
+                <div class="catalogue-combinaison"><label for="mode">Combinaison des affinités</label><select id="mode" name="mode"><option value="TOUTES" th:selected="${mode == 'TOUTES'}">Toutes les affinités cochées</option><option value="UNE" th:selected="${mode == 'UNE'}">Au moins une affinité cochée</option><option value="SANS" th:selected="${mode == 'SANS'}">Sans affinité</option></select></div>
+                <th:block th:replace="~{fragments/filtres-cartes :: choix(${selectionRaretes}, ${selectionTypes}, true)}"></th:block>
+                <th:block th:replace="~{fragments/filtres-cartes :: identite}"></th:block>
+                <label class="collection-filtre-coeur collection-coeur-avance"><input type="checkbox" name="recherches" value="true" th:checked="${filtreRecherches}">Mes recherches uniquement</label>
+                <p class="collection-filtres-aide">Variante et finition : au moins un exemplaire possédé doit correspondre. Le total et les versions restent complets.</p>
+                <button type="submit" class="catalogue-appliquer">Appliquer les filtres</button>
+            </div>
+        </details>
     </form>
-    <div class="collection-filtres-actifs" th:if="${!filtresActifs.empty}" aria-label="Filtres actifs"><a th:each="filtre : ${filtresActifs}" th:href="@{${filtre.url}}" th:attr="aria-label=${'Retirer le filtre ' + filtre.libelle}"><span th:text="${filtre.libelle}"></span><span aria-hidden="true">×</span></a></div>
+    <div class="collection-filtres-actifs" th:if="${!filtresActifs.empty}" aria-label="Filtres actifs"><a th:each="filtre : ${filtresActifs}" th:href="@{${filtre.url}}" th:attr="aria-label=${'Retirer le filtre ' + filtre.libelle}"><span th:text="${filtre.libelle}"></span><span aria-hidden="true">×</span></a><a th:href="@{/collection}">Tout effacer</a></div>
 
     <p th:if="${erreurCollection}"
        th:text="${erreurCollection}"
@@ -170,7 +195,7 @@
          aria-label="Pagination de ma collection">
 
         <a th:if="${resultat.hasPrevious()}"
-           th:href="@{/collection(page=${resultat.number - 1},q=${q},extensionId=${extensionId},version=${version},recherches=${filtreRecherches},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits})}">
+           th:href="@{/collection(page=${resultat.number - 1},q=${q},extensionId=${extensionId},version=${version},recherches=${filtreRecherches},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits},coutMin=${coutMin},coutMax=${coutMax},affinites=${selectionAffinites},mode=${mode},raretes=${selectionRaretes},types=${selectionTypes},variante=${varianteSelectionnee},finition=${finitionSelectionnee})}">
             ← Précédent
         </a>
 
@@ -179,7 +204,7 @@
         </span>
 
         <a th:if="${resultat.hasNext()}"
-           th:href="@{/collection(page=${resultat.number + 1},q=${q},extensionId=${extensionId},version=${version},recherches=${filtreRecherches},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits})}">
+           th:href="@{/collection(page=${resultat.number + 1},q=${q},extensionId=${extensionId},version=${version},recherches=${filtreRecherches},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits},coutMin=${coutMin},coutMax=${coutMax},affinites=${selectionAffinites},mode=${mode},raretes=${selectionRaretes},types=${selectionTypes},variante=${varianteSelectionnee},finition=${finitionSelectionnee})}">
             Suivant →
         </a>
     </nav>

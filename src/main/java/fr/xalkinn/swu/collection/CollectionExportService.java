@@ -32,6 +32,11 @@ public class CollectionExportService {
     @Transactional(readOnly=true,isolation=Isolation.REPEATABLE_READ)
     public Fichier exporter(Long utilisateurId,String format,String portee,String q,Long extensionId,
                             String version,boolean recherches,FiltresIdentite identite) throws IOException {
+        return exporter(utilisateurId, format, portee, q, extensionId, version, recherches, identite, FiltresCollection.VIDE);
+    }
+    @Transactional(readOnly=true,isolation=Isolation.REPEATABLE_READ)
+    public Fichier exporter(Long utilisateurId,String format,String portee,String q,Long extensionId,
+            String version,boolean recherches,FiltresIdentite identite,FiltresCollection filtres) throws IOException {
         var utilisateur=utilisateurs.findById(utilisateurId).orElseThrow(()->new AccessDeniedException("Compte introuvable."));
         if(!utilisateur.isActif()) throw new AccessDeniedException("Compte désactivé.");
         if(!List.of("xlsx","csv").contains(format)) throw new IllegalArgumentException("Choisissez le format Excel ou CSV.");
@@ -40,7 +45,7 @@ public class CollectionExportService {
         List<Ligne> lignes=new ArrayList<>();List<Detail> details=new ArrayList<>();
         for(int page=0;;page++) {
             var resultat=collection.consulter(utilisateur.getEmail(),filtrer?q:"",filtrer?extensionId:null,
-                    filtrer?version:"TOUTES",filtrer&&recherches,page,filtrer?identite:FiltresIdentite.VIDE);
+                    filtrer?version:"TOUTES",filtrer&&recherches,page,filtrer?identite:FiltresIdentite.VIDE,null,filtrer?filtres:FiltresCollection.VIDE);
             if(resultat.getTotalElements()>MAX_REFERENCES) throw new IllegalArgumentException("L’export est limité à 100 000 références. Affinez les filtres.");
             Set<Long> ids=new HashSet<>();
             for(var c:resultat) { ids.add(c.idCarte()); for(var v:c.versions()) ids.add(v.idCarte()); }
