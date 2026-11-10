@@ -1,141 +1,197 @@
 .collection-export {
-    margin: 24px 0;
-    border: 1px solid #5c6581;
-    border-radius: 14px;
-    background: #0d1d32;
-    overflow: hidden;
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+    margin: 18px 0 24px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    overflow: visible
 }
 
 .collection-export > summary {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 12px;
-    padding: 17px 22px;
-    color: #f6d280;
-    font-size: 14px;
+    gap: 9px;
+    list-style: none;
+    padding: 10px 14px;
+    min-height: 40px;
+    box-sizing: border-box;
+    border: 1px solid #299765;
+    border-radius: 9px;
+    background: #217346;
+    color: #fff;
+    font-size: 13px;
     font-weight: 650;
+    line-height: 1.4;
     cursor: pointer;
+    transition: background .15s ease
 }
 
-.collection-export > summary::marker {
-    color: #f6d280;
+.collection-export > summary::-webkit-details-marker {
+    display: none
+}
+
+.collection-export > summary:hover {
+    background: #185c38
+}
+
+.collection-excel-icone {
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round
+}
+
+.collection-export-chevron {
+    margin-left: 4px;
+    transition: transform .15s
+}
+
+.collection-export[open] .collection-export-chevron {
+    transform: rotate(180deg)
+}
+
+.collection-export[open] {
+    width: min(620px, 100%)
 }
 
 .collection-export-form {
-    padding: 0 22px 22px;
+    box-sizing: border-box;
+    padding: 18px;
+    margin-top: 10px;
+    border: 1px solid #304b43;
+    border-radius: 12px;
+    background: #0c1927
 }
 
 .collection-export-form > p {
     color: #b6c8df;
     font-size: 12px;
-    line-height: 1.8;
-    margin: 0 0 18px;
+    line-height: 1.7;
+    margin: 0 0 14px
 }
 
 .collection-export-choix {
     display: grid;
     grid-template-columns:1fr 1.5fr;
-    gap: 18px;
-    margin-bottom: 18px;
+    gap: 14px;
+    margin-bottom: 14px
 }
 
 .collection-export-choix > div {
-    min-width: 0;
+    min-width: 0
 }
 
 .collection-export-form label {
     display: block;
     color: #c7d5e7;
     font-size: 12px;
-    margin: 0 0 9px;
+    margin: 0 0 7px
 }
 
 .collection-export-form select {
     box-sizing: border-box;
     width: 100%;
     min-width: 0;
-    min-height: 45px;
+    min-height: 40px;
     margin: 0;
-    padding: 12px;
+    padding: 9px 11px;
     border: 1px solid #455d7d;
-    border-radius: 8px;
+    border-radius: 7px;
     background: #081525;
     color: #e2ebf7;
     font: inherit;
-    font-size: 14px;
+    font-size: 13px
 }
 
 .collection-export-form > button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 9px;
     width: auto;
-    min-height: 45px;
+    min-height: 40px;
     margin: 0;
-    padding: 12px 21px;
-    border-radius: 9px;
+    padding: 10px 15px;
+    border: 1px solid #299765;
+    background: #217346;
+    color: #fff;
+    border-radius: 8px;
     font-size: 13px;
+    cursor: pointer
+}
+
+.collection-export-form > button:hover {
+    background: #185c38
+}
+
+.collection-export-form > button:disabled {
+    opacity: .65;
+    cursor: wait
 }
 
 .collection-export-form .collection-export-aide {
     color: #93abc8;
-    font-size: 11px;
+    font-size: 11px
 }
 
 .collection-export-form .collection-export-etat {
-    margin: 14px 0 0;
-    color: #c6dfcc;
+    margin: 12px 0 0;
+    color: #c6dfcc
 }
 
 .collection-export-form .collection-export-erreur {
-    color: #ffb4ac;
+    color: #ffb4ac
 }
 
 .collection-export-spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid #493b2640;
-    border-top-color: #493b26;
+    width: 15px;
+    height: 15px;
+    border: 2px solid #ffffff40;
+    border-top-color: #fff;
     border-radius: 50%;
-    animation: export-tourne .8s linear infinite;
+    animation: export-tourne .8s linear infinite
 }
 
 .collection-export-spinner[hidden], .collection-export-etat[hidden] {
-    display: none;
+    display: none
 }
 
 .collection-export :is(summary,select,button):focus-visible {
     outline: 2px solid #f6d280;
-    outline-offset: 4px;
+    outline-offset: 4px
 }
 
 @keyframes export-tourne {
     to {
-        transform: rotate(360deg);
+        transform: rotate(360deg)
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .collection-export-spinner {
-        animation: none;
+        animation: none
+    }
+
+    .collection-export > summary, .collection-export-chevron {
+        transition: none
     }
 }
 
 @media (max-width: 600px) {
     .collection-export-choix {
-        grid-template-columns:1fr;
-    }
-
-    .collection-export > summary {
-        padding: 16px 18px;
+        grid-template-columns:1fr
     }
 
     .collection-export-form {
-        padding: 0 18px 18px;
+        padding: 16px
     }
 
     .collection-export-form select {
-        font-size: 16px;
+        font-size: 16px
     }
 }

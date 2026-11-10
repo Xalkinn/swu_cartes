@@ -3,7 +3,6 @@ package fr.xalkinn.swu.collection;
 import fr.xalkinn.swu.collection.AjoutRapideService.Finition;
 import fr.xalkinn.swu.collection.AjoutRapideService.ResultatAjout;
 import fr.xalkinn.swu.extension.ExtensionRepository;
-
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

@@ -4,7 +4,6 @@ import fr.xalkinn.swu.carte.Carte;
 import fr.xalkinn.swu.carte.CarteRepository;
 import fr.xalkinn.swu.extension.Extension;
 import fr.xalkinn.swu.extension.ExtensionRepository;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

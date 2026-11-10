@@ -103,7 +103,7 @@
                 image.decoding = "async";
                 image.loading = i === 0 ? "eager" : "lazy";
                 if (i === 0) image.fetchPriority = "high";
-                image.addEventListener("error", () => image.remove(), { once: true });
+                image.addEventListener("error", () => image.remove(), {once: true});
                 diapo.append(image);
             }
 
@@ -161,7 +161,7 @@
         const delai = setTimeout(() => controleur.abort(), 8000);
         try {
             const reponse = await fetch(racine.dataset.actualitesUrl, {
-                headers: { Accept: "application/json" },
+                headers: {Accept: "application/json"},
                 credentials: "same-origin",
                 cache: "no-store",
                 signal: controleur.signal
@@ -197,9 +197,15 @@
         pauseUtilisateur = !pauseUtilisateur;
         actualiserPause();
     });
-    carrousel.addEventListener("mouseenter", () => { survol = true; });
-    carrousel.addEventListener("mouseleave", () => { survol = false; });
-    carrousel.addEventListener("focusin", () => { focusInterieur = true; });
+    carrousel.addEventListener("mouseenter", () => {
+        survol = true;
+    });
+    carrousel.addEventListener("mouseleave", () => {
+        survol = false;
+    });
+    carrousel.addEventListener("focusin", () => {
+        focusInterieur = true;
+    });
     carrousel.addEventListener("focusout", evenement => {
         focusInterieur = carrousel.contains(evenement.relatedTarget);
     });
@@ -238,7 +244,7 @@
         if (evenement.target !== dialogue) return;
         const r = dialogue.getBoundingClientRect();
         if (evenement.clientX < r.left || evenement.clientX > r.right
-                || evenement.clientY < r.top || evenement.clientY > r.bottom) dialogue.close();
+            || evenement.clientY < r.top || evenement.clientY > r.bottom) dialogue.close();
     });
 
     charger();

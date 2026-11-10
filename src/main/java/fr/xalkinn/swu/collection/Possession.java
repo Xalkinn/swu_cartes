@@ -106,6 +106,15 @@ public class Possession {
         this.quantiteFoil = nouveauFoil;
     }
 
+    // Remplacement atomique de la répartition, après validation de l'import.
+    public void definirQuantites(int total, int foils) {
+        if (total < 1 || total > 9999 || foils < 0 || foils > total) {
+            throw new IllegalArgumentException("Répartition de quantités invalide.");
+        }
+        this.quantite = total;
+        this.quantiteFoil = foils;
+    }
+
     public Long getId() {
         return id;
     }

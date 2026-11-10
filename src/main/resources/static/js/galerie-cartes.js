@@ -18,7 +18,10 @@
         const target = event.target instanceof Element ? event.target : null;
         if (!target) return;
         const close = target.closest('[data-fermer-dialog]');
-        if (close?.closest('dialog.carte-dialog')) { close.closest('dialog').close(); return; }
+        if (close?.closest('dialog.carte-dialog')) {
+            close.closest('dialog').close();
+            return;
+        }
         const image = target.closest('[data-carte-zoom]');
         if (image && zoom) {
             const title = image.dataset.carteTitre || 'Carte en grand';
@@ -31,7 +34,10 @@
             return;
         }
         const trigger = target.closest('[data-dialog-id]');
-        if (trigger) { open(document.getElementById(trigger.dataset.dialogId), trigger); return; }
+        if (trigger) {
+            open(document.getElementById(trigger.dataset.dialogId), trigger);
+            return;
+        }
         // Les contrôles restent indépendants du clic sur le reste de la tuile.
         if (target.closest('button, a, form, input, select, textarea, label, details, dialog')) return;
         const tile = target.closest('[data-catalogue-dialog]');
@@ -56,7 +62,9 @@
             const rect = dialog.getBoundingClientRect();
             return event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
         };
-        dialog.addEventListener('pointerdown', event => { startedOutside = event.target === dialog && outside(event); });
+        dialog.addEventListener('pointerdown', event => {
+            startedOutside = event.target === dialog && outside(event);
+        });
         dialog.addEventListener('click', event => {
             if (startedOutside && event.target === dialog && outside(event)) dialog.close();
             startedOutside = false;
@@ -66,7 +74,7 @@
             if (index >= 0) opened.splice(index, 1);
             syncScroll();
             const opener = openers.get(dialog);
-            if (opener?.isConnected) opener.focus({ preventScroll: true });
+            if (opener?.isConnected) opener.focus({preventScroll: true});
         });
     });
 })();

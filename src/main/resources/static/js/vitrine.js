@@ -11,7 +11,8 @@
             await navigator.clipboard.writeText(input.value);
             message.textContent = 'Lien copié !';
         } catch {
-            input.focus(); input.select();
+            input.focus();
+            input.select();
             message.textContent = 'Lien sélectionné : copiez-le avec votre navigateur.';
         }
     });

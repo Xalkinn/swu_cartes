@@ -112,9 +112,9 @@
                     audio: false,
                     video: {
                         // Privilégie la caméra arrière sur téléphone.
-                        facingMode: { ideal: "environment" },
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
+                        facingMode: {ideal: "environment"},
+                        width: {ideal: 1920},
+                        height: {ideal: 1080}
                     }
                 });
 
@@ -233,7 +233,7 @@
             const photo = new File(
                 [blob],
                 "carte-swu.jpg",
-                { type: "image/jpeg" }
+                {type: "image/jpeg"}
             );
 
             // Coupe la caméra après la prise de vue.

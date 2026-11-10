@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vérifier mon import — Gestion SWU</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/collection-import.css(v=1)}">
+    <script th:src="@{/js/collection-import.js(v=1)}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header('collection')}"></header>
+<main class="import-page">
+    <a class="import-retour" th:href="@{/collection/ajout-rapide} + '#import-fichier'"
+       href="/collection/ajout-rapide#import-fichier">← Choisir un autre fichier</a>
+    <p class="eyebrow">IMPORT DE COLLECTION</p>
+    <h1>Vérifier <span>avant d'importer.</span></h1>
+    <p class="import-intro" th:text="${plan.releve.nom}"></p>
+    <span class="import-mode" th:text="${plan.mode.libelle}"></span>
+    <p class="import-intro" th:if="${plan.mode.name() == 'ACTUALISER'}">Les quantités des lignes prêtes remplaceront
+        celles de ces cartes, y compris les zéros. Les cartes absentes du fichier restent inchangées. Réimporter le même
+        fichier ne crée pas de doublons.</p>
+    <p class="import-intro" th:if="${plan.mode.name() == 'AJOUTER'}">Les quantités des lignes prêtes seront ajoutées à
+        votre collection. Réimporter le fichier une seconde fois les ajoutera une seconde fois.</p>
+    <div th:if="${erreurImport}" class="import-notice import-notice-erreur" role="alert"
+         th:text="${erreurImport}"></div>
+    <div class="import-stats">
+        <div class="import-stat"><strong th:text="${plan.pretes()}"></strong><span>références prêtes</span></div>
+        <div class="import-stat"><strong th:text="${plan.exemplaires}"></strong><span>exemplaires pris en compte</span>
+        </div>
+        <div class="import-stat"><strong th:text="${plan.changements()}"></strong><span>références à modifier</span>
+        </div>
+        <div class="import-stat"><strong th:text="${plan.bloquees()}"></strong><span>lignes bloquées</span></div>
+    </div>
+    <p class="import-notice" th:if="${plan.nonGeres > 0}"
+       th:text="${plan.nonGeres + ' exemplaire(s) Showcase / Prestige ne seront pas importés : ces versions ne sont pas encore gérées dans la collection. Ils sont soustraits du total importable et ne deviennent pas des cartes standard.'}"></p>
+    <p class="import-notice" th:if="${plan.bloquees() > 0}">Les lignes bloquées ne seront pas enregistrées. Corrigez le
+        fichier ou actualisez le catalogue, puis relancez l'analyse. Vous pouvez aussi importer uniquement les lignes
+        prêtes.</p>
+    <p class="import-intro">Aucune modification n'a encore été enregistrée. L'aperçu reste valable 30 minutes. Les
+        quantités « Actuel » et « Après » concernent les versions standard et hyperspace.</p>
+    <div class="import-tableau" role="region" aria-label="Vérification des cartes du fichier" tabindex="0">
+        <table>
+            <thead>
+            <tr>
+                <th>Référence</th>
+                <th>Carte</th>
+                <th>Fichier</th>
+                <th>Actuel</th>
+                <th>Après</th>
+                <th>Vérification</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="ligne : ${plan.visibles()}">
+                <td><strong th:text="${ligne.reference}"></strong><span class="import-source"
+                                                                        th:text="${ligne.source}"></span></td>
+                <td th:text="${ligne.nom}"></td>
+                <td th:text="${ligne.fichier}"></td>
+                <td th:text="${ligne.prete ? ligne.actuel : '—'}"></td>
+                <td th:text="${ligne.prete ? ligne.apres : '—'}"></td>
+                <td><span class="import-badge" th:classappend="${!ligne.prete} ? 'import-badge-erreur'"
+                          th:text="${ligne.prete ? 'Prête' : (ligne.ignoree ? 'Ignorée' : 'À corriger')}"></span><span
+                        class="import-detail" th:text="${ligne.detail}"></span></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="import-intro">Les lignes sans quantité ni changement sont masquées dans ce tableau. Un nom manquant dans
+        le classeur est retrouvé grâce à l'extension et au numéro, lorsque cette référence existe dans le catalogue.</p>
+    <form th:if="${plan.pretes() > 0}" th:action="@{/collection/import/confirmer}" method="post" class="import-actions"
+          data-import-form="confirmer">
+        <input type="hidden" name="jeton" th:value="${plan.jeton}">
+        <label th:if="${plan.partiel()}"><input type="checkbox" name="accepterPartiel" value="true" required>J'ai
+            vérifié les avertissements. J'accepte d'importer uniquement les lignes prêtes et d'exclure les versions non
+            gérées.</label>
+        <button type="submit">Confirmer l'import</button>
+        <a th:href="@{/collection/ajout-rapide}">Annuler</a>
+        <p data-import-etat role="status" aria-live="polite" hidden></p>
+    </form>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
