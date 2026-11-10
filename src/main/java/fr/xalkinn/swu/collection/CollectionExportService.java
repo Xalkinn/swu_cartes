@@ -70,10 +70,23 @@ public class CollectionExportService {
         valeurs.keySet().stream().filter(c->{try{Affinite.valueOf(c);return false;}catch(IllegalArgumentException e){return true;}}).sorted().forEach(labels::add);
         return labels.isEmpty()?"Neutre":String.join(" / ",labels);
     }
+    /** Deux filtres indépendants, sans perdre une troisième affinité ou un doublon. */
+    static Map<String,Integer> affinitesColonne(Map<String,Integer> valeurs,boolean alignement) {
+        Map<String,Integer> resultat=new LinkedHashMap<>();
+        valeurs.forEach((code,nombre)->{
+            boolean estAlignement=code.equals("HEROISM")||code.equals("VILLAINY");
+            if(estAlignement==alignement) resultat.put(code,nombre);
+        });
+        return resultat;
+    }
+    static String libelleAffinites(Map<String,Integer> valeurs,boolean alignement) {
+        var codes=affinitesColonne(valeurs,alignement);
+        return codes.isEmpty()?(alignement?"Sans alignement":"Neutre"):affinites(codes);
+    }
     private static byte[] csv(List<Ligne> lignes) {
         StringBuilder s=new StringBuilder("\uFEFF");
-        ligneCsv(s,List.of("Extension","Nom de la carte","Couleur / affinités","Type","Numéro","Rareté","Total","Foil","Hyperspace","Hyperspace foil"));
-        for(Ligne l:lignes)ligneCsv(s,List.of(l.extension(),l.nom(),affinites(l.affinites()),l.type(),l.numero(),l.rarete()==null?"?":l.rarete(),
+        ligneCsv(s,List.of("Extension","Nom de la carte","Affinité couleur","Affinité alignement","Type","Numéro","Rareté","Total","Foil","Hyperspace","Hyperspace foil"));
+        for(Ligne l:lignes)ligneCsv(s,List.of(l.extension(),l.nom(),libelleAffinites(l.affinites(),false),libelleAffinites(l.affinites(),true),l.type(),l.numero(),l.rarete()==null?"?":l.rarete(),
                 Integer.toString(l.total()),Integer.toString(l.foil()),Integer.toString(l.hyperspace()),Integer.toString(l.hyperspaceFoil())));
         return s.toString().getBytes(StandardCharsets.UTF_8);
     }
