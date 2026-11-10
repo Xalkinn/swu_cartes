@@ -21,8 +21,8 @@ public class VitrineController {
     @PostMapping("/ma-vitrine")
     public String enregistrer(@AuthenticationPrincipal UtilisateurConnecte principal,@RequestParam(defaultValue="false") boolean publiee,
                               @RequestParam(defaultValue="false") boolean collection,@RequestParam(defaultValue="false") boolean decks,
-                              @RequestParam(defaultValue="false") boolean recherches,RedirectAttributes redirect){
-        service.enregistrer(principal.getUtilisateurId(),publiee,collection,decks,recherches);
+                              @RequestParam(defaultValue="false") boolean recherches,@RequestParam(defaultValue="false") boolean classeur,RedirectAttributes redirect){
+        service.enregistrer(principal.getUtilisateurId(),publiee,collection,decks,recherches,classeur);
         redirect.addFlashAttribute("succesVitrine",publiee?"Votre vitrine et ses rubriques ont été mises à jour.":"Votre vitrine est privée.");return "redirect:/ma-vitrine";
     }
     @GetMapping("/joueurs")
@@ -36,7 +36,9 @@ public class VitrineController {
         // Le contenu dépend des recherches du visiteur connecté : aucun cache partagé.
         response.setHeader("Cache-Control","private, no-store");
         Long visiteurId = principal == null ? null : principal.getUtilisateurId();
+        if ("classeur".equals(rubrique)) { service.classeurPublic(id); return "redirect:/joueurs/" + id + "/classeur"; }
         var vue = service.consulter(id,rubrique,page,visiteurId,mesRecherches);
+        if (rubrique.isBlank() && "profil".equals(vue.rubrique()) && vue.joueur().classeur()) return "redirect:/joueurs/" + id + "/classeur";
         boolean collection = "collection".equals(vue.rubrique());
         boolean filtre = collection && mesRecherches;
         model.addAttribute("vue",vue);

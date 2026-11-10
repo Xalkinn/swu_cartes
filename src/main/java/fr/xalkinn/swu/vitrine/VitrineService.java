@@ -27,16 +27,20 @@ public class VitrineService {
     @Transactional(readOnly=true)
     public Reglages reglages(Long utilisateurId){
         Utilisateur u=actif(utilisateurId);Vitrine v=vitrines.findById(utilisateurId).orElse(null);
-        return new Reglages(u.getId(),u.getPseudo(),v!=null&&v.isPubliee(),v!=null&&v.isPartagerCollection(),v!=null&&v.isPartagerDecks(),v!=null&&v.isPartagerRecherches());
+        return new Reglages(u.getId(),u.getPseudo(),v!=null&&v.isPubliee(),v!=null&&v.isPartagerCollection(),v!=null&&v.isPartagerDecks(),v!=null&&v.isPartagerRecherches(),v!=null&&v.isPartagerClasseur());
     }
     @Transactional
     public void enregistrer(Long utilisateurId,boolean publiee,boolean collection,boolean decks,boolean recherches){
+        enregistrer(utilisateurId,publiee,collection,decks,recherches,false);
+    }
+    @Transactional
+    public void enregistrer(Long utilisateurId,boolean publiee,boolean collection,boolean decks,boolean recherches,boolean classeur){
         Utilisateur u=entityManager.find(Utilisateur.class,utilisateurId,LockModeType.PESSIMISTIC_WRITE);
         if(u==null)throw new AccessDeniedException("Compte introuvable.");
         entityManager.refresh(u,LockModeType.PESSIMISTIC_WRITE);
         if(!u.isActif())throw new AccessDeniedException("Compte désactivé.");
         Vitrine v=vitrines.findById(utilisateurId).orElseGet(()->new Vitrine(u));
-        v.configurer(publiee,collection,decks,recherches);vitrines.save(v);
+        v.configurer(publiee,collection,decks,recherches,classeur);vitrines.save(v);
     }
     @Transactional(readOnly=true)
     public Page<Joueur> annuaire(String q,int page){
@@ -70,6 +74,12 @@ public class VitrineService {
         return new Vue(joueur,onglet,cartes,listes,souhaits);
     }
     @Transactional(readOnly=true)
+    public Joueur classeurPublic(Long id){
+        Vitrine v=publique(id);
+        if(!v.isPartagerClasseur())throw introuvable();
+        return joueur(v);
+    }
+    @Transactional(readOnly=true)
     public DeckPublic deckPublic(Long joueurId,Long deckId){
         Vitrine v=publique(joueurId);if(!v.isPartagerDecks())throw introuvable();
         Deck d=deckRepository.findByIdAndUtilisateurId(deckId,joueurId).orElseThrow(VitrineService::introuvable);
@@ -80,11 +90,11 @@ public class VitrineService {
     }
     private Vitrine publique(Long id){Vitrine v=vitrines.findById(id).orElseThrow(VitrineService::introuvable);if(!v.isPubliee()||!v.getUtilisateur().isActif())throw introuvable();return v;}
     private Utilisateur actif(Long id){Utilisateur u=utilisateurs.findById(id).orElseThrow(()->new AccessDeniedException("Compte introuvable."));if(!u.isActif())throw new AccessDeniedException("Compte désactivé.");return u;}
-    private Joueur joueur(Vitrine v){Utilisateur u=v.getUtilisateur();return new Joueur(u.getId(),u.getPseudo(),v.isPartagerCollection(),v.isPartagerDecks(),v.isPartagerRecherches());}
+    private Joueur joueur(Vitrine v){Utilisateur u=v.getUtilisateur();return new Joueur(u.getId(),u.getPseudo(),v.isPartagerCollection(),v.isPartagerDecks(),v.isPartagerRecherches(),v.isPartagerClasseur());}
     private CartePublique fiche(Carte c){return c==null?null:new CartePublique(c.getTitre(),c.getSousTitre(),c.getExtension().getCode()+" · "+c.getNumeroAffiche(),c.getImageRecto());}
     private static ResponseStatusException introuvable(){return new ResponseStatusException(HttpStatus.NOT_FOUND,"Vitrine ou rubrique introuvable.");}
-    public record Reglages(Long id,String pseudo,boolean publiee,boolean collection,boolean decks,boolean recherches){}
-    public record Joueur(Long id,String pseudo,boolean collection,boolean decks,boolean recherches){}
+    public record Reglages(Long id,String pseudo,boolean publiee,boolean collection,boolean decks,boolean recherches,boolean classeur){}
+    public record Joueur(Long id,String pseudo,boolean collection,boolean decks,boolean recherches,boolean classeur){}
     public record Vue(Joueur joueur,String rubrique,Page<CollectionService.CartePossedee> collection,Page<DeckService.Resume> decks,Page<RechercheService.CarteRecherchee> recherches){}
     public record CartePublique(String titre,String sousTitre,String reference,String image){}
     public record LignePublique(CartePublique carte,int quantite){}

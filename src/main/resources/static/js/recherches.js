@@ -10,7 +10,7 @@
         if (!message) return;
         const dialog = [...document.querySelectorAll('dialog[open]')].pop();
         // Un élément en dehors du <dialog> serait caché derrière sa couche modale.
-        const destination = dialog?.querySelector('.deck-dialog-entete > div, .carte-dialog-entete > div');
+        const destination = dialog?.querySelector('.deck-dialog-entete > div, .carte-dialog-entete > div, .classeur-dialog-entete > div');
         if (destination) destination.append(message);
         else messageParent?.append(message);
         message.classList.toggle('recherche-message-dialog', Boolean(destination));
@@ -18,9 +18,7 @@
         message.textContent = text;
         message.classList.toggle('recherche-message-erreur', error);
         message.hidden = false;
-        timer = setTimeout(() => {
-            message.hidden = true;
-        }, 5000);
+        timer = setTimeout(() => { message.hidden = true; }, 5000);
     };
     document.addEventListener('submit', async event => {
         const form = event.target;
@@ -30,14 +28,12 @@
         if (pending) return;
         pending = true;
         const buttons = [...document.querySelectorAll('.coeur-form button')];
-        buttons.forEach(button => {
-            button.disabled = true;
-        });
+        buttons.forEach(button => { button.disabled = true; });
         form.setAttribute('aria-busy', 'true');
         try {
             const response = await fetch(form.dataset.rechercheUrl, {
                 method: 'POST', credentials: 'same-origin',
-                headers: {Accept: 'application/json'}, body: new URLSearchParams(new FormData(form))
+                headers: { Accept: 'application/json' }, body: new URLSearchParams(new FormData(form))
             });
             if (response.redirected || !response.headers.get('Content-Type')?.includes('json')) {
                 throw new Error('Votre session a peut-être expiré. Rechargez la page puis réessayez.');
@@ -61,14 +57,10 @@
             notice(error.message || 'Erreur de connexion. Réessayez.', true);
         } finally {
             pending = false;
-            buttons.forEach(button => {
-                button.disabled = false;
-            });
+            buttons.forEach(button => { button.disabled = false; });
             form.removeAttribute('aria-busy');
         }
     });
     // Le bouton Retour peut restaurer une page mise en cache avant la modification d'un cœur.
-    window.addEventListener('pageshow', event => {
-        if (event.persisted) window.location.reload();
-    });
+    window.addEventListener('pageshow', event => { if (event.persisted) window.location.reload(); });
 })();

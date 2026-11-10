@@ -6,6 +6,7 @@
 <form th:action="@{/ma-vitrine}" method="post">
 <label class="vitrine-option vitrine-option-publication"><input type="checkbox" name="publiee" value="true" th:checked="${reglages.publiee}"><span><strong>Publier ma vitrine</strong><small>Décochez pour retirer votre vitrine de l’annuaire et bloquer son accès public.</small></span></label>
 <div class="vitrine-options"><label class="vitrine-option"><input type="checkbox" name="collection" value="true" th:checked="${reglages.collection}"><span><strong>Ma collection</strong><small>Les cartes possédées et leurs quantités, regroupées par référence standard.</small></span></label>
+<label class="vitrine-option"><input type="checkbox" name="classeur" value="true" th:checked="${reglages.classeur}"><span><strong>Mon classeur</strong><small>Mes emplacements remplis et les cartes qui me manquent. Ce partage est indépendant de ma collection.</small></span></label>
 <label class="vitrine-option"><input type="checkbox" name="decks" value="true" th:checked="${reglages.decks}"><span><strong>Mes decks</strong><small>Tous mes decks, leurs listes, leurs noms et leurs notes. Le stock personnel et les cartes manquantes restent privés.</small></span></label>
 <label class="vitrine-option"><input type="checkbox" name="recherches" value="true" th:checked="${reglages.recherches}"><span><strong>Mes recherches</strong><small>Les cartes que j’ai marquées d’un cœur.</small></span></label></div>
 <button class="vitrine-bouton" type="submit">Enregistrer mes choix →</button></form>

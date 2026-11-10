@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${classeur.publique ? 'Classeur de ' + classeur.pseudo + ' — Gestion SWU' : 'Mon classeur — Gestion SWU'}">Mon classeur</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/recherches.css(v=3)}">
+    <link rel="stylesheet" th:href="@{/css/classeur.css(v=1)}">
+    <script th:src="@{/js/recherches.js(v=5)}" defer></script>
+    <script th:src="@{/js/classeur.js(v=1)}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header(${classeur.publique ? 'joueurs' : 'classeur'})}"></header>
+<main class="classeur-page">
+    <a class="classeur-retour" th:if="${classeur.publique}" th:href="@{/joueurs/{id}(id=${classeur.joueurId},rubrique='profil')}">← Le profil de <span th:text="${classeur.pseudo}"></span></a>
+    <div class="classeur-entete">
+        <div><p class="eyebrow" th:text="${classeur.publique ? 'VITRINE DE JOUEUR' : 'CHAQUE CARTE À SA PLACE'}"></p>
+            <h1 th:if="${!classeur.publique}">Mon <span>classeur.</span></h1>
+            <h1 th:if="${classeur.publique}">Le classeur de <span th:text="${classeur.pseudo}"></span></h1>
+            <p>Une case par carte de référence. Toutes les versions possédées comptent pour la remplir.</p>
+        </div>
+        <a th:if="${!classeur.publique}" class="classeur-lien" th:href="@{/ma-vitrine}">Gérer le partage →</a>
+    </div>
+    <nav th:if="${classeur.publique}" class="classeur-onglets" aria-label="Rubriques publiques du joueur">
+        <a th:if="${classeur.joueur.collection}" th:href="@{/joueurs/{id}(id=${classeur.joueurId},rubrique='collection')}">Collection</a>
+        <a th:href="@{/joueurs/{id}/classeur(id=${classeur.joueurId})}" aria-current="page">Classeur</a>
+        <a th:if="${classeur.joueur.decks}" th:href="@{/joueurs/{id}(id=${classeur.joueurId},rubrique='decks')}">Decks</a>
+        <a th:if="${classeur.joueur.recherches}" th:href="@{/joueurs/{id}(id=${classeur.joueurId},rubrique='recherches')}">Recherches</a>
+    </nav>
+    <th:block th:replace="~{fragments/recherches :: messages}"></th:block>
+    <form class="classeur-filtres" th:action="@{${cheminClasseur}}" method="get" th:if="${!classeur.extensions.empty}">
+        <div class="classeur-choix-extension"><label for="classeur-extension">Extension</label><select id="classeur-extension" name="extensionId"><option th:each="extension : ${classeur.extensions}" th:value="${extension.id}" th:selected="${classeur.extension != null and extension.id == classeur.extension.id}" th:text="${extension.code + ' · ' + extension.nom}"></option></select></div>
+        <div><label for="classeur-etat">Emplacements</label><select id="classeur-etat" name="etat"><option value="TOUTES" th:selected="${classeur.etat == 'TOUTES'}">Tous les emplacements</option><option value="MANQUANTES" th:selected="${classeur.etat == 'MANQUANTES'}">Cartes manquantes</option><option value="POSSEDEES" th:selected="${classeur.etat == 'POSSEDEES'}">Cartes possédées</option></select></div>
+        <div><label for="classeur-q">Trouver une carte</label><input type="search" id="classeur-q" name="q" maxlength="100" placeholder="Nom ou numéro, T01…" th:value="${classeur.q}"></div>
+        <button type="submit">Ouvrir →</button>
+    </form>
+    <section class="classeur-progression" th:if="${classeur.extension != null}" aria-label="Progression de cette extension">
+        <div class="classeur-serie"><span class="classeur-extension-code" th:text="${classeur.extension.code}"></span><div><h2 th:text="${classeur.extension.nom}"></h2><p>Cartes de référence · versions regroupées</p></div></div>
+        <div class="classeur-chiffres"><p><strong th:text="${classeur.remplies}"></strong><span>cases remplies</span></p><p><strong th:text="${classeur.manquantes}"></strong><span>cartes manquantes</span></p><p><strong th:text="${classeur.pourcentage + '%'}"></strong><span th:text="${'sur ' + classeur.total + ' emplacements'}"></span></p></div>
+        <progress max="100" th:value="${classeur.pourcentage}" th:attr="aria-label=${'Classeur complété à ' + classeur.pourcentage + ' pour cent'}"></progress>
+    </section>
+    <div class="classeur-legende" th:if="${classeur.extension != null}"><span><i class="classeur-point-possede"></i>Carte possédée</span><span><i class="classeur-point-manquant"></i>Emplacement à compléter</span><span th:if="${classeur.peutRechercher}">♥ Les cœurs correspondent à vos recherches</span><a th:unless="${classeur.peutRechercher}" th:href="@{/login}">Se connecter pour marquer mes recherches →</a></div>
+    <p th:if="${classeur.extension == null}" class="classeur-vide">Aucune carte de référence n’est encore disponible. Les extensions apparaîtront après l’import du catalogue.</p>
+    <p th:if="${classeur.extension != null and classeur.resultat.empty}" class="classeur-vide">Aucun emplacement ne correspond à cette sélection. <a th:href="@{${cheminClasseur}(extensionId=${classeur.extension.id})}">Voir toute l’extension →</a></p>
+    <th:block th:replace="~{fragments/classeur :: pagination}"></th:block>
+    <section class="classeur-album" th:if="${!classeur.resultat.empty}" aria-label="Emplacements du classeur">
+        <div class="classeur-reliure" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="classeur-grille">
+            <article class="classeur-case" th:each="carte : ${classeur.resultat.content}" th:classappend="${carte.possedee ? 'classeur-case-remplie' : 'classeur-case-manquante'}" th:attr="data-carte-id=${carte.id},data-possedee=${carte.possedee}">
+                <th:block th:if="${classeur.peutRechercher}" th:replace="~{fragments/classeur :: coeur(${carte})}"></th:block>
+                <button type="button" class="classeur-ouvrir" aria-haspopup="dialog" th:attr="data-dialog=${'classeur-carte-' + carte.id},aria-controls=${'classeur-carte-' + carte.id},aria-label=${carte.titre + (carte.possedee ? ' : carte possédée, voir les versions' : ' : carte manquante, voir la fiche')}">
+                    <span class="classeur-poche">
+                        <img th:if="${carte.possedee and !#strings.isEmpty(carte.image)}" th:src="${carte.image}" th:alt="${carte.titre}" loading="lazy">
+                        <span class="classeur-manque" th:unless="${carte.possedee}"><span class="classeur-manque-symbole" aria-hidden="true">＋</span><strong th:text="${carte.numero}"></strong><span>Carte manquante</span></span>
+                        <span class="classeur-sans-image" th:if="${carte.possedee and #strings.isEmpty(carte.image)}">Carte possédée<br>Image indisponible</span>
+                        <span th:if="${carte.possedee}" class="classeur-quantite" th:text="${'✓ ×' + carte.quantite}"></span>
+                    </span>
+                    <span class="classeur-reference" th:text="${carte.codeExtension + ' · ' + carte.numero}"></span>
+                    <span class="classeur-titre" th:text="${carte.titre}"></span>
+                    <span class="classeur-sous-titre" th:if="${!#strings.isEmpty(carte.sousTitre)}" th:text="${carte.sousTitre}"></span>
+                    <span class="classeur-case-indice" th:text="${carte.possedee ? 'Voir les versions →' : 'Voir la carte →'}"></span>
+                </button>
+                <dialog class="classeur-dialog" th:id="${'classeur-carte-' + carte.id}" th:attr="aria-labelledby=${'classeur-titre-' + carte.id}">
+                    <div class="classeur-dialog-entete"><div><p class="eyebrow" th:text="${carte.codeExtension + ' · ' + carte.numero}"></p><h2 th:id="${'classeur-titre-' + carte.id}" th:text="${carte.titre}"></h2></div><button type="button" data-fermer-classeur aria-label="Fermer la fiche">×</button></div>
+                    <div class="classeur-dialog-contenu"><div class="classeur-dialog-image"><img th:if="${!#strings.isEmpty(carte.image)}" th:src="${carte.image}" th:alt="${carte.titre}" loading="lazy"><span th:if="${#strings.isEmpty(carte.image)}">Image indisponible</span></div><div class="classeur-dialog-details"><p th:text="${carte.sousTitre}"></p>
+                        <p class="classeur-dialog-statut" th:text="${carte.possedee ? carte.quantite + ' exemplaire(s) dans ce classeur' : 'Cette carte manque dans ce classeur'}"></p>
+                        <ul th:if="${carte.possedee}" class="classeur-versions"><li th:each="version : ${carte.versions}"><span><strong th:text="${version.libelle}"></strong><small th:text="${version.reference}"></small></span><strong th:text="${'×' + version.quantite}"></strong></li></ul>
+                        <div th:if="${classeur.peutRechercher}" class="classeur-dialog-recherche"><th:block th:replace="~{fragments/classeur :: coeur(${carte})}"></th:block><span>Marquer dans mes recherches</span></div>
+                        <a th:unless="${classeur.peutRechercher}" class="classeur-lien" th:href="@{/login}">Se connecter pour rechercher cette carte →</a>
+                        <a th:if="${!classeur.publique}" class="classeur-lien" th:href="@{/collection(q=${carte.numero},extensionId=${classeur.extension.id})}">Voir mes exemplaires dans la collection →</a>
+                    </div></div>
+                </dialog>
+            </article>
+            <div class="classeur-case classeur-case-fin" th:if="${classeur.resultat.numberOfElements < 9}" th:each="position : ${#numbers.sequence(classeur.resultat.numberOfElements + 1,9)}" aria-hidden="true"><span>Fin de la sélection</span></div>
+        </div>
+    </section>
+    <th:block th:replace="~{fragments/classeur :: pagination}"></th:block>
+    <p class="classeur-note" th:if="${classeur.extension != null}">Les emplacements correspondent aux références présentes dans le catalogue importé. Les jetons utilisent T01, T02… Les variantes reliées remplissent la case de leur carte de référence.</p>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body></html>

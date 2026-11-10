@@ -5,10 +5,11 @@
     <li><a th:href="@{/}" th:attr="aria-current=${pageActive == 'accueil' ? 'page' : null}">Accueil</a></li>
     <li th:if="${connecte}"><a th:href="@{/catalogue}" th:attr="aria-current=${pageActive == 'catalogue' ? 'page' : null}">Les cartes</a></li>
     <li th:if="${connecte}">
-        <details class="menu-groupe" th:classappend="${pageActive == 'collection' or pageActive == 'ajout-rapide' or pageActive == 'scan' or pageActive == 'decks' or pageActive == 'vitrine' or pageActive == 'recherches'} ? 'menu-groupe-actif' : ''">
+        <details class="menu-groupe" th:classappend="${pageActive == 'collection' or pageActive == 'classeur' or pageActive == 'ajout-rapide' or pageActive == 'scan' or pageActive == 'decks' or pageActive == 'vitrine' or pageActive == 'recherches'} ? 'menu-groupe-actif' : ''">
             <summary>Ma collection</summary>
             <ul class="menu-sous-menu">
                 <li><a th:href="@{/collection}" th:attr="aria-current=${pageActive == 'collection' ? 'page' : null}"><span>Consulter ma collection</span><small>Mes cartes et leurs variantes</small></a></li>
+                <li><a th:href="@{/classeur}" th:attr="aria-current=${pageActive == 'classeur' ? 'page' : null}"><span>Mon classeur</span><small>Mes emplacements et les cartes manquantes</small></a></li>
                 <li>
                     <details class="menu-ajout" th:classappend="${pageActive == 'ajout-rapide' or pageActive == 'scan'} ? 'menu-ajout-actif' : ''">
                         <summary><span>Ajout de carte</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></summary>
