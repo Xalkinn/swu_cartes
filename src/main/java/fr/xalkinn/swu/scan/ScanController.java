@@ -1,6 +1,7 @@
 package fr.xalkinn.swu.scan;
 
 import fr.xalkinn.swu.carte.CarteRepository;
+import fr.xalkinn.swu.carte.ReferenceCarte;
 import fr.xalkinn.swu.collection.CollectionService;
 import fr.xalkinn.swu.extension.ExtensionRepository;
 
@@ -55,7 +56,7 @@ public class ScanController {
     @PostMapping("/scan/rechercher")
     public String rechercher(
             @RequestParam("extensionCode") String extensionCode,
-            @RequestParam("numero") Integer numero,
+            @RequestParam("numero") String numero,
             Model model
     ) {
         String code = extensionCode.strip().toUpperCase(Locale.ROOT);
@@ -74,21 +75,22 @@ public class ScanController {
             return "scan";
         }
 
-        if (numero == null || numero < 1 || numero > 9999) {
-            model.addAttribute(
-                    "erreurScan",
-                    "Le numéro doit être compris entre 1 et 9999."
-            );
-
+        int valeur;
+        try {
+            valeur = ReferenceCarte.numero(numero);
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("erreurScan", e.getMessage());
             return "scan";
         }
+        boolean jeton = ReferenceCarte.jeton(numero);
 
         List<CarteDetectee> candidats = carteRepository
                 .findByExtensionCodeIgnoreCaseAndNumeroOrderByIdAsc(
                         code,
-                        numero
+                        valeur
                 )
                 .stream()
+                .filter(carte -> carte.isJeton() == jeton)
                 .map(carte -> new CarteDetectee(
                         carte.getId(),
                         carte.getTitre(),

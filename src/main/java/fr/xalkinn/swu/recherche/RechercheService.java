@@ -77,7 +77,7 @@ public class RechercheService {
     }
     private Carte reference(Carte carte){
         Carte reference=carte.getCarteStandard()==null?carte:carte.getCarteStandard();
-        if(reference.isHyperspace()||reference.getCarteStandard()!=null)throw new IllegalArgumentException("Cette variante n'est pas encore reliée à une carte standard. Actualisez l'extension.");
+        if(!reference.isReference())throw new IllegalArgumentException("Cette variante n'est pas encore reliée à une carte standard. Actualisez l'extension.");
         return reference;
     }
     private Utilisateur utilisateur(Long id){Utilisateur u=utilisateurs.findById(id).orElseThrow(()->new AccessDeniedException("Compte introuvable."));if(!u.isActif())throw new AccessDeniedException("Compte désactivé.");return u;}

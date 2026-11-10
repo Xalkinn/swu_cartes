@@ -3,6 +3,7 @@ package fr.xalkinn.swu.carte;
 import java.util.List;
 
 public enum TypeCarteFiltre {
+    JETON("Jeton", ReferenceCarte.TYPES_JETON),
     UNITE("Unité", List.of("Unit", "Ground Unit", "Space Unit")),
     AMELIORATION("Amélioration", List.of("Upgrade")),
     EVENEMENT("Événement", List.of("Event")),

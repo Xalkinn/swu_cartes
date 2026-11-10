@@ -258,13 +258,19 @@ function detecterReference(texte) {
         )
     ];
 
-    const numerosTrouves = [...new Set(
+    const classiques = [...new Set(
         correspondances.map(correspondance => Number(
             correspondance[1]
                 .replace(/O/g, "0")
                 .replace(/[IL]/g, "1")
         ))
     )].filter(numero => numero >= 1 && numero <= 9999);
+
+    const jetons = [...new Set([...contenu.matchAll(/\bT\s*([0-9OIL]{1,4})\b/g)]
+        .map(m => Number(m[1].replace(/O/g,"0").replace(/[IL]/g,"1")))
+        .filter(n => n >= 1 && n <= 9999)
+        .map(n => `T${String(n).padStart(2,"0")}`))];
+    const numerosTrouves = jetons.length ? jetons : classiques;
 
     extensionSelect.value = "";
     numeroInput.value = "";

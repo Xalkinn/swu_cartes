@@ -179,9 +179,12 @@ public class DeckService {
         }
         Specification<Carte> specification = (c, requete, cb) -> {
             List<Predicate> conditions = new ArrayList<>();
-            conditions.add(cb.isFalse(c.get("hyperspace")));
+            conditions.add(cb.equal(c.get("variante"), fr.xalkinn.swu.carte.VarianteCarte.STANDARD));
+            conditions.add(cb.notEqual(c.get("finition"), fr.xalkinn.swu.carte.FinitionCarte.FOIL));
+            conditions.add(cb.isFalse(c.get("rattachementAttendu")));
             conditions.add(cb.isNull(c.get("carteStandard")));
             conditions.add(cb.isNotNull(c.get("typeCarte")));
+            conditions.add(cb.not(c.get("typeCarte").in(fr.xalkinn.swu.carte.ReferenceCarte.TYPES_JETON)));
             if (zone == Zone.LEADER || zone == Zone.BASE) {
                 conditions.add(cb.equal(c.get("typeCarte"), zone == Zone.LEADER ? "Leader" : "Base"));
             } else {
@@ -228,7 +231,8 @@ public class DeckService {
         if (id == null) throw new IllegalArgumentException("Choisissez une carte.");
         Carte carte = cartes.findById(id).orElseThrow(() -> new IllegalArgumentException("Carte introuvable."));
         if (carte.getCarteStandard() != null) carte = carte.getCarteStandard();
-        if (carte.isHyperspace() || carte.getCarteStandard() != null) throw new IllegalArgumentException("La variante n'est pas reliée à une carte standard. Actualisez l'extension.");
+        if(carte.isJeton())throw new IllegalArgumentException("Les jetons ne font pas partie de la liste de cartes d'un deck.");
+        if (!carte.isReference()) throw new IllegalArgumentException("La variante n'est pas reliée à une carte standard. Actualisez l'extension.");
         return carte;
     }
     private Utilisateur utilisateur(Long id) {

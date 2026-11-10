@@ -16,10 +16,11 @@
     <script th:src="@{/js/galerie-cartes.js(v=1)}" defer></script>
     <link rel="stylesheet" th:href="@{/css/recherches.css(v=1)}">
     <script th:src="@{/js/recherches.js(v=4)}" defer></script>
-    <link rel="stylesheet" th:href="@{/css/identite-cartes.css(v=1)}">
+<link rel="stylesheet" th:href="@{/css/identite-cartes.css(v=1)}">
     <script th:src="@{/js/identite-cartes.js(v=1)}" defer></script>
-    <link rel="stylesheet" th:href="@{/css/collection-export.css(v=2)}">
+<link rel="stylesheet" th:href="@{/css/collection-export.css(v=2)}">
     <script th:src="@{/js/collection-export.js(v=1)}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/variantes.css(v=1)}">
 </head>
 
 <body>
@@ -27,8 +28,7 @@
 <header th:replace="~{fragments/header :: header('collection')}">
 </header>
 
-<main class="collection-page"
-      th:attr="data-collection-recherches=${filtreRecherches},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits}">
+<main class="collection-page" th:attr="data-collection-recherches=${filtreRecherches},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits}">
     <th:block th:replace="~{fragments/recherches :: messages}"></th:block>
 
     <p class="eyebrow">VOTRE ESPACE PERSONNEL</p>
@@ -54,22 +54,12 @@
 
     <p th:if="${succesImport}" th:text="${succesImport}" class="notice notice-success" role="status"></p>
     <details class="collection-export">
-        <summary>
-            <svg viewBox="0 0 24 24" aria-hidden="true" class="collection-excel-icone">
-                <path d="M13 3h7a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-7M13 3 3 5v14l10 2V3Zm3 4h3m-3 5h3m-3 5h3M6 9l4 6m0-6-4 6"/>
-            </svg>
-            Exporter ma collection <span class="collection-export-chevron" aria-hidden="true">⌄</span></summary>
+        <summary><svg viewBox="0 0 24 24" aria-hidden="true" class="collection-excel-icone"><path d="M13 3h7a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-7M13 3 3 5v14l10 2V3Zm3 4h3m-3 5h3m-3 5h3M6 9l4 6m0-6-4 6"/></svg> Exporter ma collection <span class="collection-export-chevron" aria-hidden="true">⌄</span></summary>
         <form th:action="@{/collection/export}" method="get" class="collection-export-form">
-            <p>Un onglet par extension dans Excel. Une ligne par carte, toutes ses versions regroupées.</p>
+            <p>Un onglet par extension dans Excel. Synthèse par carte dans Excel, puis un onglet Détail versions pour les impressions exactes.</p>
             <div class="collection-export-choix">
-                <div><label for="export-format">Format du fichier</label><select id="export-format" name="format">
-                    <option value="xlsx">Excel (.xlsx)</option>
-                    <option value="csv">CSV (.csv)</option>
-                </select></div>
-                <div><label for="export-portee">Cartes à exporter</label><select id="export-portee" name="portee">
-                    <option value="TOUT">Toute ma collection</option>
-                    <option value="FILTRES">La sélection actuelle</option>
-                </select></div>
+                <div><label for="export-format">Format du fichier</label><select id="export-format" name="format"><option value="xlsx">Excel (.xlsx)</option><option value="csv">CSV (.csv)</option></select></div>
+                <div><label for="export-portee">Cartes à exporter</label><select id="export-portee" name="portee"><option value="TOUT">Toute ma collection</option><option value="FILTRES">La sélection actuelle</option></select></div>
             </div>
             <input type="hidden" name="q" th:value="${q}">
             <input type="hidden" name="extensionId" th:if="${extensionId != null}" th:value="${extensionId}">
@@ -78,46 +68,21 @@
             <input type="hidden" name="arenes" th:each="code : ${identite.arenes}" th:value="${code}">
             <input type="hidden" name="traits" th:each="trait : ${identite.traits}" th:value="${trait}">
             <input type="hidden" name="modeTraits" th:value="${identite.modeTraits}">
-            <p class="collection-export-aide">La sélection inclut toutes les pages. Le total comprend les versions foil
-                et hyperspace. Le CSV réunit les extensions dans une colonne dédiée.</p>
-            <button type="submit"><span class="collection-export-spinner" aria-hidden="true" hidden></span><span
-                    data-export-libelle>Télécharger le fichier</span></button>
+            <p class="collection-export-aide">La sélection inclut toutes les pages. Le total comprend les versions foil et hyperspace. Le CSV détaille chaque impression et sa finition, avec les numéros de série.</p>
+            <button type="submit"><span class="collection-export-spinner" aria-hidden="true" hidden></span><span data-export-libelle>Télécharger le fichier</span></button>
             <p class="collection-export-etat" role="status" aria-live="polite" hidden></p>
         </form>
     </details>
 
     <form th:action="@{/collection}" method="get" class="collection-filtres">
-        <div class="collection-filtre-recherche"><label for="collection-q">Rechercher dans ma collection</label><input
-                type="search" id="collection-q" name="q" th:value="${q}" maxlength="100"
-                placeholder="Titre, sous-titre ou numéro…"></div>
-        <div><label for="collection-extension">Extension</label><select id="collection-extension" name="extensionId">
-            <option value="">Toutes les extensions</option>
-            <option th:each="extension : ${extensions}" th:value="${extension.id}"
-                    th:selected="${extension.id == extensionId}"
-                    th:text="${extension.code + ' · ' + extension.nom}"></option>
-        </select></div>
-        <div><label for="collection-version">Version possédée</label><select id="collection-version" name="version">
-            <option value="TOUTES" th:selected="${version == 'TOUTES'}">Toutes les versions</option>
-            <option value="STANDARD" th:selected="${version == 'STANDARD'}">Avec standard</option>
-            <option value="HYPERSPACE" th:selected="${version == 'HYPERSPACE'}">Avec hyperspace</option>
-            <option value="FOIL" th:selected="${version == 'FOIL'}">Avec foil</option>
-            <option value="NONFOIL" th:selected="${version == 'NONFOIL'}">Avec non-foil</option>
-        </select></div>
-        <label class="collection-filtre-coeur"><input type="checkbox" name="recherches" value="true"
-                                                      th:checked="${filtreRecherches}">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M20.8 4.6a5.6 5.6 0 0 0-7.9 0L12 5.5l-.9-.9a5.6 5.6 0 0 0-7.9 7.9L12 21l8.8-8.5a5.6 5.6 0 0 0 0-7.9Z"/>
-            </svg>
-            Mes recherches uniquement</label>
+        <div class="collection-filtre-recherche"><label for="collection-q">Rechercher dans ma collection</label><input type="search" id="collection-q" name="q" th:value="${q}" maxlength="100" placeholder="Titre, sous-titre ou numéro…"></div>
+        <div><label for="collection-extension">Extension</label><select id="collection-extension" name="extensionId"><option value="">Toutes les extensions</option><option th:each="extension : ${extensions}" th:value="${extension.id}" th:selected="${extension.id == extensionId}" th:text="${extension.code + ' · ' + extension.nom}"></option></select></div>
+        <div><label for="collection-version">Version possédée</label><select id="collection-version" name="version"><option value="TOUTES" th:selected="${version == 'TOUTES'}">Toutes les versions</option><option value="STANDARD" th:selected="${version == 'STANDARD'}">Avec standard</option><option value="HYPERSPACE" th:selected="${version == 'HYPERSPACE'}">Avec hyperspace</option><option value="SHOWCASE" th:selected="${version == 'SHOWCASE'}">Avec Showcase</option><option value="PRESTIGE" th:selected="${version == 'PRESTIGE'}">Avec Prestige</option><option value="PRESTIGE_SERIALISEE" th:selected="${version == 'PRESTIGE_SERIALISEE'}">Avec Prestige sérialisée</option><option value="PROMO" th:selected="${version == 'PROMO'}">Avec promotionnelle</option><option value="AUTRE" th:selected="${version == 'AUTRE'}">Avec autre traitement</option><option value="FOIL" th:selected="${version == 'FOIL'}">Avec foil</option><option value="NONFOIL" th:selected="${version == 'NONFOIL'}">Avec non-foil</option></select></div>
+        <label class="collection-filtre-coeur"><input type="checkbox" name="recherches" value="true" th:checked="${filtreRecherches}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.6 5.6 0 0 0-7.9 0L12 5.5l-.9-.9a5.6 5.6 0 0 0-7.9 7.9L12 21l8.8-8.5a5.6 5.6 0 0 0 0-7.9Z"/></svg>Mes recherches uniquement</label>
         <th:block th:replace="~{fragments/filtres-cartes :: identite}"></th:block>
-        <div class="collection-filtres-actions">
-            <button type="submit">Filtrer ma collection →</button>
-            <a th:href="@{/collection}">Réinitialiser</a></div>
+        <div class="collection-filtres-actions"><button type="submit">Filtrer ma collection →</button><a th:href="@{/collection}">Réinitialiser</a></div>
     </form>
-    <div class="collection-filtres-actifs" th:if="${!filtresActifs.empty}" aria-label="Filtres actifs"><a
-            th:each="filtre : ${filtresActifs}" th:href="@{${filtre.url}}"
-            th:attr="aria-label=${'Retirer le filtre ' + filtre.libelle}"><span th:text="${filtre.libelle}"></span><span
-            aria-hidden="true">×</span></a></div>
+    <div class="collection-filtres-actifs" th:if="${!filtresActifs.empty}" aria-label="Filtres actifs"><a th:each="filtre : ${filtresActifs}" th:href="@{${filtre.url}}" th:attr="aria-label=${'Retirer le filtre ' + filtre.libelle}"><span th:text="${filtre.libelle}"></span><span aria-hidden="true">×</span></a></div>
 
     <p th:if="${erreurCollection}"
        th:text="${erreurCollection}"
@@ -141,8 +106,7 @@
 
         <article th:each="carte : ${resultat.content}"
                  class="collection-carte">
-            <th:block
-                    th:replace="~{fragments/recherches :: coeur(${carte.idCarte}, ${carte.titre}, ${recherchesSelection.contains(carte.idCarte)}, ${retour})}"></th:block>
+            <th:block th:replace="~{fragments/recherches :: coeur(${carte.idCarte}, ${carte.titre}, ${recherchesSelection.contains(carte.idCarte)}, ${retour})}"></th:block>
 
 
             <button type="button"

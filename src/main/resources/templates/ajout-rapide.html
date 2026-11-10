@@ -13,6 +13,8 @@
           th:href="@{/css/ajout-rapide.css(v=1)}">
     <link rel="stylesheet" th:href="@{/css/collection-import.css(v=1)}">
     <script th:src="@{/js/collection-import.js(v=1)}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/variantes.css(v=1)}">
+    <script th:src="@{/js/variantes.js(v=1)}" defer></script>
 </head>
 
 <body>
@@ -35,28 +37,15 @@
     <section class="import-panel" id="import-fichier" aria-labelledby="import-titre">
         <p class="rapide-surtitre">DEPUIS UN TABLEUR</p>
         <h2 id="import-titre">Importer mes cartes</h2>
-        <p>Choisissez le classeur préparé pour Gestion SWU ou un export de votre collection. Vérifiez les cartes et les
-            quantités avant de confirmer.</p>
-        <p th:if="${erreurImport}" class="import-notice import-notice-erreur" role="alert"
-           th:text="${erreurImport}"></p>
-        <form th:action="@{/collection/import/analyser}" method="post" enctype="multipart/form-data" class="import-form"
-              data-import-form="analyser">
-            <div><label for="import-fichier-input">Fichier Excel ou CSV</label><input id="import-fichier-input"
-                                                                                      name="fichier" type="file"
-                                                                                      accept=".xlsx,.csv" required
-                                                                                      aria-describedby="import-aide">
-            </div>
-            <div><label for="import-mode">Comment traiter les quantités ?</label><select name="mode" id="import-mode">
-                <option value="ACTUALISER">Mettre à jour les quantités</option>
-                <option value="AJOUTER">Ajouter à mes quantités</option>
-            </select></div>
+        <p>Choisissez le classeur préparé pour Gestion SWU ou un export de votre collection. Vérifiez les cartes et les quantités avant de confirmer.</p>
+        <p th:if="${erreurImport}" class="import-notice import-notice-erreur" role="alert" th:text="${erreurImport}"></p>
+        <form th:action="@{/collection/import/analyser}" method="post" enctype="multipart/form-data" class="import-form" data-import-form="analyser">
+            <div><label for="import-fichier-input">Fichier Excel ou CSV</label><input id="import-fichier-input" name="fichier" type="file" accept=".xlsx,.csv" required aria-describedby="import-aide"></div>
+            <div><label for="import-mode">Comment traiter les quantités ?</label><select name="mode" id="import-mode"><option value="ACTUALISER">Mettre à jour les quantités</option><option value="AJOUTER">Ajouter à mes quantités</option></select></div>
             <button type="submit">Vérifier le fichier →</button>
             <p data-import-etat class="import-etat" role="status" aria-live="polite" hidden></p>
         </form>
-        <p class="import-aide" id="import-aide">.xlsx ou .csv UTF-8 avec point-virgule, 5 Mo maximum. La mise à jour
-            utilise les quantités du fichier ; l'ajout les cumule. Showcase et Prestige seront signalés comme non
-            importés. Le fichier Excel d'origine avec ses colonnes personnelles doit d'abord être converti au format
-            Gestion SWU.</p>
+        <p class="import-aide" id="import-aide">.xlsx ou .csv UTF-8 avec point-virgule, 5 Mo maximum. La mise à jour utilise les quantités du fichier ; l'ajout les cumule. Showcase, Prestige, promotions et séries sont pris en charge lorsqu’ils existent dans votre catalogue. Le fichier Excel d'origine avec ses colonnes personnelles doit d'abord être converti au format Gestion SWU.</p>
     </section>
 
     <div class="rapide-layout">
@@ -116,22 +105,23 @@
                     <input id="numero"
                            name="numero"
                            type="text"
-                           inputmode="numeric"
-                           pattern="[0-9]{1,5}"
-                           maxlength="5"
+                           inputmode="text"
+                           pattern="[Tt]?[0-9]{1,6}"
+                           maxlength="7"
                            autocomplete="off"
-                           placeholder="Ex. : 166"
+                           placeholder="Ex. : 166 ou T01"
                            aria-describedby="numero-aide"
                            th:value="${numero}"
                            autofocus
                            required>
 
                     <small id="numero-aide">
-                        Pour 166/252, saisissez simplement 166.
+                        Pour 166/252, saisissez 166. Pour un jeton, utilisez T01, T02, etc.
                         Pour une hyperspace, utilisez son propre numéro.
                     </small>
                 </div>
 
+                <div class="rapide-champ"><label for="serie">Numéro de série, si Prestige sérialisée</label><input type="text" id="serie" name="serie" maxlength="30" placeholder="Ex. : 042/250" th:value="${serie}" aria-describedby="serie-aide"><small id="serie-aide">Facultatif. Renseignez uniquement le numéro imprimé sur votre exemplaire sérialisé.</small></div>
                 <button type="submit" class="rapide-ajouter">
                     Ajouter à ma collection →
                 </button>
@@ -258,6 +248,7 @@
                            name="carteId"
                            th:value="${carte.id}">
 
+                    <input type="hidden" name="serie" th:value="${serie}">
                     <button type="submit">
                         Ajouter cette carte →
                     </button>

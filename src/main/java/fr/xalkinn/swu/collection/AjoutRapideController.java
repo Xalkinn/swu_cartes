@@ -3,6 +3,7 @@ package fr.xalkinn.swu.collection;
 import fr.xalkinn.swu.collection.AjoutRapideService.Finition;
 import fr.xalkinn.swu.collection.AjoutRapideService.ResultatAjout;
 import fr.xalkinn.swu.extension.ExtensionRepository;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -57,13 +58,14 @@ public class AjoutRapideController {
             @RequestParam String numero,
             @RequestParam Finition finition,
             @RequestParam(required = false) Long carteId,
+            @RequestParam(defaultValue="") String serie,
             RedirectAttributes redirect
     ) {
         // Ces deux choix restent sélectionnés après chaque ajout.
         redirect.addAttribute("extensionId", extensionId);
         redirect.addAttribute("finition", finition.name());
 
-        redirect.addFlashAttribute("numero", numero);
+        redirect.addFlashAttribute("numero", numero);redirect.addFlashAttribute("serie",serie);
 
         try {
             ResultatAjout resultat = ajoutRapideService.ajouter(
@@ -71,7 +73,7 @@ public class AjoutRapideController {
                     extensionId,
                     numero,
                     finition,
-                    carteId
+                    carteId,serie
             );
 
             if (resultat.carte() == null) {
@@ -102,7 +104,7 @@ public class AjoutRapideController {
                 );
 
                 // Prépare immédiatement le numéro suivant.
-                redirect.addFlashAttribute("numero", "");
+                redirect.addFlashAttribute("numero", "");redirect.addFlashAttribute("serie","");
             }
 
         } catch (IllegalArgumentException exception) {

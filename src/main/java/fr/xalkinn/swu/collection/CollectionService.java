@@ -4,9 +4,11 @@ import fr.xalkinn.swu.carte.Carte;
 import fr.xalkinn.swu.carte.CarteRepository;
 import fr.xalkinn.swu.utilisateur.Utilisateur;
 import fr.xalkinn.swu.utilisateur.UtilisateurRepository;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -52,6 +54,11 @@ public class CollectionService {
             int variation,
             boolean foil
     ) {
+        ajuster(email,carteId,variation,foil,"");
+    }
+
+    @Transactional
+    public void ajuster(String email,Long carteId,int variation,boolean foil,String serie) {
         if (variation != 1 && variation != -1) {
             throw new IllegalArgumentException(
                     "Seuls les ajustements +1 et -1 sont autorisés."
@@ -75,6 +82,19 @@ public class CollectionService {
                         "Carte introuvable."
                 ));
 
+        if(carte.getFinition()==fr.xalkinn.swu.carte.FinitionCarte.FOIL)foil=true;
+        if(variation==1&&!carte.getFinition().autorise(foil)){
+            boolean historique=foil&&(carte.getVariante()==fr.xalkinn.swu.carte.VarianteCarte.STANDARD||carte.getVariante()==fr.xalkinn.swu.carte.VarianteCarte.HYPERSPACE)&&possessionRepository.findByUtilisateurIdAndCarteId(utilisateur.getId(),carteId).map(p->p.getQuantiteFoil()>0).orElse(false);
+            if(!historique)throw new IllegalArgumentException("Choisissez l'impression correspondant à cette finition dans le catalogue.");
+            Long reference=carte.getCarteStandard()==null?carte.getId():carte.getCarteStandard().getId();
+            fr.xalkinn.swu.carte.VarianteCarte famille=carte.getVariante();
+            List<Carte> choix=carteRepository.trouverImpressions(List.of(reference)).stream().filter(c->c.getVariante()==famille&&c.getFinition()==fr.xalkinn.swu.carte.FinitionCarte.FOIL).toList();
+            if(choix.size()!=1)throw new IllegalArgumentException("La finition historique ne possède pas de correspondance foil unique. Utilisez le catalogue.");
+            carte=choix.get(0);carteId=carte.getId();
+        }
+        String numeroSerie=Possession.normaliserSerie(serie);
+        if(!numeroSerie.isEmpty()&&carte.getVariante()!=fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE_SERIALISEE)throw new IllegalArgumentException("Cette impression n'est pas sérialisée.");
+
         Possession possession = possessionRepository
                 .findByUtilisateurIdAndCarteId(
                         utilisateur.getId(),
@@ -84,15 +104,15 @@ public class CollectionService {
 
         if (possession == null) {
             if (variation == 1) {
-                possessionRepository.save(
-                        new Possession(utilisateur, carte, foil)
-                );
+                Possession nouvelle=new Possession(utilisateur,carte,foil);
+                if(!numeroSerie.isBlank())nouvelle.definirSeries(List.of(numeroSerie));
+                possessionRepository.save(nouvelle);
             }
 
             return;
         }
 
-        possession.ajuster(variation, foil);
+        possession.ajuster(variation, foil,numeroSerie);
 
         if (possession.getQuantite() == 0) {
             possessionRepository.delete(possession);
@@ -158,34 +178,32 @@ public class CollectionService {
 
     @Transactional(readOnly = true)
     public Page<CartePossedee> consulter(String email, String recherche, Long extensionId,
-                                         String version, boolean recherches, int page) {
-        return consulter(email, recherche, extensionId, version, recherches, page, fr.xalkinn.swu.carte.FiltresIdentite.VIDE);
+                                        String version, boolean recherches, int page) {
+        return consulter(email,recherche,extensionId,version,recherches,page,fr.xalkinn.swu.carte.FiltresIdentite.VIDE);
     }
-
     @Transactional(readOnly = true)
     public Page<CartePossedee> consulter(String email, String recherche, Long extensionId,
-                                         String version, boolean recherches, int page, fr.xalkinn.swu.carte.FiltresIdentite identite) {
-        return consulter(email, recherche, extensionId, version, recherches, page, identite, null);
+                                        String version, boolean recherches, int page, fr.xalkinn.swu.carte.FiltresIdentite identite) {
+        return consulter(email,recherche,extensionId,version,recherches,page,identite,null);
     }
-
     // Le propriétaire de la collection reste email ; seul le propriétaire de la liste
     // de recherches varie. Le contrôleur public obtient celui-ci depuis la session.
     @Transactional(readOnly = true)
     public Page<CartePossedee> consulter(String email, String recherche, Long extensionId,
-                                         String version, boolean recherches, int page, fr.xalkinn.swu.carte.FiltresIdentite identite,
-                                         Long recherchesUtilisateurId) {
+                                        String version, boolean recherches, int page, fr.xalkinn.swu.carte.FiltresIdentite identite,
+                                        Long recherchesUtilisateurId) {
         identite.verifier();
         String q = recherche == null ? "" : recherche.strip();
         if (q.length() > 100) throw new IllegalArgumentException("La recherche est limitée à 100 caractères.");
-        if (!List.of("TOUTES", "STANDARD", "HYPERSPACE", "FOIL", "NONFOIL").contains(version)) {
+        if (!List.of("TOUTES", "STANDARD", "HYPERSPACE", "FOIL", "NONFOIL", "SHOWCASE", "PRESTIGE", "PRESTIGE_SERIALISEE", "PROMO", "AUTRE").contains(version)) {
             throw new IllegalArgumentException("Version possédée invalide.");
         }
-        Integer numero = q.matches("[0-9]{1,6}") ? Integer.valueOf(q) : null;
+        Integer numero = q.matches("(?i)T?[0-9]{1,6}") ? fr.xalkinn.swu.carte.ReferenceCarte.numero(q) : null;
         Page<Long> groupes = possessionRepository.trouverGroupesFiltresIdentitePour(
                 email, q, numero, extensionId, version, recherches,
-                !identite.arenes().isEmpty(), identite.arenes().isEmpty() ? List.of("") : identite.arenes(),
-                !identite.traits().isEmpty(), identite.traits().isEmpty() ? List.of("") : identite.traits(),
-                "TOUS".equals(identite.modeTraits()), (long) identite.traits().size(), recherchesUtilisateurId,
+                !identite.arenes().isEmpty(), identite.arenes().isEmpty()?List.of(""):identite.arenes(),
+                !identite.traits().isEmpty(), identite.traits().isEmpty()?List.of(""):identite.traits(),
+                "TOUS".equals(identite.modeTraits()), (long)identite.traits().size(), recherchesUtilisateurId,
                 PageRequest.of(Math.max(0, page), 24)
         );
 
@@ -195,9 +213,9 @@ public class CollectionService {
 
             groupes = possessionRepository.trouverGroupesFiltresIdentitePour(
                     email, q, numero, extensionId, version, recherches,
-                    !identite.arenes().isEmpty(), identite.arenes().isEmpty() ? List.of("") : identite.arenes(),
-                    !identite.traits().isEmpty(), identite.traits().isEmpty() ? List.of("") : identite.traits(),
-                    "TOUS".equals(identite.modeTraits()), (long) identite.traits().size(), recherchesUtilisateurId,
+                !identite.arenes().isEmpty(), identite.arenes().isEmpty()?List.of(""):identite.arenes(),
+                !identite.traits().isEmpty(), identite.traits().isEmpty()?List.of(""):identite.traits(),
+                "TOUS".equals(identite.modeTraits()), (long)identite.traits().size(), recherchesUtilisateurId,
                     PageRequest.of(groupes.getTotalPages() - 1, 24)
             );
         }
@@ -243,7 +261,7 @@ public class CollectionService {
 
         Comparator<Possession> triVersions = Comparator
                 .comparingInt((Possession possession) ->
-                        possession.getCarte().isHyperspace() ? 1 : 0
+                        possession.getCarte().getVariante().ordinal()
                 )
                 .thenComparing((Possession possession) ->
                         possession.getCarte().getNumero()
@@ -278,9 +296,7 @@ public class CollectionService {
                 total += possession.getQuantite();
                 totalFoil += possession.getQuantiteFoil();
 
-                String libelle = carte.isHyperspace()
-                        ? "Hyperspace"
-                        : "Standard";
+                String libelle = carte.libelleVersion(false);
 
                 int nonFoils = possession.getQuantite()
                         - possession.getQuantiteFoil();
@@ -293,19 +309,21 @@ public class CollectionService {
                             carte.getImageRecto(),
                             false,
                             nonFoils,
-                            possession.getQuantite()
+                            possession.getQuantite(), carte.getExtension().getCode(),
+                            possession.getNumerosSerie().stream().sorted().toList()
                     ));
                 }
 
                 if (possession.getQuantiteFoil() > 0) {
                     versions.add(new VersionPossedee(
                             carte.getId(),
-                            libelle + " foil",
+                            carte.libelleVersion(true),
                             carte.getNumeroAffiche(),
                             carte.getImageRecto(),
                             true,
                             possession.getQuantiteFoil(),
-                            possession.getQuantite()
+                            possession.getQuantite(), carte.getExtension().getCode(),
+                            possession.getNumerosSerie().stream().sorted().toList()
                     ));
                 }
             }
@@ -350,7 +368,10 @@ public class CollectionService {
             String imageRecto,
             boolean foil,
             int quantite,
-            int totalSurCarte
+            int totalSurCarte,
+            String codeExtension,
+            List<String> numerosSerie
     ) {
+        public VersionPossedee(Long idCarte,String libelle,String numeroAffiche,String imageRecto,boolean foil,int quantite,int totalSurCarte){this(idCarte,libelle,numeroAffiche,imageRecto,foil,quantite,totalSurCarte,"",List.of());}
     }
 }

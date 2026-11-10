@@ -31,9 +31,13 @@ public interface CarteRepository
     );
 
     @EntityGraph(attributePaths = "extension")
+    @org.springframework.data.jpa.repository.Query("select c from Carte c join c.extension e where lower(e.code)=lower(:codeExtension) and c.numero=:numero order by c.id")
     List<Carte> findByExtensionCodeIgnoreCaseAndNumeroOrderByIdAsc(
-            String codeExtension,
-            Integer numero
+            @org.springframework.data.repository.query.Param("codeExtension") String codeExtension,
+            @org.springframework.data.repository.query.Param("numero") Integer numero
     );
+    @EntityGraph(attributePaths="extension")
+    @org.springframework.data.jpa.repository.Query("select c from Carte c where c.carteStandard.id in :ids")
+    List<Carte> trouverImpressions(@org.springframework.data.repository.query.Param("ids") java.util.Collection<Long> ids);
     long countByTypeCarteIsNull();
 }

@@ -1,6 +1,8 @@
 package fr.xalkinn.swu.importation;
 
 import fr.xalkinn.swu.carte.Carte;
+import fr.xalkinn.swu.carte.VarianteCarte;
+import fr.xalkinn.swu.carte.FinitionCarte;
 import fr.xalkinn.swu.carte.Rarete;
 import fr.xalkinn.swu.carte.CarteRepository;
 import fr.xalkinn.swu.extension.Extension;
@@ -79,51 +81,48 @@ public class ImportCatalogueService {
             int misesAJour = 0;
             Map<String, Carte> cartesImportees = new HashMap<>();
 
+            Map<String, Extension> editions=new HashMap<>();
+            editions.put(codeOfficiel(code),extensionActuelle);
             // Premier passage : création ou mise à jour des fiches.
             for (CarteSource source : donnees) {
                 Carte carte = carteRepository.findByIdentifiantSource(source.id()).orElse(null);
 
+                Extension edition=editions.computeIfAbsent(source.codeEdition(),c->extensionRepository.findByCodeIgnoreCase(c)
+                        .orElseGet(()->extensionRepository.save(new Extension(c,source.nomEdition(),null))));
                 if (carte == null) {
                     carte = new Carte(source.id(), source.titre(), source.sousTitre(),
-                            source.numero(), extensionActuelle);
+                            source.numero(), edition);
                     carteRepository.save(carte);
                     ajouts++;
                 } else {
                     carte.actualiser(source.titre(), source.sousTitre(),
-                            source.numero(), extensionActuelle);
+                            source.numero(), edition);
                     misesAJour++;
                 }
 
                 carte.actualiserImages(source.imageRecto(), source.imageVerso());
                 carte.actualiserFiltres(source.cout(), source.affinites());
-                carte.actualiserHyperspace(source.hyperspace());
+                carte.actualiserVariante(source.variante().famille(),source.variante().finition(),source.variante().code(),source.variante().libelle(),source.identifiantStandard()!=null||source.variante().famille()!=VarianteCarte.STANDARD||source.variante().finition()==FinitionCarte.FOIL);
                 carte.actualiserType(source.typeCarte());
                 carte.actualiserRarete(source.rarete());
                 carte.actualiserIdentite(source.arenes(), source.traits());
                 cartesImportees.put(source.id(), carte);
             }
 
-            // Deuxième passage : les standards existent avant de relier les variantes.
+            // Les liens de référence sont aplatis. Une promotion peut appartenir à une autre édition.
+            int nonReliees=0;
+            Map<String,CarteSource> sourcesParId=donnees.stream().collect(java.util.stream.Collectors.toMap(CarteSource::id,c->c));
             for (CarteSource source : donnees) {
-                Carte carte = cartesImportees.get(source.id());
-
-                if (source.identifiantStandard() == null) {
-                    carte.rattacherA(null);
-                    continue;
-                }
-
-                Carte standard = cartesImportees.get(source.identifiantStandard());
-                if (standard == null) {
-                    standard = carteRepository.findByIdentifiantSource(source.identifiantStandard())
-                            .orElseThrow(() -> new IllegalStateException(
-                                    "La carte standard associée à une hyperspace est absente. "
-                                            + "L'import a été annulé."));
-                }
+                Carte carte=cartesImportees.get(source.id());
+                if(!carte.isRattachementAttendu()){carte.rattacherA(null);continue;}
+                Carte standard=reference(source,cartesImportees,sourcesParId);
+                if(standard==null){carte.rattacherA(null);nonReliees++;continue;}
                 carte.rattacherA(standard);
+                // Même carte de jeu : privilégier son nom français de référence pour la recherche.
+                carte.actualiser(standard.getTitre(),standard.getSousTitre(),carte.getNumero(),carte.getExtension());
             }
-
             carteRepository.flush();
-            return new BilanImport(code, ajouts, misesAJour);
+            return new BilanImport(code, ajouts, misesAJour,nonReliees);
         });
     }
 
@@ -140,7 +139,7 @@ public class ImportCatalogueService {
             try {
                 BilanImport bilan = importer(extension.getId());
                 details.add(new DetailImport(extension.getCode(), bilan.ajouts(),
-                        bilan.misesAJour(), null));
+                        bilan.misesAJour(), null,bilan.nonReliees()));
             } catch (RuntimeException exception) {
                 LOGGER.warn("Échec de l'import de l'extension {}", extension.getCode(), exception);
                 String message = exception instanceof IllegalStateException
@@ -157,122 +156,113 @@ public class ImportCatalogueService {
         return new BilanImportGlobal(extensions.size(), reussites, List.copyOf(details));
     }
 
-    private List<CarteSource> recupererCartes(String code) {
-        List<CarteSource> cartes = new ArrayList<>();
-        Set<String> identifiants = new HashSet<>();
-        int page = 1;
-        int nombrePages;
-        int totalAttendu = -1;
+    private static String codeOfficiel(String code){return "HWD".equalsIgnoreCase(code)?"HMW":code.toUpperCase(Locale.ROOT);}
 
-        do {
-            final int pageDemandee = page;
-            Map<String, Object> reponse = client.get()
-                    .uri(builder -> builder
-                            .path("/api/card-list")
-                            .queryParam("locale", "fr")
-                            .queryParam("pagination[page]", pageDemandee)
-                            .queryParam("pagination[pageSize]", 50)
-                            .queryParam("sort", "id:asc")
-                            .queryParam("filters[expansion][code][$eq]", code)
-                            .queryParam("filters[$or][0][variantOf][id][$null]", true)
-                            // Le type 02 évite les indicateurs hyperspace/hasFoil
-                            // incohérents sur certaines extensions.
-                            .queryParam("filters[$or][1][variantTypes][variantId][$eq]", "02")
-                            .build())
-                    .retrieve()
-                    .body(new ParameterizedTypeReference<Map<String, Object>>() {});
-
-            if (reponse == null || !(reponse.get("data") instanceof List<?> donnees)) {
-                throw new IllegalStateException("La source a renvoyé une réponse inattendue.");
-            }
-
-            Map<?, ?> pagination = objet(objet(reponse.get("meta")).get("pagination"));
-            nombrePages = entier(pagination.get("pageCount"));
-            int total = entier(pagination.get("total"));
-
-            if (entier(pagination.get("page")) != page
-                    || nombrePages < 1 || nombrePages > 100 || total < 1) {
-                throw new IllegalStateException(
-                        "Aucune carte trouvée ou pagination invalide. Vérifiez le code de l'extension.");
-            }
-
-            if (totalAttendu == -1) {
-                totalAttendu = total;
-            } else if (total != totalAttendu) {
-                throw new IllegalStateException(
-                        "Le catalogue source a changé pendant la lecture. Réessayez.");
-            }
-
-            for (Object element : donnees) {
-                Map<?, ?> fiche = objet(element);
-                Map<?, ?> attributs = objet(fiche.get("attributes"));
-                String langue = texte(attributs.get("locale"));
-                Map<?, ?> expansion = objet(objet(attributs.get("expansion")).get("data"));
-                String codeRecu = texte(objet(expansion.get("attributes")).get("code"));
-                boolean carteDeBase = objet(attributs.get("variantOf")).get("data") == null;
-                boolean hyperspace = !carteDeBase && estHyperspaceNonFoil(attributs);
-
-                if (!"fr".equals(langue) || !code.equalsIgnoreCase(codeRecu)
-                        || (!carteDeBase && !hyperspace)) {
-                    throw new IllegalStateException(
-                            "Une carte reçue ne correspond pas aux critères de l'import.");
-                }
-
-                String id = texte(fiche.get("id"));
-                String titre = texte(attributs.get("title")).strip();
-                String sousTitre = texte(attributs.get("subtitle")).strip();
-                int numero = entier(attributs.get("cardNumber"));
-
-                if (id.isBlank() || id.length() > 100 || titre.isBlank()
-                        || titre.length() > 255 || sousTitre.length() > 255
-                        || numero < 1 || !identifiants.add(id)) {
-                    throw new IllegalStateException(
-                            "Une fiche source est invalide ou apparaît plusieurs fois.");
-                }
-
-                cartes.add(new CarteSource(
-                        id, titre, sousTitre.isEmpty() ? null : sousTitre, numero,
-                        recupererImage(attributs.get("artFront")),
-                        recupererImage(attributs.get("artBack")),
-                        recupererCout(attributs.get("cost")),
-                        recupererAffinites(attributs), hyperspace,
-                        recupererIdentifiantStandard(attributs, hyperspace), recupererType(attributs), recupererRarete(attributs), recupererArenes(attributs), recupererTraits(attributs)));
-            }
-            page++;
-        } while (page <= nombrePages);
-
-        if (cartes.size() != totalAttendu) {
-            throw new IllegalStateException(
-                    "La liste reçue est incomplète. Aucune carte n'a été enregistrée.");
+    private Carte reference(CarteSource source,Map<String,Carte> cartes,Map<String,CarteSource> sources){
+        String id=source.identifiantStandard();Set<String> visites=new HashSet<>();
+        while(id!=null&&visites.add(id)&&visites.size()<20){
+            Carte cible=cartes.get(id);if(cible==null)cible=carteRepository.findByIdentifiantSource(id).orElse(null);
+            if(cible!=null&&cible.isReference())return cible;
+            CarteSource suivante=sources.get(id);
+            if(suivante!=null)id=suivante.identifiantStandard();
+            else if(cible!=null&&cible.getCarteStandard()!=null)return cible.getCarteStandard().isReference()?cible.getCarteStandard():null;
+            else return null;
         }
-        return cartes;
+        return null;
     }
 
-    private static boolean estHyperspaceNonFoil(Map<?, ?> attributs) {
-        Object donnees = objet(attributs.get("variantTypes")).get("data");
-        if (!(donnees instanceof List<?> variantes)) {
-            return false;
-        }
-        for (Object variante : variantes) {
-            Map<?, ?> informations = objet(objet(variante).get("attributes"));
-            if ("02".equals(texte(informations.get("variantId")).strip())) {
-                return true;
+    private List<CarteSource> recupererCartes(String code){
+        String officiel=codeOfficiel(code);Map<String,CarteSource> sources=new java.util.LinkedHashMap<>();
+        Map<String,String> criteres=new java.util.LinkedHashMap<>();
+        criteres.put("filters[$or][0][expansion][code][$eq]",officiel);
+        criteres.put("filters[$or][1][variantOf][expansion][code][$eq]",officiel);
+        criteres.put("filters[$or][2][reprintOf][expansion][code][$eq]",officiel);
+        for(Map<?,?> fiche:telecharger(criteres,false)){CarteSource source=convertir(fiche);sources.put(source.id(),source);}
+        // Certaines références de promotion sont publiées dans une édition distincte.
+        Set<String> tentees=new HashSet<>();
+        for(int profondeur=0;profondeur<10;profondeur++){
+            List<CarteSource> manquantes=sources.values().stream().filter(c->c.identifiantStandard()!=null&&!sources.containsKey(c.identifiantStandard())&&!tentees.contains(c.identifiantStandard())).toList();
+            if(manquantes.isEmpty())break;
+            for(CarteSource c:manquantes){
+                tentees.add(c.identifiantStandard());
+                List<Map<?,?>> parents=telecharger(Map.of("filters[id][$eq]",c.identifiantStandard()),true);
+                if(parents.isEmpty()&&c.uidStandard()!=null)parents=telecharger(Map.of("filters[cardUid][$eq]",c.uidStandard()),true);
+                if(parents.size()==1){CarteSource parent=convertir(parents.get(0));sources.putIfAbsent(parent.id(),parent);
+                    if(!parent.id().equals(c.identifiantStandard()))sources.put(c.id(),c.avecParent(parent.id()));}
             }
+        }
+        if(sources.size()>15000)throw new IllegalStateException("Trop de cartes reçues pour cette extension.");
+        reparerRattachements(sources);
+        return List.copyOf(sources.values());
+    }
+
+    // Les liens officiels sont prioritaires. Une absence, un cycle ou un lien cassé
+    // ne sont compensés que par UNE référence de la même édition, aux règles identiques.
+    private static void reparerRattachements(Map<String, CarteSource> sources) {
+        record Cle(String edition, List<Object> identite) { }
+        Map<Cle, List<CarteSource>> references = new HashMap<>();
+        for (CarteSource c : sources.values()) {
+            if (estReference(c) && !c.identite().isEmpty()) {
+                references.computeIfAbsent(new Cle(c.codeEdition(), c.identite()), k -> new ArrayList<>()).add(c);
+            }
+        }
+        int repares = 0;
+        for (CarteSource c : List.copyOf(sources.values())) {
+            if (racinePresente(c, sources) || c.identite().isEmpty()) continue;
+            List<CarteSource> choix = references.getOrDefault(new Cle(c.codeEdition(), c.identite()), List.of());
+            if (choix.size() == 1 && !choix.get(0).id().equals(c.id())) {
+                sources.put(c.id(), c.avecParent(choix.get(0).id()));
+                repares++;
+            }
+        }
+        if (repares > 0) LOGGER.info("{} rattachement(s) retrouvé(s) par identité exacte dans l'édition", repares);
+    }
+
+    private static boolean estReference(CarteSource c) {
+        return c.identifiantStandard() == null && c.variante().famille() == VarianteCarte.STANDARD
+                && c.variante().finition() != FinitionCarte.FOIL;
+    }
+
+    private static boolean racinePresente(CarteSource c, Map<String, CarteSource> sources) {
+        Set<String> visites = new HashSet<>();
+        while (c != null && visites.add(c.id()) && visites.size() <= 20) {
+            if (estReference(c)) return true;
+            c = sources.get(c.identifiantStandard());
         }
         return false;
     }
 
-    private static String recupererIdentifiantStandard(Map<?, ?> attributs, boolean hyperspace) {
-        if (!hyperspace) {
-            return null;
-        }
-        Map<?, ?> standard = objet(objet(attributs.get("variantOf")).get("data"));
-        String identifiant = texte(standard.get("id")).strip();
-        if (identifiant.isEmpty() || identifiant.length() > 100) {
-            throw new IllegalStateException(
-                    "Une hyperspace ne possède pas de lien valide vers sa carte standard.");
-        }
-        return identifiant;
+    private List<Map<?,?>> telecharger(Map<String,String> criteres,boolean videAutorise){
+        List<Map<?,?>> cartes=new ArrayList<>();Set<String> ids=new HashSet<>();int page=1,nombrePages=1,totalAttendu=-1;
+        do{
+            final int pageDemandee=page;
+            Map<String,Object> reponse=client.get().uri(builder->{
+                builder.path("/api/card-list").queryParam("locale","fr").queryParam("pagination[page]",pageDemandee).queryParam("pagination[pageSize]",50).queryParam("sort","id:asc");
+                criteres.forEach(builder::queryParam);return builder.build();
+            }).retrieve().body(new ParameterizedTypeReference<Map<String,Object>>(){});
+            if(reponse==null||!(reponse.get("data") instanceof List<?> donnees))throw new IllegalStateException("Réponse inattendue de la source.");
+            Map<?,?> pagination=objet(objet(reponse.get("meta")).get("pagination"));int total=entier(pagination.get("total"));nombrePages=entier(pagination.get("pageCount"));
+            if(total==0&&videAutorise)return List.of();
+            if(entier(pagination.get("page"))!=page||nombrePages<1||nombrePages>300||total<1)throw new IllegalStateException("Pagination invalide ou extension absente de la source.");
+            if(totalAttendu<0)totalAttendu=total;else if(totalAttendu!=total)throw new IllegalStateException("Le catalogue source a changé. Réessayez.");
+            for(Object valeur:donnees){Map<?,?> fiche=objet(valeur);String id=texte(fiche.get("id"));if(id.isBlank()||!ids.add(id))throw new IllegalStateException("Fiche reçue plusieurs fois.");cartes.add(fiche);}
+            page++;
+        }while(page<=nombrePages);
+        if(cartes.size()!=totalAttendu)throw new IllegalStateException("Liste de cartes incomplète : aucune écriture effectuée.");
+        return cartes;
+    }
+    private static CarteSource convertir(Map<?,?> fiche){
+        Map<?,?> a=objet(fiche.get("attributes"));if(!"fr".equals(texte(a.get("locale"))))throw new IllegalStateException("La source n'a pas renvoyé une fiche française.");
+        String id=texte(fiche.get("id")),titre=texte(a.get("title")).strip(),sousTitre=texte(a.get("subtitle")).strip();int numero=entier(a.get("cardNumber"));
+        if(id.isBlank()||id.length()>100||titre.isBlank()||titre.length()>255||sousTitre.length()>255||numero<1)throw new IllegalStateException("Fiche source invalide.");
+        Map<?,?> ed=objet(objet(objet(a.get("expansion")).get("data")).get("attributes"));String code=texte(ed.get("code")).strip(),nom=texte(ed.get("name")).strip();
+        if(!code.matches("[A-Za-z0-9]{2,12}")||nom.isBlank()||nom.length()>150)throw new IllegalStateException("Édition source invalide.");
+        VarianteSource variante=VarianteSource.lire(a);
+        if(variante.famille()==VarianteCarte.AUTRE&&code.matches("(?:P|C|J)[0-9]{2}|[A-Z0-9]{3,4}P"))variante=new VarianteSource(VarianteCarte.PROMO,FinitionCarte.MIXTE,null,"Promotion — traitement non renseigné");
+        Map<?,?> parent=objet(objet(a.get("variantOf")).get("data"));
+        if(parent.isEmpty()&&variante.famille()!=VarianteCarte.STANDARD)parent=objet(objet(a.get("reprintOf")).get("data"));
+        String parentId=texte(parent.get("id")),parentUid=texte(objet(parent.get("attributes")).get("cardUid"));
+        return new CarteSource(id,titre,sousTitre.isEmpty()?null:sousTitre,numero,recupererImage(a.get("artFront")),recupererImage(a.get("artBack")),recupererCout(a.get("cost")),recupererAffinites(a),variante,parentId.isBlank()?null:parentId,parentUid.isBlank()?null:parentUid,recupererType(a),recupererRarete(a),recupererArenes(a),recupererTraits(a),code,nom,IdentiteCarteSource.lire(a));
     }
 
     private static Set<String> nomsRelation(Map<?, ?> attributs, String champ) {
@@ -371,15 +361,11 @@ public class ImportCatalogueService {
         return type;
     }
 
-    private record CarteSource(
-            String id, String titre, String sousTitre, Integer numero,
-            String imageRecto, String imageVerso, Integer cout,
-            Map<String, Integer> affinites, boolean hyperspace, String identifiantStandard, String typeCarte, String rarete, Set<String> arenes, Set<String> traits
-    ) {}
-
-    public record BilanImport(String codeExtension, int ajouts, int misesAJour) {}
-
-    public record DetailImport(String codeExtension, int ajouts, int misesAJour, String erreur) {}
-
-    public record BilanImportGlobal(int total, int reussites, List<DetailImport> details) {}
+    private record CarteSource(String id,String titre,String sousTitre,Integer numero,String imageRecto,String imageVerso,Integer cout,
+            Map<String,Integer> affinites,VarianteSource variante,String identifiantStandard,String uidStandard,String typeCarte,String rarete,Set<String> arenes,Set<String> traits,String codeEdition,String nomEdition,List<Object> identite){
+        CarteSource avecParent(String parent){return new CarteSource(id,titre,sousTitre,numero,imageRecto,imageVerso,cout,affinites,variante,parent,uidStandard,typeCarte,rarete,arenes,traits,codeEdition,nomEdition,identite);}
+    }
+    public record BilanImport(String codeExtension,int ajouts,int misesAJour,int nonReliees){public BilanImport(String code,int ajouts,int maj){this(code,ajouts,maj,0);}}
+    public record DetailImport(String codeExtension,int ajouts,int misesAJour,String erreur,int nonReliees){public DetailImport(String code,int ajouts,int maj,String erreur){this(code,ajouts,maj,erreur,0);}}
+    public record BilanImportGlobal(int total,int reussites,List<DetailImport> details){}
 }

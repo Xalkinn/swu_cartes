@@ -4,6 +4,7 @@ import fr.xalkinn.swu.carte.Carte;
 import fr.xalkinn.swu.carte.CarteRepository;
 import fr.xalkinn.swu.extension.Extension;
 import fr.xalkinn.swu.extension.ExtensionRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +35,10 @@ public class AjoutRapideService {
             Finition finition,
             Long carteId
     ) {
+        return ajouter(email,extensionId,numeroSaisi,finition,carteId,"");
+    }
+    @Transactional
+    public ResultatAjout ajouter(String email,Long extensionId,String numeroSaisi,Finition finition,Long carteId,String serie){
         if (finition == null) {
             throw new IllegalArgumentException(
                     "Choisissez une finition."
@@ -44,20 +49,8 @@ public class AjoutRapideService {
                 ? ""
                 : numeroSaisi.strip();
 
-        // Accepte aussi les numéros avec des zéros au début : 005.
-        if (!saisie.matches("[0-9]{1,5}")) {
-            throw new IllegalArgumentException(
-                    "Saisissez uniquement le numéro de la carte, par exemple 005."
-            );
-        }
-
-        int numero = Integer.parseInt(saisie);
-
-        if (numero < 1) {
-            throw new IllegalArgumentException(
-                    "Le numéro doit être supérieur à zéro."
-            );
-        }
+        int numero=fr.xalkinn.swu.carte.ReferenceCarte.numero(saisie);
+        boolean jeton=fr.xalkinn.swu.carte.ReferenceCarte.jeton(saisie);
 
         Extension extension = extensionRepository.findById(extensionId)
                 .orElseThrow(() -> new IllegalArgumentException(
@@ -73,7 +66,7 @@ public class AjoutRapideService {
                 )
                 .stream()
                 .filter(carte ->
-                        carte.isHyperspace() == finition.isHyperspace()
+                        carte.isJeton()==jeton && carte.getVariante()==finition.getFamille() && carte.getFinition().autorise(finition.isFoil())
                 )
                 .toList();
 
@@ -107,7 +100,7 @@ public class AjoutRapideService {
             );
 
         } else {
-            carte = correspondances.getFirst();
+            carte = correspondances.get(0);
         }
 
         // Réutilise le service existant et son verrou par utilisateur.
@@ -115,7 +108,7 @@ public class AjoutRapideService {
                 email,
                 carte.getId(),
                 1,
-                finition.isFoil()
+                finition.isFoil(),serie
         );
 
         List<Long> ids = List.of(carte.getId());
@@ -147,18 +140,26 @@ public class AjoutRapideService {
 
     public enum Finition {
 
-        CLASSIQUE("Classique", false, false),
-        FOIL("Foil", false, true),
-        HYPERSPACE("Hyperspace", true, false),
-        HYPERSPACE_FOIL("Hyperspace foil", true, true);
+        CLASSIQUE("Standard",fr.xalkinn.swu.carte.VarianteCarte.STANDARD,false),
+        FOIL("Standard foil",fr.xalkinn.swu.carte.VarianteCarte.STANDARD,true),
+        HYPERSPACE("Hyperspace",fr.xalkinn.swu.carte.VarianteCarte.HYPERSPACE,false),
+        HYPERSPACE_FOIL("Hyperspace foil",fr.xalkinn.swu.carte.VarianteCarte.HYPERSPACE,true),
+        SHOWCASE("Showcase",fr.xalkinn.swu.carte.VarianteCarte.SHOWCASE,true),
+        PRESTIGE("Prestige",fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE,false),
+        PRESTIGE_FOIL("Prestige foil",fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE,true),
+        PRESTIGE_SERIALISEE("Prestige sérialisée",fr.xalkinn.swu.carte.VarianteCarte.PRESTIGE_SERIALISEE,true),
+        PROMO("Promotionnelle non foil",fr.xalkinn.swu.carte.VarianteCarte.PROMO,false),
+        PROMO_FOIL("Promotionnelle foil",fr.xalkinn.swu.carte.VarianteCarte.PROMO,true),
+        AUTRE("Autre traitement non foil",fr.xalkinn.swu.carte.VarianteCarte.AUTRE,false),
+        AUTRE_FOIL("Autre traitement foil",fr.xalkinn.swu.carte.VarianteCarte.AUTRE,true);
 
         private final String libelle;
-        private final boolean hyperspace;
+        private final fr.xalkinn.swu.carte.VarianteCarte famille;
         private final boolean foil;
 
-        Finition(String libelle, boolean hyperspace, boolean foil) {
+        Finition(String libelle, fr.xalkinn.swu.carte.VarianteCarte famille, boolean foil) {
             this.libelle = libelle;
-            this.hyperspace = hyperspace;
+            this.famille = famille;
             this.foil = foil;
         }
 
@@ -167,9 +168,10 @@ public class AjoutRapideService {
         }
 
         public boolean isHyperspace() {
-            return hyperspace;
+            return famille==fr.xalkinn.swu.carte.VarianteCarte.HYPERSPACE;
         }
 
+        public fr.xalkinn.swu.carte.VarianteCarte getFamille(){return famille;}
         public boolean isFoil() {
             return foil;
         }

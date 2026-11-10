@@ -64,6 +64,42 @@ public class Carte {
     @Column(nullable = false)
     private boolean hyperspace;
 
+    @Enumerated(EnumType.STRING)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.VARCHAR)
+    @Column(nullable = false, length = 30)
+    private VarianteCarte variante = VarianteCarte.STANDARD;
+
+    @Enumerated(EnumType.STRING)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.VARCHAR)
+    @Column(nullable = false, length = 12)
+    private FinitionCarte finition = FinitionCarte.MIXTE;
+
+    @Column(name = "code_variante_source", length = 24)
+    private String codeVarianteSource;
+    @Column(name = "libelle_variante", length = 120)
+    private String libelleVariante;
+    @Column(name = "rattachement_attendu", nullable = false)
+    private boolean rattachementAttendu;
+
+    public VarianteCarte getVariante(){ return variante; }
+    public FinitionCarte getFinition(){ return finition; }
+    public String getCodeVarianteSource(){ return codeVarianteSource; }
+    public boolean isRattachementAttendu(){return rattachementAttendu;}
+    public boolean isReference(){return variante==VarianteCarte.STANDARD && finition!=FinitionCarte.FOIL && carteStandard==null && !rattachementAttendu;}
+    public boolean isFoilAutorise(){return finition.autorise(true);}
+    public boolean isNonFoilAutorise(){return finition.autorise(false);}
+    public String getLibelleVariante(){return libelleVariante==null?variante.getLibelle():libelleVariante;}
+    public String libelleVersion(boolean foil){
+        String libelle=getLibelleVariante();
+        if(foil && variante!=VarianteCarte.SHOWCASE && variante!=VarianteCarte.PRESTIGE_SERIALISEE && !libelle.toLowerCase(java.util.Locale.ROOT).contains("foil"))libelle+=" foil";
+        return libelle;
+    }
+    public void actualiserVariante(VarianteCarte variante,FinitionCarte finition,String code,String libelle,boolean rattachementAttendu){
+        if(variante==null||finition==null||code!=null&&code.length()>24||libelle!=null&&libelle.length()>120)throw new IllegalArgumentException("Variante invalide.");
+        this.variante=variante;this.finition=finition;this.hyperspace=variante==VarianteCarte.HYPERSPACE;
+        this.codeVarianteSource=code;this.libelleVariante=libelle;this.rattachementAttendu=rattachementAttendu;
+    }
+
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
             name = "carte_affinites",
@@ -146,8 +182,9 @@ public class Carte {
     }
 
     // Conserve un nombre en BDD, mais permet l'affichage « 005 ».
+    public boolean isJeton(){return ReferenceCarte.estJeton(typeCarte);}
     public String getNumeroAffiche() {
-        return String.format(java.util.Locale.ROOT, "%03d", numero);
+        return ReferenceCarte.afficher(numero,isJeton());
     }
 
     public Extension getExtension() {
@@ -187,6 +224,7 @@ public class Carte {
 
     public void actualiserHyperspace(boolean hyperspace) {
         this.hyperspace = hyperspace;
+        this.variante = hyperspace ? VarianteCarte.HYPERSPACE : VarianteCarte.STANDARD;
     }
 
     public boolean isHyperspace() {
@@ -206,19 +244,12 @@ public class Carte {
                 );
             }
 
-            if (standard.isHyperspace()) {
+            if (!standard.isReference()) {
                 throw new IllegalArgumentException(
                         "La carte de référence doit être une carte standard."
                 );
             }
 
-            if (!extension.getId().equals(
-                    standard.getExtension().getId()
-            )) {
-                throw new IllegalArgumentException(
-                        "Les deux cartes doivent appartenir à la même extension."
-                );
-            }
         }
 
         this.carteStandard = standard;

@@ -41,11 +41,14 @@
                     <span th:if="${carte.affinites.empty}" class="carte-detail-affinite">Sans affinité</span>
                 </div>
                 <div class="carte-detail-stock"><span>Dans votre collection, pour cette référence</span><strong th:text="${quantite}"></strong><span>exemplaire(s), foil inclus</span></div>
+                <p class="carte-galerie-reference" th:text="${carte.versionLibelle}"></p>
+                <p th:if="${carte.nonReliee}" class="carte-dialog-erreur">Cette impression n'est pas encore rattachée à sa carte de référence dans la source.</p>
                 <h3>Ajouter à ma collection</h3>
                 <div class="carte-detail-ajouts">
-                    <form th:each="foil : ${ {false, true} }" th:action="@{/collection/ajuster}" method="post">
+                    <form th:each="foil : ${ {false, true} }" th:if="${foil ? carte.foilAutorise : carte.nonFoilAutorise}" th:action="@{/collection/ajuster}" method="post">
                         <input type="hidden" name="carteId" th:value="${carte.id}"><input type="hidden" name="variation" value="1">
                         <input type="hidden" name="foil" th:value="${foil}"><input type="hidden" name="retour" th:value="${retourCatalogue}">
+                        <label th:if="${carte.variante.name() == 'PRESTIGE_SERIALISEE'}">Numéro de série (facultatif)<input type="text" name="serie" placeholder="042/250" maxlength="30"></label>
                         <button class="carte-ajouter" type="submit" th:disabled="${quantite >= 9999}"
                                 th:attr="aria-label=${'Ajouter un exemplaire ' + (foil ? 'foil' : 'non foil') + ' de ' + carte.titre}">
                             <span aria-hidden="true">+</span><span th:text="${foil ? '1 exemplaire foil' : '1 exemplaire non foil'}"></span>
@@ -84,14 +87,16 @@
         <div class="carte-galerie versions-liste">
             <article th:each="version : ${carte.versions}" class="carte-galerie-carte version-ligne" th:classappend="${version.foil} ? 'carte-version-foil' : ''">
                 <div class="carte-galerie-visuel">
-                    <th:block th:replace="~{fragments/galerie-cartes :: image(${version.imageRecto}, ${carte.titre + ' — ' + version.libelle}, ${carte.codeExtension + ' · ' + version.numeroAffiche})}"></th:block>
+                    <th:block th:replace="~{fragments/galerie-cartes :: image(${version.imageRecto}, ${carte.titre + ' — ' + version.libelle}, ${(version.codeExtension == '' ? carte.codeExtension : version.codeExtension) + ' · ' + version.numeroAffiche})}"></th:block>
                     <span class="carte-galerie-quantite" th:text="${'× ' + version.quantite}"></span>
                 </div>
                 <div class="carte-galerie-infos">
-                    <p class="carte-galerie-reference" th:text="${carte.codeExtension + ' · ' + version.numeroAffiche}"></p>
+                    <p class="carte-galerie-reference" th:text="${(version.codeExtension == '' ? carte.codeExtension : version.codeExtension) + ' · ' + version.numeroAffiche}"></p>
                     <h3 th:text="${version.libelle}"></h3><p class="carte-version-nom" th:text="${carte.titre}"></p>
                     <p class="carte-version-stock"><strong th:text="${version.quantite}"></strong> exemplaire(s) possédé(s)</p>
+                    <p th:if="${!version.numerosSerie.empty}" class="carte-galerie-reference" th:text="${'Séries : ' + #strings.listJoin(version.numerosSerie, ', ')}"></p>
                     <form th:action="@{/collection/ajuster}" method="post" class="version-actions">
+                        <label th:if="${!version.numerosSerie.empty}">Exemplaire à retirer<select name="serie"><option value="">Sans numéro renseigné</option><option th:each="serie : ${version.numerosSerie}" th:value="${serie}" th:text="${serie}"></option></select></label>
                         <input type="hidden" name="carteId" th:value="${version.idCarte}"><input type="hidden" name="foil" th:value="${version.foil}">
                         <input type="hidden" name="retour" th:value="${retour}">
                         <button type="submit" name="variation" value="-1" th:attr="aria-label=${'Retirer un exemplaire ' + version.libelle + ' de ' + carte.titre}">−1</button>

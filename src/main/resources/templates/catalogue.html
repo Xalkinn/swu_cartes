@@ -22,6 +22,7 @@
     <link rel="stylesheet" th:href="@{/css/filtres-cartes.css(v=1)}">
 <link rel="stylesheet" th:href="@{/css/identite-cartes.css(v=1)}">
     <script th:src="@{/js/identite-cartes.js(v=1)}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/variantes.css(v=1)}">
 </head>
 
 <body>
@@ -52,6 +53,7 @@
         <details class="catalogue-filtres-panneau" th:open="${erreur != null}">
             <summary><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z"/></svg><span>Filtres avancés</span><span class="catalogue-filtres-compte" th:if="${nombreFiltresAvances > 0}" th:text="${nombreFiltresAvances}"></span><svg class="catalogue-filtres-signe" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
             <div class="catalogue-filtres-interieur">
+                <div class="catalogue-couts"><div><label for="variante">Variante</label><select id="variante" name="variante"><option value="TOUTES">Toutes les variantes</option><option th:each="v : ${variantesDisponibles}" th:value="${v.name()}" th:selected="${varianteSelectionnee == v.name()}" th:text="${v.libelle}"></option></select></div><div><label for="finition-catalogue">Finition</label><select id="finition-catalogue" name="finition"><option value="TOUTES">Toutes les finitions</option><option value="NON_FOIL" th:selected="${finitionSelectionnee == 'NON_FOIL'}">Non foil</option><option value="FOIL" th:selected="${finitionSelectionnee == 'FOIL'}">Foil</option></select></div></div>
                 <div class="catalogue-couts"><div><label for="coutMin">Coût minimum</label><input type="number" id="coutMin" name="coutMin" min="0" th:value="${coutMin}" placeholder="Sans limite"></div><div><label for="coutMax">Coût maximum</label><input type="number" id="coutMax" name="coutMax" min="0" th:value="${coutMax}" placeholder="Sans limite"></div></div>
                 <fieldset class="catalogue-affinites-compactes"><legend>Affinités</legend><div class="affinites-options"><label th:each="affinite : ${affinitesDisponibles}"><input type="checkbox" name="affinites" th:value="${affinite.name()}" th:checked="${selectionAffinites.contains(affinite.name())}"><span class="affinite-pastille" th:style="${'background:' + affinite.couleur}"></span><span th:text="${affinite.libelle}"></span></label></div></fieldset>
                 <div class="catalogue-combinaison"><label for="mode">Combinaison des affinités</label><select id="mode" name="mode"><option value="TOUTES" th:selected="${mode == 'TOUTES'}">Toutes les affinités cochées</option><option value="UNE" th:selected="${mode == 'UNE'}">Au moins une affinité cochée</option><option value="SANS" th:selected="${mode == 'SANS'}">Sans affinité</option></select></div>
@@ -147,6 +149,8 @@
                     SOR · 005
                 </p>
 
+                <p class="variante-badge" th:text="${carte.versionLibelle}"></p>
+                <p class="variante-a-verifier" th:if="${carte.nonReliee}">Référence non reliée</p>
                 <h2><button type="button" class="catalogue-titre-ouvrir" th:text="${carte.titre}" aria-haspopup="dialog"
                             th:attr="data-dialog-id=${'catalogue-carte-' + carte.id},aria-controls=${'catalogue-carte-' + carte.id}"></button></h2>
 
@@ -283,7 +287,7 @@
                 th:if="${resultat.hasPrevious()}"
                 th:href="@{/catalogue(
                 raretes=${selectionRaretes},
-                types=${selectionTypes},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits},
+                types=${selectionTypes},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits},variante=${varianteSelectionnee},finition=${finitionSelectionnee},
                 q=${recherche},
                 extensionId=${extensionSelectionnee},
                 coutMin=${coutMin},
@@ -306,7 +310,7 @@
                 th:if="${resultat.hasNext()}"
                 th:href="@{/catalogue(
                 raretes=${selectionRaretes},
-                types=${selectionTypes},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits},
+                types=${selectionTypes},arenes=${identite.arenes},traits=${identite.traits},modeTraits=${identite.modeTraits},variante=${varianteSelectionnee},finition=${finitionSelectionnee},
                 q=${recherche},
                 extensionId=${extensionSelectionnee},
                 coutMin=${coutMin},

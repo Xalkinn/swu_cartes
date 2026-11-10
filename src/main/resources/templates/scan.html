@@ -11,7 +11,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js" defer></script>
 
-    <script th:src="@{/js/scan.js}" defer></script>
+    <script th:src="@{/js/scan.js(v=3)}" defer></script>
     <script th:src="@{/js/camera.js}" defer></script>
 </head>
 
@@ -164,13 +164,13 @@
                 <label for="numero">Numéro de la carte</label>
 
                 <input
-                        type="number"
+                        type="text"
                         id="numero"
                         name="numero"
-                        min="1"
-                        max="9999"
-                        step="1"
-                        placeholder="Ex. : 5 pour 005/252"
+                        inputmode="text"
+                        pattern="[Tt]?[0-9]{1,6}"
+                        maxlength="7"
+                        placeholder="Ex. : 005 ou T01 pour un jeton"
                         th:value="${numeroSelectionne}"
                         required
                 >

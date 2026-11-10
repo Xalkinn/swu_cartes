@@ -50,6 +50,12 @@ public class CatalogueService {
     public Page<CarteAffichee> rechercher(String recherche, Long extensionId, Integer coutMin, Integer coutMax,
                                          List<String> affinites, String mode, int page, List<String> raretes, List<String> types,
                                          FiltresIdentite identite) {
+        return rechercher(recherche,extensionId,coutMin,coutMax,affinites,mode,page,raretes,types,identite,"TOUTES","TOUTES");
+    }
+    @Transactional(readOnly = true)
+    public Page<CarteAffichee> rechercher(String recherche,Long extensionId,Integer coutMin,Integer coutMax,List<String> affinites,String mode,int page,List<String> raretes,List<String> types,FiltresIdentite identite,String variante,String finition){
+        if(!variante.equals("TOUTES"))try{VarianteCarte.valueOf(variante);}catch(IllegalArgumentException e){throw new IllegalArgumentException("Variante inconnue.");}
+        if(!List.of("TOUTES","FOIL","NON_FOIL").contains(finition))throw new IllegalArgumentException("Finition inconnue.");
         identite.verifier();
         List<String> selectionRaretes = FiltresCarte.raretes(raretes);
         List<String> selectionTypes = FiltresCarte.types(types);
@@ -90,14 +96,17 @@ public class CatalogueService {
 
         Specification<Carte> specification = (racine, requete, cb) -> {
             List<Predicate> conditions = new ArrayList<>();
+            if(!"TOUTES".equals(variante))conditions.add(cb.equal(racine.get("variante"),VarianteCarte.valueOf(variante)));
+            if(!"TOUTES".equals(finition))conditions.add(racine.get("finition").in(FinitionCarte.valueOf(finition),FinitionCarte.MIXTE));
 
+            if(recherche.matches("(?i)T?[0-9]{1,6}"))conditions.add(ReferenceCarte.jeton(recherche)?racine.get("typeCarte").in(ReferenceCarte.TYPES_JETON):cb.not(cb.coalesce(racine.<String>get("typeCarte"),"").in(ReferenceCarte.TYPES_JETON)));
             if (!recherche.isBlank()) {
                 String motif = "%"
                         + echapperRecherche(recherche.toLowerCase(Locale.ROOT))
                         + "%";
 
                 Predicate texte = cb.or(cb.like(cb.lower(racine.get("titre")), motif, '\\'), cb.like(cb.lower(racine.get("sousTitre")), motif, '\\'));
-                if (recherche.matches("[0-9]{1,6}")) texte = cb.or(texte, cb.equal(racine.get("numero"), Integer.parseInt(recherche)));
+                if (recherche.matches("(?i)T?[0-9]{1,6}")) texte = cb.or(texte, cb.equal(racine.get("numero"), ReferenceCarte.numero(recherche)));
                 conditions.add(texte);
             }
 
@@ -183,7 +192,7 @@ public class CatalogueService {
                 carte.getImageRecto(),
                 carte.getImageVerso(),
                 carte.getCout(),
-                carte.getAffinites(), carte.getRarete(), carte.getTypeCarte()
+                carte.getAffinites(), carte.getRarete(), carte.getTypeCarte(),carte.getVariante(),carte.getFinition(),carte.getLibelleVariante(),carte.isRattachementAttendu()&&carte.getCarteStandard()==null
         ));
     }
 
@@ -226,12 +235,16 @@ public class CatalogueService {
             String imageVerso,
             Integer cout,
             Map<String, Integer> affinites,
-            String rarete, String typeCarte
+            String rarete, String typeCarte,VarianteCarte variante,FinitionCarte finition,String libelleVariante,boolean nonReliee
     ) {
         public CarteAffichee(Long id, String titre, String sousTitre, String numeroAffiche, String codeExtension, String nomExtension,
                              String imageRecto, String imageVerso, Integer cout, Map<String,Integer> affinites) {
             this(id, titre, sousTitre, numeroAffiche, codeExtension, nomExtension, imageRecto, imageVerso, cout, affinites, null, null);
         }
+        public CarteAffichee(Long id,String titre,String sousTitre,String numeroAffiche,String codeExtension,String nomExtension,String imageRecto,String imageVerso,Integer cout,Map<String,Integer> affinites,String rarete,String typeCarte){this(id,titre,sousTitre,numeroAffiche,codeExtension,nomExtension,imageRecto,imageVerso,cout,affinites,rarete,typeCarte,VarianteCarte.STANDARD,FinitionCarte.MIXTE,"Standard",false);}
+        public boolean isFoilAutorise(){return finition.autorise(true);}
+        public boolean isNonFoilAutorise(){return finition.autorise(false);}
+        public String getVersionLibelle(){return libelleVariante+(finition==FinitionCarte.FOIL&&variante!=VarianteCarte.SHOWCASE&&variante!=VarianteCarte.PRESTIGE_SERIALISEE&&!libelleVariante.toLowerCase(Locale.ROOT).contains("foil")?" foil":"");}
         public String getRareteLibelle() { return Rarete.libelle(rarete); }
         public String getRareteCode() { return rarete == null ? "INCONNUE" : rarete; }
         public String getTypeLibelle() { return TypeCarteFiltre.libelle(typeCarte); }

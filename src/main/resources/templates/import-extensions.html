@@ -15,8 +15,8 @@
     <p class="import-eyebrow">ADMINISTRATION</p>
     <h1>Enrichir <span>le catalogue.</span></h1>
     <p class="import-intro">
-        Importez les cartes françaises standard et hyperspace.
-        Les fiches existantes sont mises à jour et les liens entre versions sont conservés.
+        Importez toutes les impressions françaises publiées : standard, foil, hyperspace, Showcase, Prestige et promotions liées.
+        Les fiches existantes sont mises à jour sans modifier vos quantités. Les éditions promotionnelles liées sont créées si nécessaire.
     </p>
 
     <p th:if="${erreurImport != null}" th:text="${erreurImport}"
@@ -96,6 +96,7 @@
                 <span th:if="${detail.erreur == null}" class="import-global-succes"
                       th:text="${'✓ ' + detail.ajouts + ' ajout(s), '
                           + detail.misesAJour + ' mise(s) à jour'}"></span>
+                <span th:if="${detail.nonReliees > 0}" class="import-global-erreur" th:text="${detail.nonReliees + ' référence(s) à vérifier dans la source'}"></span>
                 <span th:if="${detail.erreur != null}" class="import-global-erreur"
                       th:text="${'✕ ' + detail.erreur}"></span>
             </li>
@@ -103,6 +104,7 @@
     </section>
 
     <a class="import-retour" th:href="@{/admin}">← Retour à l’administration</a>
+    <p class="notice" th:if="${bilanImport != null and bilanImport.nonReliees > 0}" th:text="${bilanImport.nonReliees + ' impression(s) sans lien de référence fiable dans la source. Elles sont conservées avec leur traitement et signalées dans le catalogue ; aucun rattachement approximatif n’est créé.'}"></p>
 </main>
 
 <footer th:replace="~{fragments/footer :: footer}"></footer>
