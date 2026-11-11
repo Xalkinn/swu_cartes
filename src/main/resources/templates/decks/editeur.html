@@ -93,6 +93,23 @@
                 </div>
             </details>
 
+            <details class="deck-panneau deck-composition" id="reserve" open th:if="${reserveDeck != null}">
+                <summary class="deck-section-entete"><h2>Réserve</h2><span>Déplier / Replier</span></summary>
+                <div class="deck-composition-contenu">
+                    <p class="deck-aide">La réserve est séparée de la liste principale et des compteurs ci-dessus. Les exemplaires ne sont pas réservés dans votre collection.</p>
+                    <p class="deck-vide" th:if="${reserveDeck.empty}">Aucune carte en réserve. Utilisez « + Réserve » dans la recherche pour en ajouter.</p>
+                    <ul class="deck-lignes"><li th:each="ligne : ${reserveDeck}">
+                        <img th:if="${!#strings.isEmpty(ligne.carte.image)}" th:src="${ligne.carte.image}" alt="" loading="lazy">
+                        <div class="deck-ligne-texte"><span class="deck-reference" th:text="${ligne.carte.reference}"></span><h3 th:text="${ligne.carte.titre}"></h3><p class="deck-sous-titre" th:text="${ligne.carte.sousTitre}"></p></div>
+                        <form class="deck-quantite" th:action="@{/decks/{id}/reserve/quantite(id=${vue.id})}" method="post">
+                            <input type="hidden" name="carteId" th:value="${ligne.carte.id}"><th:block th:replace="~{decks/fragments :: filtresCaches}"></th:block>
+                            <label th:for="${'reserve-' + ligne.carte.id}">Quantité</label><input type="number" name="quantite" th:id="${'reserve-' + ligne.carte.id}" th:value="${ligne.quantite}" min="0" max="99" required>
+                            <button class="deck-bouton" type="submit" th:attr="aria-label=${'Enregistrer la réserve de ' + ligne.carte.titre}">OK</button>
+                        </form>
+                    </li></ul><p class="deck-aide" th:unless="${reserveDeck.empty}">Saisissez 0 pour retirer une carte de la réserve.</p>
+                </div>
+            </details>
+
             <section class="deck-panneau deck-recherche" id="recherche" aria-labelledby="recherche-titre">
                 <div class="deck-section-entete"><h2 id="recherche-titre">Construire votre deck</h2><span>Depuis votre catalogue</span></div>
                 <nav class="deck-onglets" aria-label="Cartes à rechercher">
@@ -128,6 +145,10 @@
                             <label th:for="${'ajout-' + carte.id}">Exemplaires à ajouter</label>
                             <div class="deck-ajout-actions"><input type="number" name="quantite" th:id="${'ajout-' + carte.id}" value="1" min="1" th:max="${99 - resultatCarte.dansDeck}" th:disabled="${resultatCarte.dansDeck >= 99}" required>
                                 <button class="deck-bouton" type="submit" th:disabled="${resultatCarte.dansDeck >= 99}" th:attr="aria-label=${'Ajouter ' + carte.titre + ' au deck'}">+ Ajouter</button></div>
+                        </form>
+                        <form th:if="${filtres.zone.name() == 'PRINCIPAL'}" th:action="@{/decks/{id}/reserve/ajouter(id=${vue.id})}" method="post">
+                            <input type="hidden" name="carteId" th:value="${carte.id}"><input type="hidden" name="quantite" value="1"><th:block th:replace="~{decks/fragments :: filtresCaches}"></th:block>
+                            <button class="deck-bouton" type="submit" th:attr="aria-label=${'Ajouter ' + carte.titre + ' à la réserve'}">+ Réserve</button>
                         </form>
                         <form th:if="${filtres.zone.name() != 'PRINCIPAL'}" th:action="@{/decks/{id}/choisir(id=${vue.id})}" method="post">
                             <input type="hidden" name="carteId" th:value="${carte.id}"><input type="hidden" name="emplacement" th:value="${filtres.zone}">

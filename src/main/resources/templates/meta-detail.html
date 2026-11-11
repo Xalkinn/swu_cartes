@@ -6,7 +6,7 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <link rel="stylesheet" th:href="@{/css/recherches.css}">
     <link rel="stylesheet" th:href="@{/css/galerie-cartes.css}">
-    <link rel="stylesheet" th:href="@{/css/meta.css(v=2)}">
+    <link rel="stylesheet" th:href="@{/css/meta.css(v=3)}">
     <script th:src="@{/js/recherches.js(v=5)}" defer></script>
     <script th:src="@{/js/galerie-cartes.js}" defer></script>
 </head>
@@ -17,6 +17,17 @@
     <p class="eyebrow" th:text="${'TOP ' + deck.rang + ' · PREMIER'}"></p>
     <h1 class="meta-titre-deck" th:text="${deck.nom}"></h1>
     <p class="meta-intro"><span th:text="${deck.tournoi}"></span> · <span th:text="${deck.date}"></span><br>Joué par <strong th:text="${deck.joueur}"></strong></p>
+    <div class="meta-copie-actions">
+        <th:block th:if="${connecte}">
+            <a th:if="${copieMetaId != null}" class="meta-bouton" th:href="@{/decks/{id}(id=${copieMetaId})}">Ouvrir ma copie →</a>
+            <form th:unless="${copieMetaId != null}" th:action="@{/decks-du-moment/{id}/copier(id=${deck.id})}" method="post">
+                <button type="submit" class="meta-bouton" th:disabled="${deck.nonTraduites > 0}">Copier dans mes decks +</button>
+            </form>
+            <p th:if="${copieMetaId == null and deck.nonTraduites > 0}">Actualisez les extensions concernées dans le catalogue pour pouvoir copier cette liste complète.</p>
+        </th:block>
+        <a th:unless="${connecte}" class="meta-bouton" th:href="@{/login}">Se connecter pour copier ce deck →</a>
+    </div>
+    <p th:if="${erreurCopieMeta}" class="meta-notice" role="alert" th:text="${erreurCopieMeta}"></p>
     <div class="meta-resume"><span><strong th:text="${deck.total}"></strong> cartes principales</span><span><strong th:text="${deck.totalReserve}"></strong> en réserve</span><span th:text="${vue.meta}"></span></div>
     <p th:if="${deck.nonTraduites > 0}" class="meta-notice" th:text="${deck.nonTraduites + ' carte(s) affichée(s) dans la langue source, faute de correspondance certaine dans le catalogue français.'}"></p>
     <th:block th:replace="~{fragments/recherches :: messages}"></th:block>

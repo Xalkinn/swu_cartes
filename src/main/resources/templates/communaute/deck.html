@@ -11,6 +11,7 @@
         <th:block th:if="${vue.deck.base != null}"><article th:replace="~{communaute/fragments :: carte(${vue.deck.base}, 1, 'Base')}"></article></th:block>
     </div></section>
     <section class="communaute-section"><div class="communaute-section-entete"><h2>Liste principale</h2><span th:text="${vue.deck.total + ' exemplaire(s)'}"></span></div><p th:if="${vue.lignes.empty}" class="communaute-vide">La liste principale est encore en construction.</p><div class="communaute-cartes"><th:block th:each="ligne : ${vue.lignes}"><article th:replace="~{communaute/fragments :: carte(${ligne.carte}, ${ligne.quantite}, '')}"></article></th:block></div></section>
+    <section class="communaute-section" th:if="${!vue.reserve.empty}"><div class="communaute-section-entete"><h2>Réserve</h2></div><div class="communaute-cartes"><th:block th:each="ligne : ${vue.reserve}"><article th:replace="~{communaute/fragments :: carte(${ligne.carte}, ${ligne.quantite}, 'Réserve')}"></article></th:block></div></section>
     <th:block th:replace="~{fragments/galerie-cartes :: zoom}"></th:block>
 </main><footer th:replace="~{fragments/footer :: footer}"></footer>
 </body></html>
